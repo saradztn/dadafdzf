@@ -271,8 +271,10 @@ PAGE = r"""<!doctype html>
     <h2>1 &middot; Input files (input/)</h2>
     <div class="files" id="files"></div>
     <div class="row">
+      <input type="file" id="fbxPick" accept=".fbx,.FBX" style="display:none" onchange="uploadFbx(this)">
+      <button class="action" id="uploadBtn" onclick="document.getElementById('fbxPick').click()">&#8682; Choose FBX file &hellip;</button>
       <button class="ghost" id="genFbx" onclick="api('generate-fbx')">+ Generate Test FBX</button>
-      <span class="hint">creates input/generated_test.fbx (a real low-poly model, exported by Blender)</span>
+      <span class="hint">Choose FBX: pick any .fbx from your computer &rarr; uploaded to input/ &rarr; then Convert it</span>
     </div>
   </section>
 
@@ -425,6 +427,34 @@ async function api(name, body){
   refresh();
 }
 
+let uploadMsg = {ok: null, text: ""};
+async function uploadFbx(inp){
+  const f = inp.files[0];
+  if (!f) return;
+  const fd = new FormData();
+  fd.append("file", f);
+  try {
+    const r = await fetch("/api/upload", {method: "POST", body: fd});
+    const d = await r.json();
+    if (d.ok){
+      uploadMsg = {ok: true, text: "Uploaded " + d.saved + " (" + (d.bytes/1024).toFixed(1) + " KB) to input/ - it is selected below"};
+      stateLogLocal("Upload OK: " + d.saved);
+    } else {
+      uploadMsg = {ok: false, text: "Upload failed: " + (d.error || "unknown error")};
+      stateLogLocal("Upload FAILED: " + (d.error || "unknown error"));
+    }
+  } catch(e){
+    uploadMsg = {ok: false, text: "Upload failed: cannot reach backend - restart python start.py"};
+  }
+  inp.value = "";
+  refresh();
+}
+function stateLogLocal(msg){
+  const lg = $("#log");
+  lg.textContent += "\n[" + new Date().toTimeString().slice(0,8) + "] " + msg;
+  lg.scrollTop = lg.scrollHeight;
+}
+
 function doConvert(){
   const files = [...document.querySelectorAll("#files input:checked")].map(i => i.dataset.name);
   api("convert", {files, col: $("#genCol").checked, quality: $("#quality").value,
@@ -492,6 +522,51 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self._json({"error": "not found"}, 404)
 
+    MAX_UPLOAD = 1024 * 1024 * 1024  # 1 GB
+
+    def _handle_upload(self, raw):
+        import re
+        ct = self.headers.get("Content-Type", "")
+        m = re.search(r"boundary=([^;]+)", ct)
+        if not m:
+            self._json({"ok": False, "error": "multipart/form-data expected"}, 400)
+            return
+        boundary = m.group(1).strip('"').encode()
+        # split multipart body on the boundary
+        parts = raw.split(b"--" + boundary)
+        saved = None
+        for part in parts:
+            if b"filename=" not in part:
+                continue
+            head, sep, data = part.partition(b"\r\n\r\n")
+            if not sep:
+                continue
+            if data.endswith(b"\r\n"):
+                data = data[:-2]  # strip the CRLF separator after the payload
+            fm = re.search(rb'filename="([^"]+)"', head)
+            fname = os.path.basename(fm.group(1).decode("utf-8", "replace")) if fm else ""
+            fname = re.sub(r"[^A-Za-z0-9._-]", "_", fname)[:120] or "model.fbx"
+            if not fname.lower().endswith(".fbx"):
+                self._json({"ok": False,
+                            "error": "only .fbx files are accepted (got " + fname + ")"}, 400)
+                return
+            if len(data) == 0:
+                self._json({"ok": False, "error": "empty file"}, 400)
+                return
+            if len(data) > self.MAX_UPLOAD:
+                self._json({"ok": False, "error": "file too large (max 1 GB)"}, 400)
+                return
+            dest = os.path.join(INPUT_DIR, fname)
+            with open(dest, "wb") as f:
+                f.write(data)
+            saved = {"saved": fname, "bytes": len(data)}
+            state_log(f"Uploaded FBX: {fname} ({len(data):,} bytes) -> input/{fname}")
+            break
+        if saved is None:
+            self._json({"ok": False, "error": "no file field found in upload"}, 400)
+        else:
+            self._json({"ok": True, **saved})
+
     def _serve_file(self):
         from urllib.parse import urlparse, parse_qs
         qs = parse_qs(urlparse(self.path).query)
@@ -512,7 +587,11 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             n = int(self.headers.get("Content-Length") or 0)
-            body = json.loads(self.rfile.read(n) or b"{}")
+            raw = self.rfile.read(n)
+            if self.path == "/api/upload":
+                self._handle_upload(raw)
+                return
+            body = json.loads(raw or b"{}")
         except Exception:
             body = {}
         if self.path == "/api/convert":

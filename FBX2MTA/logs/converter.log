@@ -2130,3 +2130,84 @@
 [18:25:34] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
 [18:25:34] BATCH: success=1 failed=0 skipped=0
 [18:25:34]   OK: Dragon_2.5
+[18:31:30] Starting converter (driver)
+[18:31:30] Blender backend: headless bpy via /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh
+[18:31:30] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[18:31:30] Collision: enabled (AUTO - budget chosen by model size)
+[18:31:30] ============================================================
+[18:31:30] Processing: my_model.fbx
+[18:31:30] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/my_model.fbx --output /home/user/dadafdzf/FBX2MTA/temp/my_model.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/my_model.log --status /home/user/dadafdzf/FBX2MTA/temp/my_model.status.json --col --col-quality AUTO --col-triangles 0 --col-output /home/user/dadafdzf/FBX2MTA/temp/my_model.col
+    [stderr] /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh: line 8: /home/user/dadafdzf/FBX2MTA/blender/venv/bin/python: No such file or directory
+[18:31:30] FAILED: conversion of my_model (see /home/user/dadafdzf/FBX2MTA/logs/my_model.log)
+[18:31:30] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[18:31:30] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[18:31:30] BATCH: success=0 failed=1 skipped=0
+[18:31:30]   FAILED: my_model (conversion failed)
+[18:34:34] Blender bpy venv missing - rebuilding via blender/setup_env.sh (~30s)...
+[18:34:51]   [setup] [setup] Creating Blender bpy venv (downloads ~350MB)...
+[18:34:51]   [setup] [setup] Blender 4.2.23 LTS ready
+[18:34:51] Blender bpy venv rebuilt OK
+[18:34:51] Starting converter (driver)
+[18:34:51] Blender backend: headless bpy via /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh
+[18:34:51] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[18:34:51] Collision: enabled (AUTO - budget chosen by model size)
+[18:34:51] ============================================================
+[18:34:51] Processing: my_model.fbx
+[18:34:51] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/my_model.fbx --output /home/user/dadafdzf/FBX2MTA/temp/my_model.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/my_model.log --status /home/user/dadafdzf/FBX2MTA/temp/my_model.status.json --col --col-quality AUTO --col-triangles 0 --col-output /home/user/dadafdzf/FBX2MTA/temp/my_model.col
+    [INFO] Processing mesh 'TestCreature': verts=384 polys=620
+    [INFO]   triangulated 60 quads/ngons -> tris=728
+    [INFO]   closed mesh: recalculated normals outward
+    [INFO]   UV layer 'UVMap': 2184 coords (loops=2184)
+    [INFO] No residual object transforms to apply
+    [INFO] Converted model to GTA SA Y-up model space (-90 deg about X, no mirroring)
+    [INFO] OBJECT: TestCreature
+    Vertices: 384
+    Triangles: 728
+    [INFO] MATERIAL: TestMaterial
+    Triangles: 728
+    [INFO] Geometry Budget: AUTO - 728 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO]   'TestCreature': estimated DFF vertices 650 (limit 65535)
+    Info: Finished export in 0.10s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/my_model.dff (32216 bytes) in 0.76s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/my_model.dff
+    [INFO] === Collision (COL) stage ===
+    [INFO] Original collision triangles: 728
+    [INFO] Target collision triangles: 728 (small model - collision kept at full detail)
+    [INFO] [INFO] Creating collision mesh from 1 object(s)
+    [INFO] Collision optimized: 384 vertices / 728 triangles
+    [INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/my_model.col
+    [SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/my_model.col (8248 bytes)
+    [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/my_model.col (8248 bytes, 728 triangles)
+[18:34:52] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/my_model.dff --expect-tris 728
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/my_model.dff)
+      [PASS] size>0  (32216 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=1 geos=1 atomics=1 tris=728 verts=650 mats=1 skin_bones=0
+      textures: ['']
+      material effects: none
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (728 tris / 650 verts)
+      [PASS] tri_count_matches  (expected 728, got 728)
+    VALIDATION PASS
+[18:34:52] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/my_model.dff --status /home/user/dadafdzf/FBX2MTA/temp/my_model.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/my_model.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/my_model.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=728 verts=384 armatures=0 bones=0 mats=1 vgroups=0 uv_layers=1
+    [INFO] Expected:      tris=728 verts=384 frames=0 mats=1
+    Info: Saved "my_model_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/my_model_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[18:34:53] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_col.py /home/user/dadafdzf/FBX2MTA/temp/my_model.col --report /home/user/dadafdzf/FBX2MTA/temp/my_model.col.validation.json
+    COL VALIDATION PASSED: my_model.col (8248 bytes, 728 collision triangles, 384 vertices)
+[18:34:53] COL validation passed for my_model (728 triangles in file)
+[18:34:53] SUCCESS: my_model -> /home/user/dadafdzf/FBX2MTA/output/my_model.dff + /home/user/dadafdzf/FBX2MTA/output/my_model.col
+[18:34:53] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[18:34:53] Test resource model: my_model
+[18:34:53] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[18:34:53] BATCH: success=1 failed=0 skipped=0
+[18:34:53]   OK: my_model

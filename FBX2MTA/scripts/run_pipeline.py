@@ -81,6 +81,21 @@ def main():
             only_files.append(sys.argv[i + 1])
             i += 1
 
+    # ---- 0) self-heal: the headless Blender venv (~1GB) may not survive
+    #         environment resets/snapshots - rebuild it automatically
+    venv_py = os.path.join(ROOT, "blender", "venv", "bin", "python")
+    if not os.path.exists(venv_py):
+        log("Blender bpy venv missing - rebuilding via blender/setup_env.sh (~30s)...")
+        p = subprocess.run([os.path.join(ROOT, "blender", "setup_env.sh")],
+                           capture_output=True, text=True, timeout=1800)
+        tail = (p.stdout or p.stderr or "").strip().splitlines()[-3:]
+        for l in tail:
+            log("  [setup] " + l)
+        if p.returncode != 0 or not os.path.exists(venv_py):
+            log("ERROR: could not rebuild Blender env - aborting batch")
+            return
+        log("Blender bpy venv rebuilt OK")
+
     inputs = sorted(glob.glob(os.path.join(ROOT, "input", "*.fbx")))
     if only_files:
         inputs = [p for p in inputs
