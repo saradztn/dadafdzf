@@ -86,8 +86,7 @@ class JobState:
 
 def list_input_files():
     out = []
-    for p in sorted({q for q in glob.glob(os.path.join(INPUT_DIR, "*"))
-                     if q.lower().endswith(".fbx") and os.path.isfile(q)}):
+    for p in sorted(glob.glob(os.path.join(INPUT_DIR, "*.fbx"))):
         out.append({"name": os.path.basename(p),
                     "size": os.path.getsize(p),
                     "mtime": int(os.path.getmtime(p))})

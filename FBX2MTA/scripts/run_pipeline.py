@@ -64,50 +64,9 @@ def find_mta():
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from mta_resource import make_test_resource  # noqa: E402
-from fbx_compat import fbx_version, FBX_MIN_OK  # noqa: E402
-
-VENV45_PY = os.path.join(ROOT, "blender", "venv45",
-                         "Scripts" if os.name == "nt" else "bin",
-                         "python.exe" if os.name == "nt" else "python")
-
-
-def bridge_old_fbx(inp, name):
-    """Re-export an old FBX (< 7.1) through Blender 5.0.s new importer.
-
-    Returns the bridged file path, or None on failure. The 5.0 engine is a
-    second, optional venv (venv45) created on demand - only old FBX files
-    ever trigger it.
-    """
-    out = os.path.join(ROOT, "temp", name + ".bridge.fbx")
-    if not os.path.exists(VENV45_PY):
-        log("Blender 5.0 bridge engine missing - creating it (one-time "
-            "~350MB download, only needed for old FBX files)...")
-        p = subprocess.run([sys.executable,
-                            os.path.join(ROOT, "blender", "setup_env.py"),
-                            "--venv", "venv45", "--bpy", "bpy==5.0.1"],
-                           capture_output=True, text=True, timeout=7200)
-        tail = (p.stdout or p.stderr or "").strip().splitlines()[-8:]
-        for l in tail:
-            log("  [setup45] " + l)
-        if p.returncode != 0 or not os.path.exists(VENV45_PY):
-            log("ERROR: could not create the Blender 5.0 bridge engine "
-                "(needed to import FBX older than 7.1)")
-            return None
-        log("Blender 5.0 bridge engine ready")
-    if os.path.exists(out):
-        os.remove(out)
-    p = run([PY, RUN_BLENDER, "--venv", "venv45",
-             os.path.join(ROOT, "scripts", "bridge_old_fbx.py"),
-             "--input", inp, "--output", out], timeout=1800)
-    if p.returncode == 0 and os.path.exists(out) and os.path.getsize(out) > 0:
-        return out
-    log("ERROR: FBX bridge failed (see [bridge] lines above)")
-    return None
 
 
 def main():
-    for d in ("temp", "output", "logs", "reports"):
-        os.makedirs(os.path.join(ROOT, d), exist_ok=True)
     budget = "AUTO"
     col_enabled = True
     col_quality = "AUTO"
@@ -147,8 +106,7 @@ def main():
             sys.exit(2)
         log("Blender bpy venv rebuilt OK")
 
-    inputs = sorted({p for p in glob.glob(os.path.join(ROOT, "input", "*"))
-                     if p.lower().endswith(".fbx") and os.path.isfile(p)})
+    inputs = sorted(glob.glob(os.path.join(ROOT, "input", "*.fbx")))
     if only_files:
         inputs = [p for p in inputs
                   if os.path.splitext(os.path.basename(p))[0] in only_files]
@@ -187,32 +145,9 @@ def main():
         for f in (tmp_dff, tmp_col, status_f, rt_status_f):
             if os.path.exists(f): os.remove(f)
 
-        # ---- 0) old-FBX bridge: Blender 4.2 refuses FBX < 7.1 (e.g. 6.100)
-        src = inp
-        ver = fbx_version(inp)
-        if ver is not None and ver < FBX_MIN_OK:
-            log(f"[INFO] FBX version {ver} (< 7100 - older format, e.g. "
-                "3ds Max 2008 era): auto-bridging via Blender 5.0 new "
-                "importer ...")
-            bridged = bridge_old_fbx(inp, name)
-            if bridged:
-                log(f"[INFO] Bridge OK: {os.path.basename(bridged)} - "
-                    "continuing with the regular 4.2.23 pipeline")
-                src = bridged
-            else:
-                reason = (f"FBX version {ver} is older than 7.100 - the "
-                          "Blender 4.2 engine cannot import it and the "
-                          "automatic bridge (Blender 5.0 new importer) "
-                          "failed. Re-export the model from your 3D tool as "
-                          "FBX 7.1+ (3ds Max: File > Export > FBX, version "
-                          "7.1 or newer) and drop it in input/.")
-                summary["failed"].append((name, reason))
-                log(f"FAILED: {name} - {reason}")
-                continue
-
         # ---- 1) convert (DFF + COL in the same Blender session)
         conv_cmd = [PY, RUN_BLENDER, os.path.join(ROOT, "scripts", "convert.py"),
-                    "--input", src, "--output", tmp_dff,
+                    "--input", inp, "--output", tmp_dff,
                     "--budget", budget, "--log", log_f, "--status", status_f]
         if col_enabled:
             conv_cmd += ["--col", "--col-quality", col_quality,
