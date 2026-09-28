@@ -1,0 +1,38 @@
+[INFO] Starting converter (Blender side)
+[INFO] Blender 4.2.23 LTS headless
+[INFO] DragonFF addon registered (official Parik27/DragonFF)
+[INFO] Importing FBX: /home/user/dadafdzf/FBX2MTA/input/parented_test.fbx
+[INFO]   axis check: forward=-Z up=Y -> extents X=0.50 Y=0.50 Z=0.50 (upright score 1.000) [default (Y-up source)]
+[INFO] FBX imported (axis forward=-Z, up=Y, extents X/Y/Z = 0.50/0.50/0.50)
+[INFO] Orientation plan: import in Blender Z-up (axis auto-detected above), then stage 4.5 converts the model to GTA SA Y-up model space (-90 deg about X, no mirroring). Both DFF and COL are exported from the same Y-up mesh.
+[INFO] Skinned model detected: 1 armature(s)
+[INFO] Processing mesh 'Body': verts=8 polys=6
+[INFO]   triangulated 6 quads/ngons -> tris=12
+[INFO]   closed mesh: recalculated normals outward
+[INFO]   UV layer 'UVMap': 36 coords (loops=36)
+[INFO] Applied residual transforms on 2 object(s) (kept model shape, normalized root matrices)
+[INFO] Converted model to GTA SA Y-up model space (-90 deg about X, no mirroring)
+[INFO] All skinned meshes already have Armature modifiers
+[INFO] Scene parked on animation start frame 1 (DFF/COL rest pose = first keyframe = IFP frame 1)
+[INFO] Unparented armature 'Root' from 'Sam' (DragonFF export-order safety; matrices already identity)
+[INFO] OBJECT: Body
+Vertices: 8
+Triangles: 12
+[INFO] MATERIAL: M
+Triangles: 12
+[INFO] Geometry Budget: AUTO - 12 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+[INFO] Armature 'Root': bone_id/type set on 2 bones
+[INFO]   'Body': estimated DFF vertices 24 (limit 65535)
+[INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+[INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/parented_test.dff (2352 bytes) in 0.6s
+[SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/parented_test.dff
+[INFO] === Animation (IFP) stage ===
+[SUCCESS] model.ifp created: /home/user/dadafdzf/FBX2MTA/temp/parented_test.ifp (2 bones, 30 frames @ 30fps, anim name 'parented_test')
+[INFO] === Collision (COL) stage ===
+[INFO] Original collision triangles: 12
+[INFO] Target collision triangles: 12 (small model - collision kept at full detail)
+[INFO] [INFO] Creating collision mesh from 1 object(s)
+[INFO] Collision optimized: 8 vertices / 12 triangles
+[INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/parented_test.col
+[SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/parented_test.col (264 bytes)
+[SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/parented_test.col (264 bytes, 12 triangles)

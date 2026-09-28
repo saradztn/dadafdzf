@@ -391,6 +391,21 @@ def main():
             bpy.context.scene.frame_set(anim_start)
             log("INFO", f"Scene parked on animation start frame {anim_start} "
                         f"(DFF/COL rest pose = first keyframe = IFP frame 1)")
+        # DragonFF's exporter processes each armature IMMEDIATELY during
+        # the object pass, while empties are only processed when their own
+        # turn comes (FBX import collection order is arbitrary). If the
+        # armature is still parented to an empty - typical of RDR/STK
+        # style rigs ("Sam", "..._CTRL" roots) - and its turn comes first,
+        # the exporter raises "Failed to set parent for <arm> to <empty>".
+        # All object matrices are identity at this point (stage 4), so
+        # unparenting changes nothing geometrically: the armature frame
+        # simply becomes the clump root frame (its true role in a GTA rig).
+        for arm in arm_objs:
+            if arm.parent is not None:
+                log("INFO", f"Unparented armature {arm.name!r} from "
+                            f"{arm.parent.name!r} (DragonFF export-order "
+                            f"safety; matrices already identity)")
+                arm.parent = None
 
     # ================================================================
     # 5. TRIANGLE ANALYSIS (rule 9)
