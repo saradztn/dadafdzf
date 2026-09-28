@@ -19,10 +19,21 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # FBX2MTA/
 IS_WIN = os.name == "nt"
-VENV = os.path.join(ROOT, "blender", "venv")
+
+# parameters: `python setup_env.py [--venv NAME] [--bpy SPEC]`
+#   main engine:  --venv venv   --bpy bpy==4.2.23  (DragonFF validated)
+#   old-FBX bridge: --venv venv45 --bpy bpy==4.5.14
+_args = sys.argv[1:]
+VENV_NAME = "venv"
+if "--venv" in _args:
+    VENV_NAME = _args[_args.index("--venv") + 1]
+BPY_SPEC = "bpy==4.2.23"
+if "--bpy" in _args:
+    BPY_SPEC = _args[_args.index("--bpy") + 1]
+
+VENV = os.path.join(ROOT, "blender", VENV_NAME)
 VENV_PY = os.path.join(VENV, "Scripts" if IS_WIN else "bin",
                        "python.exe" if IS_WIN else "python")
-BPY_SPEC = "bpy==4.2.23"
 
 
 def venv_python_path():
@@ -109,7 +120,7 @@ def main():
 
     ver = _run([py, "-c",
                 "import sys; print('.'.join(map(str, sys.version_info[:3])))"])
-    print(f"[setup] Creating bpy venv with Python "
+    print(f"[setup] Creating {BPY_SPEC} venv ({VENV_NAME}) with Python "
           f"{ver.stdout.strip() or '?'} ({py}) ... (downloads ~350MB, "
           f"can take a few minutes)")
     r = _run([py, "-m", "venv", VENV])
