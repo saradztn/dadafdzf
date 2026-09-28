@@ -59,6 +59,7 @@ class Fbx2MtaApp:
         self.quality = tk.StringVar(value="AUTO")
         self.gen_col = tk.BooleanVar(value=True)
         self.col_tris = tk.StringVar(value="3000")
+        self.gen_ifp = tk.BooleanVar(value=True)
         self._last_log_len = 0
         self._last_log_text = ""
 
@@ -85,6 +86,9 @@ class Fbx2MtaApp:
         self.pick_btn.pack(side="left")
         ttk.Button(row, text="+ Generate Test FBX",
                    command=self.generate_fbx).pack(side="left", padx=8)
+        ttk.Button(row, text="+ Animated Test FBX (IFP test)",
+                   command=lambda: self.generate_fbx(animated=True)
+                   ).pack(side="left", padx=2)
         ttk.Label(row, foreground="#7f8c9b",
                   text="Choose FBX: pick any .fbx from your computer "
                        "(copied to input/)").pack(side="left", padx=10)
@@ -126,6 +130,20 @@ class Fbx2MtaApp:
                        "floors / walls, removes interior detail).").pack(
                       anchor="w", padx=10, pady=(0, 8))
 
+        # ---- 2b. animation (IFP) -----------------------------------------
+        f2b = ttk.LabelFrame(main, text=" 2b - ANIMATION (IFP) ")
+        f2b.pack(fill="x", **pad)
+        ra = ttk.Frame(f2b)
+        ra.pack(fill="x", padx=8, pady=(8, 4))
+        ttk.Checkbutton(ra, text="Export animation to IFP (MTA:SA / GTA SA ANP3)",
+                        variable=self.gen_ifp).pack(side="left")
+        ttk.Label(f2b, foreground="#7f8c9b", justify="left",
+                  text="Automatic detection: if the FBX has an armature animation it is "
+                       "baked to output/<name>.ifp (bone ids match the DFF frames - "
+                       "load with engineLoadIFP + setPedAnimation). No animation -> "
+                       "skipped, nothing exported.").pack(
+                      anchor="w", padx=10, pady=(0, 8))
+
         # ---- 3. convert --------------------------------------------------
         f3 = ttk.LabelFrame(main, text=" 3 - CONVERT ")
         f3.pack(fill="x", **pad)
@@ -152,12 +170,13 @@ class Fbx2MtaApp:
                                bg="#1a2430", fg="#9fc2e0", relief="solid",
                                bd=1, padx=10, pady=8, justify="left")
         self.banner.pack(fill="x", padx=8, pady=(8, 4))
-        cols = ("model", "dff", "col", "tris", "coltris", "outputs")
+        cols = ("model", "dff", "col", "ifp", "tris", "coltris", "outputs")
         self.tree = ttk.Treeview(f4, columns=cols, show="headings", height=6)
-        for c, t, w in (("model", "Model", 140), ("dff", "DFF", 70),
-                        ("col", "COL", 90), ("tris", "Triangles", 100),
-                        ("coltris", "Collision Triangles", 150),
-                        ("outputs", "Outputs", 320)):
+        for c, t, w in (("model", "Model", 120), ("dff", "DFF", 65),
+                        ("col", "COL", 80), ("ifp", "IFP (anim)", 80),
+                        ("tris", "Triangles", 90),
+                        ("coltris", "Collision Triangles", 130),
+                        ("outputs", "Outputs", 300)):
             self.tree.heading(c, text=t)
             self.tree.column(c, width=w, anchor="w")
         self.tree.pack(fill="both", expand=True, padx=8, pady=(4, 8))
@@ -207,11 +226,18 @@ class Fbx2MtaApp:
         self.refresh_files()
         self.refresh_results()
 
-    def generate_fbx(self):
-        out = os.path.join(joblib.INPUT_DIR, "generated_test.fbx")
+    def generate_fbx(self, animated=False):
+        if animated:
+            out = os.path.join(joblib.INPUT_DIR, "generated_anim.fbx")
+            desc = "generate animated test FBX (IFP test)"
+        else:
+            out = os.path.join(joblib.INPUT_DIR, "generated_test.fbx")
+            desc = "generate test FBX"
         cmd = [PY, RUN_BLENDER, GEN_FBX, "--output", out,
                "--log", os.path.join(ROOT, "logs", "test_fbx.log")]
-        if not STATE.run(cmd, "generate test FBX"):
+        if animated:
+            cmd.append("--animated")
+        if not STATE.run(cmd, desc):
             self._busy_warning()
 
     def do_convert(self):
@@ -230,6 +256,8 @@ class Fbx2MtaApp:
                     pass
         else:
             cmd += ["--no-col"]
+        if not self.gen_ifp.get():
+            cmd += ["--no-ifp"]
         if not STATE.run(cmd, f"convert ({len(files)} file(s), "
                               f"{'COL ' + q if self.gen_col.get() else 'no COL'})"):
             self._busy_warning()
@@ -290,18 +318,21 @@ class Fbx2MtaApp:
             last = r
             dff_ok = r["dff"] == "PASS"
             col_ok = r["col"] in ("PASS", "SKIPPED")
-            if not (dff_ok and col_ok):
+            ifp = r.get("ifp", "NONE")
+            ifp_ok = ifp in ("PASS", "NONE")
+            if not (dff_ok and col_ok and ifp_ok):
                 all_ok = False
             outs = ", ".join(f"{o['file']} ({o['bytes']/1024:.1f} KB)"
                              for o in r["outputs"])
             col_txt = r["col"]
             if r["col"] == "FAILED":
                 col_txt += " - " + (r.get("col_reason") or "see log")[:80]
-            tag = "fail" if not (dff_ok and col_ok) else "pass"
-            if r["col"] == "SKIPPED" and dff_ok:
-                tag = "skip"
+            ifp_txt = ifp
+            if ifp == "FAILED":
+                ifp_txt += " - " + (r.get("ifp_reason") or "see log")[:80]
+            tag = "fail" if not (dff_ok and col_ok and ifp_ok) else "pass"
             self.tree.insert("", "end", values=(
-                r["name"], r["dff"], col_txt,
+                r["name"], r["dff"], col_txt, ifp_txt,
                 f"{r['triangles']:,}" if r.get("triangles") is not None else "-",
                 f"{r['col_triangles']:,}" if r.get("col_triangles") is not None else "-",
                 outs), tags=(tag,))
@@ -318,13 +349,15 @@ class Fbx2MtaApp:
             b.configure(bg="#12351f", fg="#37b45f",
                         text="Conversion Complete\n"
                              f"DFF: PASS   |   COL: {last['col']}   |   "
+                             f"IFP: {last.get('ifp', 'NONE')}   |   "
                              f"Triangles: {last.get('triangles') or 0:,}   |   "
                              f"Collision Triangles: {last.get('col_triangles') or 0:,}\n"
                              "Outputs: " + ", ".join(
                                  o["file"] for o in last["outputs"]))
         elif any_row:
             bad = next((r for r in results
-                        if r["dff"] != "PASS" or r["col"] == "FAILED"), None)
+                        if r["dff"] != "PASS" or r["col"] == "FAILED"
+                        or r.get("ifp") == "FAILED"), None)
             b.configure(bg="#3a1518", fg="#e05252",
                         text="Conversion finished with errors - "
                              + (bad["name"] if bad else "") +

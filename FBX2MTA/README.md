@@ -87,8 +87,9 @@ Blender تلقائياً (self-heal) ويعيد المحاولة.
 |---|---|
 | `output/<name>.dff` | نموذج العرض (GTA SA v3.6.0.3، Y-up) |
 | `output/<name>.col` | **كوليشن حقيقي** (GTA SA COL3 — `engineLoadCOL()`/`engineReplaceCOL()`) |
+| `output/<name>.ifp` | **الأنيميشن** (GTA SA ANP3) — فقط إن كان الـ FBX يحوي سكيلتون متحركاً |
 | `output/<name>.{dff,col}.validation.json` | تقارير الفحص المستقل |
-| `test_resource/` | MTA resource جاهز (meta.xml + client.lua + model.dff + model.col) |
+| `test_resource/` | MTA resource جاهز (meta.xml + client.lua + model.dff + model.col [+ model.ifp]) |
 | `reports/model_report.txt` | تقرير كامل |
 | `logs/converter.log` + `logs/<name>.log` | السجلات |
 | `temp/*.status.json` | تفاصيل JSON لكل ملف |
@@ -110,6 +111,30 @@ Blender تلقائياً (self-heal) ويعيد المحاولة.
   وحجمه >0، البنية صالحة، هناك هندسة كوليشن فعلية (وجوه/كرات/صناديق)، الرؤوس
   محدودة، فهارس الوجوه صالحة وغير متدهورة، الحدود (bounds) صالحة.
 
+## نظام الأنيميشن (IFP) / Animation System
+
+- **كشف تلقائي**: إن وُجد في الـ FBX سكيلتون (armature) بمفاتيح حركة (pose bone
+  keys) → يُصدَّر الأنيميشن؛ وإلا → **NONE** (لا ملف يُنتج، لا خطأ).
+- **النوع**: مبدّل في الواجهة `Export animation to IFP` (فعّال افتراضياً) —
+  `--no-ifp` يقفله في السطر.
+- **النسخة**: `engineLoadIFP` / `setPedAnimation` (مسار MTA الموثّق — لا ITP).
+- **الصيغة**: GTA SA **ANP3** (int16: دوران ×4096، زمن 1/60s، إزاحة ×1024) —
+  تُكتب وتُعاد قراءتها بالفحص المستقل `scripts/gta_ifp.py` (magic + حجم +
+  هيكل + keyframes).
+- **مطابقة العظام**: `bone_id` في الـ IFP = **رقم frame** في الـ DFF المُصدَّر
+  (نفس الاسم، نفس الترتيب) — يقرؤها MTA ويربطها بالإطار الصحيح.
+- **نفس الفضاء**: يُحمَّر (bake) بعد تحويل Y-up نفسه الخاص بالـ DFF؛ كل مفاتيح
+  الحركة تُحسب كمصفوفة العظمة المحلية في فضاء الأب (root في فضاء الـ clump).
+  **الإطار 0 = وضع الراحة = الإطار الأول للحركة** (يُثبَّت المشهد عليه قبل
+  تصدير DFF/COL أيضاً) — الأنيميشن يبدأ من نفس الوضع الذي يظهَر به النموذج.
+- **الفصل عن DFF/COL**: فشل IFP (أو غيابه) **لا** يفشل النموذج — يظهر
+  `IFP: FAILED/…` في التقرير مع السبب بينما تبقى DFF/COL بـ PASS.
+- **المصدر**: `scripts/gta_ifp.py` (كاتب/قارئ ANP3 نقي) +
+  `scripts/ifp_stage.py` (bake داخل جلسة Blender) — مرحلة 7.5 في
+  `convert.py`، مرحلة 4.5 في `run_pipeline.py`.
+- **حدود**: زمن < 1092s (int16 ticks)، طول العظمة/الإزاحة < 31.5 وحدة،
+  حد 6553 إطاراً (يُختزل تلقائياً).
+
 ## بنية المشروع / Structure
 
 ```
@@ -121,19 +146,21 @@ FBX2MTA/
 ├── tests/smoke_tkgui.py  # اختبار دخان للواجهة بدون شاشة (للبنية/الاتصال)
 ├── input/          # ملفات FBX (تُكتشف تلقائياً)
 ├── output/         # DFF + COL النهائية
-├── test_resource/  # MTA resource (meta.xml, client.lua, model.dff, model.col)
+├── test_resource/  # MTA resource (meta.xml, client.lua, model.dff, model.col [, model.ifp])
 ├── blender/        # محرك bpy (venv) + setup_env.py + run_blender.py (عابر للنظام)
 │   │               # + stubs لـ X11/GL (لينكس فقط) + setup_env.sh/run_blender.sh (غلاف)
 ├── dragonff/       # DragonFF الرسمي (cloned from Parik27/DragonFF)
 ├── scripts/
-│   ├── convert.py            # خط التحويل داخل Blender (DFF ثم COL)
+│   ├── convert.py            # خط التحويل داخل Blender (DFF ثم IFP ثم COL)
 │   ├── collision_generator.py# بناء شبكة الكوليشن + تصديرها عبر DragonFF COL
+│   ├── gta_ifp.py            # كاتب/قارئ ANP3 (IFP) نقي + فحص read-back
+│   ├── ifp_stage.py          # bake الأنيميشن → IFP (مرحلة 7.5)
 │   ├── validate_dff.py       # فحص DFF مستقل (gtaLib/dff.py)
 │   ├── validate_col.py       # فحص COL مستقل (gtaLib/col.py)
 │   ├── roundtrip.py          # DFF → DragonFF Import → Blender
-│   ├── generate_test_fbx.py  # توليد FBX اختباري (نموذج + UV + material)
+│   ├── generate_test_fbx.py  # توليد FBX اختباري (--animated: سكيلتون متحرك)
 │   ├── mta_resource.py       # توليد test_resource/
-│   └── run_pipeline.py       # المشغّل: batch + COL + تقرير
+│   └── run_pipeline.py       # المشغّل: batch + COL + IFP + تقرير
 ├── logs/  reports/  temp/
 ```
 
@@ -149,6 +176,9 @@ FBX2MTA/
 - **Skinned mesh**: العظام تُصدَّر كـ frames مع SkinPLG (230 عظمة في التنين).
   ملاحظة: العدد أكبر من هيكل SA المكون من 32 عظمة — صالح كنموذج مستقل،
   أما استبدال موديل ped فسيُعاد للهيكل القياسي.
+  ملاحظة 2: DragonFF لا يكتب الـ skin إلا إذا كان على الـ mesh
+  **Armature modifier** — يستعيده خط التحويل آلياً إن غاب (الـ FBX لا
+  يضمن وجوده)، ويُثبَّت المشهد على أول مفتاح حركة (وضع الراحة).
 - **الملفات المدخلة في `input/` لا تُعدَّل أبداً** — كل العمليات على نسخ.
 
 ## الاختبار داخل MTA:SA / In-game test
@@ -160,8 +190,16 @@ FBX2MTA/
 ```lua
 engineLoadDFF(0, 'model.dff')      + engineReplaceModel(206, 'model.dff', 'model.txd')
 engineLoadCOL('model.col')         + engineReplaceCOL(206, 'model.col')
+-- إن كان الـ FBX متحركاً (يوجد model.ifp في الـ resource):
+engineLoadIFP('model.ifp')
+setPedAnimation(localPlayer, '<اسم_الأنيميشن>', 0, -1, -1, 1)  -- اسم = اسم الملف
 createObject(206, 100.0, 1.5, -1000.0, 0, 0, 0)   -- spawn للاختبار الفوري
 ```
+
+ملاحظة: `setPedAnimation` يلعب على **ped** (اللاعب في الاختبار) ويتطلب
+تطابق السكيلتون مع هيكل SA — الأنيميشن المصدَّر مربوط بعظام النموذج
+(bone_id = frame id في الـ DFF)، فيُرى صحيحاً على نموذجك عند استخدامه
+كموديل ped مخصص (`engineReplaceModel` + `createPed`):
 
 (لم يتم تشغيل MTA هنا — غير مثبت — لذا: **MTA runtime test unavailable**).
 

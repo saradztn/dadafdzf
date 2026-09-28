@@ -68,12 +68,15 @@ from mta_resource import make_test_resource  # noqa: E402
 
 def main():
     budget = "AUTO"
+    ifp_enabled = True
     col_enabled = True
     col_quality = "AUTO"
     col_tris = 0
     only_files = []
     if "--budget" in sys.argv:
         budget = sys.argv[sys.argv.index("--budget") + 1]
+    if "--no-ifp" in sys.argv:
+        ifp_enabled = False
     if "--no-col" in sys.argv:
         col_enabled = False
     if "--col-quality" in sys.argv:
@@ -112,6 +115,8 @@ def main():
                   if os.path.splitext(os.path.basename(p))[0] in only_files]
     log("Starting converter (driver)")
     log(f"Blender backend: headless bpy via {PY} {RUN_BLENDER}")
+    log("Animation: IFP export " + ("enabled (auto - only files with animation)"
+        if ifp_enabled else "DISABLED (--no-ifp)"))
     log("DragonFF: official Parik27/DragonFF addon (Blender 4.2+)")
     if col_enabled:
         if col_quality == "CUSTOM":
@@ -138,11 +143,12 @@ def main():
         out_col = os.path.join(ROOT, "output", name + ".col")
         tmp_dff = os.path.join(ROOT, "temp", name + ".dff")
         tmp_col = os.path.join(ROOT, "temp", name + ".col")
+        tmp_ifp = os.path.join(ROOT, "temp", name + ".ifp")
         status_f = os.path.join(ROOT, "temp", name + ".status.json")
         rt_status_f = os.path.join(ROOT, "temp", name + ".rt.json")
         log_f = os.path.join(ROOT, "logs", name + ".log")
         rt_log_f = os.path.join(ROOT, "logs", name + ".rt.log")
-        for f in (tmp_dff, tmp_col, status_f, rt_status_f):
+        for f in (tmp_dff, tmp_col, tmp_ifp, status_f, rt_status_f):
             if os.path.exists(f): os.remove(f)
 
         # ---- 1) convert (DFF + COL in the same Blender session)
@@ -153,6 +159,8 @@ def main():
             conv_cmd += ["--col", "--col-quality", col_quality,
                          "--col-triangles", str(col_tris),
                          "--col-output", tmp_col]
+        if ifp_enabled:
+            conv_cmd += ["--ifp", "--ifp-output", tmp_ifp]
         p = run(conv_cmd)
         if p.returncode != 0 or not os.path.exists(tmp_dff):
             log(f"FAILED: conversion of {name} (see {log_f})")
@@ -254,6 +262,43 @@ def main():
             colres = {"status": "SKIPPED", "reason": "--no-col",
                       "final_tris": 0, "verts": 0, "validation": None}
 
+        # ---- 4.5) IFP stage (isolated - DFF/COL are already verified)
+        ifpres = None
+        ifp_status = status.get("ifp", {})
+        if ifp_enabled:
+            if not ifp_status.get("present"):
+                ifpres = {"status": "NONE",
+                          "reason": ifp_status.get("reason") or "no animation"}
+                log(f"IFP for {name}: no animation "
+                    f"({ifpres['reason']})")
+            elif ifp_status.get("success") and os.path.exists(tmp_ifp):
+                # independent validation: re-read the ANP3 structure
+                p = run([PY, os.path.join(ROOT, "scripts", "gta_ifp.py"),
+                         tmp_ifp])
+                ok = p.returncode == 0
+                ifpres = {
+                    "status": "PASS" if ok else "FAILED",
+                    "reason": None if ok else "IFP read-back validation failed",
+                    "anim": ifp_status.get("anim"),
+                    "frames": ifp_status.get("frames", 0),
+                    "fps": ifp_status.get("fps", 0.0),
+                    "bones": ifp_status.get("bones", 0),
+                    "size_bytes": os.path.getsize(tmp_ifp) if ok else 0,
+                }
+                if ok:
+                    log(f"IFP validated for {name}: {ifpres['bones']} bones, "
+                        f"{ifpres['frames']} frames @ {ifpres['fps']:.0f}fps, "
+                        f"anim '{ifpres['anim']}'")
+                else:
+                    log(f"IFP FAILED for {name}: ANP3 read-back validation "
+                        f"failed (DFF/COL unaffected)")
+            else:
+                ifpres = {"status": "FAILED",
+                          "reason": ifp_status.get("reason") or "IFP not generated",
+                          "anim": ifp_status.get("anim"), "frames": 0,
+                          "fps": 0.0, "bones": 0, "size_bytes": 0}
+                log(f"IFP FAILED for {name}: {ifpres['reason']} (DFF unaffected)")
+
         # ---- 5) finalize
         shutil.copyfile(tmp_dff, out_dff)
         if os.path.exists(tmp_dff + ".validation.json"):
@@ -265,11 +310,22 @@ def main():
             col_out_final = out_col
             shutil.copyfile(tmp_col + ".validation.json",
                             out_col + ".validation.json")
-            log(f"SUCCESS: {name} -> {out_dff} + {out_col}")
+            ifp_txt = ""
+            if ifpres and ifpres["status"] == "PASS":
+                shutil.copyfile(tmp_ifp, os.path.join(ROOT, "output",
+                                                      name + ".ifp"))
+                ifp_txt = f" + {name}.ifp"
+            log(f"SUCCESS: {name} -> {out_dff} + {out_col}{ifp_txt}")
         else:
-            log(f"SUCCESS: {name} -> {out_dff} (COL: {colres['status'] if colres else 'SKIPPED'})")
+            ifp_txt = ""
+            if ifpres and ifpres["status"] == "PASS":
+                shutil.copyfile(tmp_ifp, os.path.join(ROOT, "output",
+                                                      name + ".ifp"))
+                ifp_txt = f" + {name}.ifp"
+            log(f"SUCCESS: {name} -> {out_dff} (COL: {colres['status'] if colres else 'SKIPPED'}"
+                f"{ifp_txt})")
         summary["success"].append(name)
-        reports.append((name, inp, status, validation, rt, val, colres))
+        reports.append((name, inp, status, validation, rt, val, colres, ifpres))
 
     # ---- MTA test resource (DFF + COL)
     mta = find_mta()
@@ -280,22 +336,25 @@ def main():
             "writing drop-in test resource instead")
     # the test resource is generated for the LAST successful model of the batch
     last_ok = None
-    for name, inp, status, validation, rt, val, colres in reports:
+    for name, inp, status, validation, rt, val, colres, ifpres in reports:
         if status:
-            last_ok = (name, colres)
+            last_ok = (name, colres, ifpres)
     if last_ok:
-        name, colres = last_ok
+        name, colres, ifpres = last_ok
         make_test_resource(
             name,
             os.path.join(ROOT, "output", name + ".dff"),
             col=os.path.join(ROOT, "output", name + ".col")
                 if (colres and colres["status"] == "PASS") else None,
-            col_failed_reason=colres.get("reason") if colres else None)
+            col_failed_reason=colres.get("reason") if colres else None,
+            ifp=os.path.join(ROOT, "output", name + ".ifp")
+                if (ifpres and ifpres["status"] == "PASS") else None,
+            ifp_anim=ifpres.get("anim") if ifpres else None)
         log(f"Test resource model: {name}")
 
     # ---- report
     rpt = ["=" * 40, "FBX2MTA CONVERSION REPORT", "=" * 40, ""]
-    for name, inp, status, validation, rt, val, colres in reports:
+    for name, inp, status, validation, rt, val, colres, ifpres in reports:
         rpt.append(f"Input: {os.path.basename(inp)}")
         if status:
             o = status.get("original", {})
@@ -342,6 +401,26 @@ def main():
                             "DFF is NOT affected - it remains valid and usable"]
             else:
                 rpt.append("Status: SKIPPED")
+            rpt += ["", "Animation (IFP):"]
+            if ifpres:
+                if ifpres["status"] == "PASS":
+                    rpt += [
+                        "Status: PASS (MTA:SA IFP / ANP3)",
+                        f"Anim name: {ifpres.get('anim', '?')}",
+                        f"Bones: {ifpres.get('bones', 0)}  "
+                        f"Frames: {ifpres.get('frames', 0)}  "
+                        f"FPS: {ifpres.get('fps', 0):.0f}",
+                        f"File: {name}.ifp ({ifpres.get('size_bytes', 0):,} bytes)",
+                        "Load in MTA: engineLoadIFP('model.ifp') + "
+                        "setPedAnimation(ped, '" + str(ifpres.get('anim', 'anim')) + "', ...)",
+                    ]
+                elif ifpres["status"] == "NONE":
+                    rpt += [f"Status: NONE ({ifpres.get('reason', '?')})"]
+                else:
+                    rpt += [f"Status: FAILED ({ifpres.get('reason', '?')})",
+                            "DFF/COL are NOT affected"]
+            else:
+                rpt.append("Status: SKIPPED (--no-ifp)")
             rpt += [
                 "",
                 "DragonFF Export:",

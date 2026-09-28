@@ -21,7 +21,8 @@ import time
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # FBX2MTA/
 
 
-def make_test_resource(name, dff, col=None, col_failed_reason=None, verbose=True):
+def make_test_resource(name, dff, col=None, col_failed_reason=None,
+                       ifp=None, ifp_anim=None, verbose=True):
     """Generate the MTA:SA drop-in test resource (test_resource/)."""
     def log(msg):
         if verbose:
@@ -51,6 +52,30 @@ def make_test_resource(name, dff, col=None, col_failed_reason=None, verbose=True
             f"{col_failed_reason or 'COL not generated'}\n"
         )
 
+    have_ifp = bool(ifp and os.path.exists(ifp))
+    anim_name = ifp_anim or "anim"
+    if have_ifp:
+        files.append('<file src="model.ifp"/>')
+        ifp_lua = (
+            "-- 3) IFP (animation - MTA engineLoadIFP, GTA SA ANP3)\n"
+            "local ifpOk, ifpErr = engineLoadIFP('model.ifp')\n"
+            "if not ifpOk then\n"
+            "    print('IFP LOAD FAILED: ' .. tostring(ifpErr))\n"
+            "else\n"
+            "    print('IFP LOADED OK')\n"
+            "    -- plays on the player ped (needs matching skeleton, e.g.\n"
+            "    -- use your model as a custom ped: engineReplaceModel + createPed)\n"
+            f"    setPedAnimation(localPlayer, '{anim_name}', 0, -1, -1, 1)\n"
+            "    print('ANIMATION PLAYING: " + anim_name + " (setPedAnimation)')\n"
+            "end\n\n"
+        )
+        spawn_txt = "-- 4) spawn the model so you can see / walk on it\n"
+    else:
+        ifp_lua = (
+            "-- 3) IFP: no animation in this FBX (nothing exported)\n\n"
+        )
+        spawn_txt = "-- 4) spawn the model so you can see / walk on it\n"
+
     meta = f"""<meta>
     <min_mta_version auth_id="" auth_version="1.5.9"></min_mta_version>
     <info author="FBX2MTA" name="{name} test" type="map" version="1.1" description="Automatic DFF + COL load test (FBX2MTA)"/>
@@ -73,7 +98,8 @@ def make_test_resource(name, dff, col=None, col_failed_reason=None, verbose=True
         "end\n\n"
         "-- 2) COL (collision)\n"
         f"{col_lua}"
-        "-- 3) spawn the model so you can see / walk on it\n"
+        f"{ifp_lua}"
+        f"{spawn_txt}"
         "local obj = createObject(slot, 100.0, 1.5, -1000.0, 0, 0, 0)\n"
         "if obj then\n"
         "    print('MODEL SPAWNED at (100.0, 1.5, -1000.0) - /goto obj')\n"
@@ -86,6 +112,8 @@ def make_test_resource(name, dff, col=None, col_failed_reason=None, verbose=True
     shutil.copyfile(dff, os.path.join(d, "model.dff"))
     if have_col:
         shutil.copyfile(col, os.path.join(d, "model.col"))
+    if have_ifp:
+        shutil.copyfile(ifp, os.path.join(d, "model.ifp"))
     log(f"MTA test resource written to {d} (drop into MTASA/resources/{name}_test)")
     return d
 

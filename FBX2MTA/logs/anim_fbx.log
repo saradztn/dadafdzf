@@ -1,0 +1,3 @@
+[22:58:14] Blender 4.2.23 LTS - generating ANIMATED test FBX
+[22:58:15] Animated test model: 16 vertices, 12 faces, 3 bones, 30 frames @ 30fps
+[22:58:15] [SUCCESS] Animated test FBX created: input/generated_anim.fbx (40940 bytes)

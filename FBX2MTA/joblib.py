@@ -104,7 +104,8 @@ def latest_results():
         name = os.path.splitext(f["name"])[0]
         res = {"name": name, "dff": "MISSING", "col": "MISSING",
                "triangles": None, "col_triangles": None,
-               "col_reason": None, "outputs": []}
+               "col_reason": None, "ifp": "NONE", "ifp_reason": None,
+               "outputs": []}
         status_f = os.path.join(TEMP_DIR, name + ".status.json")
         out_dff = os.path.join(OUTPUT_DIR, name + ".dff")
         out_col = os.path.join(OUTPUT_DIR, name + ".col")
@@ -120,6 +121,15 @@ def latest_results():
                         res["col_reason"] = col.get("reason")
                     else:
                         res["col"] = "SKIPPED"
+                    ifp = s.get("ifp", {})
+                    if ifp.get("success"):
+                        res["ifp"] = "PASS"
+                    elif ifp.get("present"):
+                        res["ifp"] = "FAILED"
+                        res["ifp_reason"] = ifp.get("reason")
+                    else:
+                        res["ifp"] = "NONE"
+                        res["ifp_reason"] = ifp.get("reason")
             except Exception:
                 pass
         # fallback (e.g. temp/ was reset): output files only exist after the
@@ -151,7 +161,7 @@ def latest_results():
                     res["col_reason"] = "; ".join(cv.get("errors", []))
             except Exception:
                 pass
-        for ext in (".dff", ".col"):
+        for ext in (".dff", ".col", ".ifp"):
             p = os.path.join(OUTPUT_DIR, name + ext)
             if os.path.exists(p):
                 res["outputs"].append({"file": f"output/{name}{ext}",

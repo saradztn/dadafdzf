@@ -160,7 +160,7 @@ def run_job(cmd, desc):
     return True
 
 
-def start_convert(files, col, quality, col_tris):
+def start_convert(files, col, quality, col_tris, ifp=True):
     cmd = [PY, PIPELINE, "--budget", "AUTO"]
     if files:
         cmd += ["--files"] + files
@@ -170,15 +170,24 @@ def start_convert(files, col, quality, col_tris):
             cmd += ["--col-triangles", str(int(col_tris))]
     else:
         cmd += ["--no-col"]
+    if not ifp:
+        cmd += ["--no-ifp"]
     return run_job(cmd, f"convert ({len(files) or 'all'} files, "
                         f"COL {'AUTO' if quality == 'AUTO' else quality})")
 
 
-def start_generate_fbx():
-    out = os.path.join(INPUT_DIR, "generated_test.fbx")
+def start_generate_fbx(animated=False):
+    if animated:
+        out = os.path.join(INPUT_DIR, "generated_anim.fbx")
+        desc = "generate animated test FBX (IFP test)"
+    else:
+        out = os.path.join(INPUT_DIR, "generated_test.fbx")
+        desc = "generate test FBX"
     cmd = [PY, RUN_BLENDER, GEN_FBX, "--output", out,
            "--log", os.path.join(ROOT, "logs", "test_fbx.log")]
-    return run_job(cmd, "generate test FBX")
+    if animated:
+        cmd.append("--animated")
+    return run_job(cmd, desc)
 
 
 def start_resource():
@@ -274,6 +283,7 @@ PAGE = r"""<!doctype html>
       <input type="file" id="fbxPick" accept=".fbx,.FBX" style="display:none" onchange="uploadFbx(this)">
       <button class="action" id="uploadBtn" onclick="document.getElementById('fbxPick').click()">&#8682; Choose FBX file &hellip;</button>
       <button class="ghost" id="genFbx" onclick="api('generate-fbx')">+ Generate Test FBX</button>
+      <button class="ghost" id="genFbxAnim" onclick="api('generate-fbx', {animated: true})">+ Animated Test FBX (IFP test)</button>
       <span class="hint">Choose FBX: pick any .fbx from your computer &rarr; uploaded to input/ &rarr; then Convert it</span>
     </div>
   </section>
@@ -308,6 +318,16 @@ PAGE = r"""<!doctype html>
     </div>
     <div class="hint">AUTO: small model &rarr; minimal reduction &middot; medium &rarr; ~3,000 &middot; large &rarr; ~5,000
       collision triangles (keeps outer silhouette / floors / walls, removes interior detail).</div>
+  </section>
+
+  <section class="col-section">
+    <h2>2b &middot; Animation (IFP)</h2>
+    <div class="row">
+      <label><input type="checkbox" id="genIfp" checked> Export animation to IFP (MTA:SA / GTA SA ANP3)</label>
+    </div>
+    <div class="hint">Automatic: if the FBX has an armature animation it is baked to
+      output/&lt;name&gt;.ifp (bone ids match the DFF frames - engineLoadIFP + setPedAnimation).
+      No animation &rarr; skipped, nothing exported.</div>
   </section>
 
   <section>
@@ -457,7 +477,7 @@ function stateLogLocal(msg){
 
 function doConvert(){
   const files = [...document.querySelectorAll("#files input:checked")].map(i => i.dataset.name);
-  api("convert", {files, col: $("#genCol").checked, quality: $("#quality").value,
+  api("convert", {files, col: $("#genCol").checked, ifp: $("#genIfp").checked, quality: $("#quality").value,
                   col_tris: parseInt($("#colTris").value || "0", 10)});
 }
 
@@ -598,10 +618,12 @@ class Handler(BaseHTTPRequestHandler):
             started = start_convert(body.get("files") or [],
                                     bool(body.get("col", True)),
                                     str(body.get("quality") or "AUTO").upper(),
-                                    body.get("col_tris") or 0)
+                                    body.get("col_tris") or 0,
+                                    bool(body.get("ifp", True)))
             self._json({"started": started})
         elif self.path == "/api/generate-fbx":
-            self._json({"started": start_generate_fbx()})
+            self._json({"started": start_generate_fbx(
+                bool(body.get("animated")))})
         elif self.path == "/api/resource":
             self._json({"started": start_resource()})
         else:

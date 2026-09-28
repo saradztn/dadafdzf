@@ -45,9 +45,15 @@ def main():
                     help="maximum collision triangles (used with CUSTOM / as cap)")
     ap.add_argument("--col-output", default="",
                     help="COL output path (default: DFF path with .col extension)")
+    ap.add_argument("--ifp", action="store_true",
+                    help="export the armature animation to a MTA:SA / GTA SA "
+                         "IFP (ANP3) - detects animation automatically")
+    ap.add_argument("--ifp-output", default="",
+                    help="IFP output path (default: DFF path with .ifp extension)")
     args = ap.parse_args()
 
     col_out = args.col_output or os.path.splitext(args.output)[0] + ".col"
+    ifp_out = args.ifp_output or os.path.splitext(args.output)[0] + ".ifp"
 
     LOG_PATH = args.log
     os.makedirs(os.path.dirname(args.log), exist_ok=True)
@@ -59,6 +65,9 @@ def main():
                 "success": False, "reason": None,
                 "quality": args.col_quality, "original_tris": 0,
                 "budget_tris": 0, "final_tris": 0, "verts": 0},
+        "ifp": {"enabled": bool(args.ifp), "output": ifp_out,
+                "present": False, "success": False, "reason": None,
+                "anim": None, "frames": 0, "fps": 0.0, "bones": 0},
     }
 
     t0 = time.time()
@@ -103,7 +112,7 @@ def main():
             filepath=args.input,
             axis_forward=forward, axis_up=up,
             global_scale=1.0,
-            use_anim=False,
+            use_anim=bool(args.ifp),
         )
         return res
 
@@ -334,6 +343,54 @@ def main():
         if o.type == "EMPTY":
             o.matrix_world = YUP @ o.matrix_world
     log("INFO", "Converted model to GTA SA Y-up model space (-90 deg about X, no mirroring)")
+
+    # ---- ensure Armature modifiers (DFF skinning requirement) ----------
+    #      FBX imports do not always create the Armature modifier, but
+    #      DragonFF's exporter only writes skin data (SkinPLG) for objects
+    #      that have one. Bind each skinned mesh to the armature whose
+    #      bones match its vertex groups (or its parent), and park the
+    #      scene on the first animation keyframe so the exported DFF/COL
+    #      rest pose equals keyframe 1 (same frame the IFP starts from).
+    if arm_objs:
+        bone_names_by_arm = {a.name: {b.name for b in a.data.bones}
+                             for a in arm_objs}
+        fixed = 0
+        for ob in mesh_objs:
+            if any(m.type == "ARMATURE" for m in ob.modifiers):
+                continue
+            vg_names = {g.name for g in ob.vertex_groups}
+            arm = None
+            best_hits = 0
+            for a in arm_objs:
+                hits = len(vg_names & bone_names_by_arm[a.name])
+                if hits > best_hits:
+                    best_hits, arm = hits, a
+            if arm is None and ob.parent is not None \
+                    and ob.parent.type == "ARMATURE":
+                arm = ob.parent
+            if arm is not None:
+                mod = ob.modifiers.new("Armature", "ARMATURE")
+                mod.object = arm
+                fixed += 1
+                log("INFO", f"Added missing Armature modifier to {ob.name!r} "
+                            f"(armature {arm.name!r}) - required for DFF skinning")
+        if not fixed:
+            log("INFO", "All skinned meshes already have Armature modifiers")
+        anim_start = None
+        for a in arm_objs:
+            ad = a.animation_data
+            if ad and ad.action:
+                f0 = int(ad.action.frame_range[0])
+                anim_start = f0 if anim_start is None else min(anim_start, f0)
+        for ob in mesh_objs:
+            ad = ob.animation_data
+            if ad and ad.action:
+                f0 = int(ad.action.frame_range[0])
+                anim_start = f0 if anim_start is None else min(anim_start, f0)
+        if anim_start is not None:
+            bpy.context.scene.frame_set(anim_start)
+            log("INFO", f"Scene parked on animation start frame {anim_start} "
+                        f"(DFF/COL rest pose = first keyframe = IFP frame 1)")
 
     # ================================================================
     # 5. TRIANGLE ANALYSIS (rule 9)
@@ -574,6 +631,37 @@ def main():
     status["elapsed_s"] = round(time.time() - t0, 2)
     log("INFO", f"DFF exported: {args.output} ({status['size_bytes']} bytes) in {status['elapsed_s']}s")
     log("SUCCESS", f"DFF created: {args.output}")
+
+    # ================================================================
+    # 7.5 ANIMATION (IFP) - ISOLATED LIKE COL: an IFP problem NEVER
+    #     fails the DFF/COL. Runs before the COL stage so the collision
+    #     cleanup cannot touch the armature pose.
+    # ================================================================
+    if args.ifp:
+        log("INFO", "=== Animation (IFP) stage ===")
+        try:
+            import ifp_stage
+            r = ifp_stage.export_ifp(args.output, ifp_out,
+                                     os.path.splitext(os.path.basename(
+                                         args.input))[0],
+                                     fbx_path=args.input)
+            status["ifp"].update(r)
+            if r["success"]:
+                log("SUCCESS", f"model.ifp created: {ifp_out} "
+                    f"({r['bones']} bones, {r['frames']} frames @ {r['fps']:.0f}fps, "
+                    f"anim name '{r['anim']}')")
+                if r["reason"]:
+                    log("WARN", f"IFP note: {r['reason']}")
+            elif r["present"]:
+                log("ERROR", f"IFP FAILED (DFF unaffected): {r['reason']}")
+            else:
+                log("INFO", f"IFP: no animation - {r['reason']}")
+        except Exception as e:
+            status["ifp"]["success"] = False
+            status["ifp"]["reason"] = f"IFP stage error: {e}"
+            log("ERROR", f"IFP stage error (DFF unaffected): {e}")
+        with open(args.status, "w") as f:
+            json.dump(status, f, indent=2)
 
     with open(args.status, "w") as f:
         json.dump(status, f, indent=2)

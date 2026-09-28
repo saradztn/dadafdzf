@@ -19,7 +19,19 @@ else
     engineReplaceCOL(206, 'model.col')
     print('COL LOADED + REPLACED OK')
 end
--- 3) spawn the model so you can see / walk on it
+-- 3) IFP (animation - MTA engineLoadIFP, GTA SA ANP3)
+local ifpOk, ifpErr = engineLoadIFP('model.ifp')
+if not ifpOk then
+    print('IFP LOAD FAILED: ' .. tostring(ifpErr))
+else
+    print('IFP LOADED OK')
+    -- plays on the player ped (needs matching skeleton, e.g.
+    -- use your model as a custom ped: engineReplaceModel + createPed)
+    setPedAnimation(localPlayer, 'generated_anim', 0, -1, -1, 1)
+    print('ANIMATION PLAYING: generated_anim (setPedAnimation)')
+end
+
+-- 4) spawn the model so you can see / walk on it
 local obj = createObject(slot, 100.0, 1.5, -1000.0, 0, 0, 0)
 if obj then
     print('MODEL SPAWNED at (100.0, 1.5, -1000.0) - /goto obj')

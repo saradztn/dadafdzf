@@ -1,0 +1,5 @@
+[INFO] Round-trip: importing DFF back through DragonFF
+[INFO] Re-imported: meshes=1 tris=24 verts=16 armatures=1 bones=3 mats=1 vgroups=3 uv_layers=1
+[INFO] Expected:      tris=24 verts=16 frames=3 mats=1
+[INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/generated_anim_roundtrip.blend
+[SUCCESS] Round-trip test: PASS 

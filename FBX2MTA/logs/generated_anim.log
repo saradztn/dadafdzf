@@ -1,0 +1,37 @@
+[INFO] Starting converter (Blender side)
+[INFO] Blender 4.2.23 LTS headless
+[INFO] DragonFF addon registered (official Parik27/DragonFF)
+[INFO] Importing FBX: /home/user/dadafdzf/FBX2MTA/input/generated_anim.fbx
+[INFO]   axis check: forward=-Z up=Y -> extents X=1.00 Y=0.60 Z=0.85 (upright score 0.850) [default (Y-up source)]
+[INFO] FBX imported (axis forward=-Z, up=Y, extents X/Y/Z = 1.00/0.60/0.85)
+[INFO] Orientation plan: import in Blender Z-up (axis auto-detected above), then stage 4.5 converts the model to GTA SA Y-up model space (-90 deg about X, no mirroring). Both DFF and COL are exported from the same Y-up mesh.
+[INFO] Skinned model detected: 1 armature(s)
+[INFO] Processing mesh 'TestCharacter': verts=16 polys=12
+[INFO]   triangulated 12 quads/ngons -> tris=24
+[INFO]   closed mesh: recalculated normals outward
+[INFO]   UV layer 'UVMap': 72 coords (loops=72)
+[INFO] Applied residual transforms on 1 object(s) (kept model shape, normalized root matrices)
+[INFO] Converted model to GTA SA Y-up model space (-90 deg about X, no mirroring)
+[INFO] Added missing Armature modifier to 'TestCharacter' (armature 'TestRig') - required for DFF skinning
+[INFO] Scene parked on animation start frame 1 (DFF/COL rest pose = first keyframe = IFP frame 1)
+[INFO] OBJECT: TestCharacter
+Vertices: 16
+Triangles: 24
+[INFO] MATERIAL: TestMaterial
+Triangles: 24
+[INFO] Geometry Budget: AUTO - 24 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+[INFO] Armature 'TestRig': bone_id/type set on 3 bones
+[INFO]   'TestCharacter': estimated DFF vertices 48 (limit 65535)
+[INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+[INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff (4023 bytes) in 0.55s
+[SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff
+[INFO] === Animation (IFP) stage ===
+[SUCCESS] model.ifp created: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.ifp (3 bones, 30 frames @ 30fps, anim name 'generated_anim')
+[INFO] === Collision (COL) stage ===
+[INFO] Original collision triangles: 24
+[INFO] Target collision triangles: 24 (small model - collision kept at full detail)
+[INFO] [INFO] Creating collision mesh from 1 object(s)
+[INFO] Collision optimized: 16 vertices / 24 triangles
+[INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col
+[SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col (408 bytes)
+[SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col (408 bytes, 24 triangles)
