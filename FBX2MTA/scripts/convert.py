@@ -36,7 +36,18 @@ def main():
     ap.add_argument("--budget", default="AUTO")
     ap.add_argument("--log", required=True)
     ap.add_argument("--status", required=True)
+    # ---- collision (COL) options (new stage, isolated from the DFF)
+    ap.add_argument("--col", action="store_true",
+                    help="generate a real COL collision mesh via DragonFF COL export")
+    ap.add_argument("--col-quality", default="AUTO",
+                    choices=["AUTO", "LOW", "MEDIUM", "HIGH", "CUSTOM"])
+    ap.add_argument("--col-triangles", type=int, default=0,
+                    help="maximum collision triangles (used with CUSTOM / as cap)")
+    ap.add_argument("--col-output", default="",
+                    help="COL output path (default: DFF path with .col extension)")
     args = ap.parse_args()
+
+    col_out = args.col_output or os.path.splitext(args.output)[0] + ".col"
 
     LOG_PATH = args.log
     os.makedirs(os.path.dirname(args.log), exist_ok=True)
@@ -44,6 +55,10 @@ def main():
     status = {
         "input": args.input, "output": args.output,
         "success": False, "attempts": [], "errors": [], "warnings": [],
+        "col": {"enabled": bool(args.col), "output": col_out,
+                "success": False, "reason": None,
+                "quality": args.col_quality, "original_tris": 0,
+                "budget_tris": 0, "final_tris": 0, "verts": 0},
     }
 
     t0 = time.time()
@@ -123,10 +138,11 @@ def main():
     log("INFO", f"FBX imported (axis forward={FWD}, up={UP}, extents X/Y/Z = "
                 f"{EXTENTS[0]:.2f}/{EXTENTS[1]:.2f}/{EXTENTS[2]:.2f})")
     status["orientation"] = {"axis_forward": FWD, "axis_up": UP, "label": OLAB,
-                             "upright_score": round(score, 4), "extents": [round(v, 2) for v in EXTENTS]}
-    log("INFO", "GTA SA coordinate layer: Blender is Z-up right-handed, matching GTA SA "
-                "(+Z up). Model verified upright in Blender space -> no mirror/hand-flip needed. "
-                "DragonFF exports Blender coords verbatim and handles UV v-flip + winding internally.")
+                             "upright_score": round(score, 4), "extents": [round(v, 2) for v in EXTENTS],
+                             "model_space": "GTA SA Y-up (Blender Z-up rotated -90deg about X)"}
+    log("INFO", "Orientation plan: import in Blender Z-up (axis auto-detected above), then "
+                "stage 4.5 converts the model to GTA SA Y-up model space (-90 deg about X, "
+                "no mirroring). Both DFF and COL are exported from the same Y-up mesh.")
 
     mesh_objs = [o for o in bpy.data.objects if o.type == "MESH"]
     arm_objs = [o for o in bpy.data.objects if o.type == "ARMATURE"]
@@ -285,6 +301,39 @@ def main():
         log("INFO", f"Applied residual transforms on {len(need)} object(s) (kept model shape, normalized root matrices)")
     else:
         log("INFO", "No residual object transforms to apply")
+
+    # ================================================================
+    # 4.5 CONVERT BLENDER Z-UP -> GTA SA Y-UP MODEL SPACE
+    #      GTA:SA DFF model space is Y-up (clump root frames are
+    #      identity, so the geometry itself must be Y-up). Blender
+    #      works in Z-up, so rotate the whole model -90 deg about X:
+    #      (x, y, z) -> (x, z, -y). Right-handed (no mirroring), so
+    #      winding/normals stay valid. At this point every object has
+    #      an identity matrix, so rotating the DATA (mesh vertices +
+    #      armature bones + empties) keeps skinning consistent.
+    # ================================================================
+    import mathutils
+    YUP = mathutils.Matrix.Rotation(math.radians(-90), 4, "X")
+    for ob in mesh_objs:
+        bm = bmesh.new()
+        bm.from_mesh(ob.data)
+        bm.transform(YUP)
+        bm.to_mesh(ob.data)
+        bm.free()
+        ob.data.update()
+    for arm in arm_objs:
+        bpy.ops.object.select_all(action="DESELECT")
+        arm.select_set(True)
+        bpy.context.view_layer.objects.active = arm
+        bpy.ops.object.mode_set(mode="EDIT")
+        for b in arm.data.edit_bones:
+            b.head = YUP @ b.head
+            b.tail = YUP @ b.tail
+        bpy.ops.object.mode_set(mode="OBJECT")
+    for o in bpy.data.objects:
+        if o.type == "EMPTY":
+            o.matrix_world = YUP @ o.matrix_world
+    log("INFO", "Converted model to GTA SA Y-up model space (-90 deg about X, no mirroring)")
 
     # ================================================================
     # 5. TRIANGLE ANALYSIS (rule 9)
@@ -528,6 +577,78 @@ def main():
 
     with open(args.status, "w") as f:
         json.dump(status, f, indent=2)
+
+    # ================================================================
+    # 8. COLLISION (COL) - NEW STAGE, FULLY ISOLATED FROM THE DFF
+    #    A COL failure is recorded in status["col"] and NEVER fails the
+    #    DFF (the DFF is already exported + verified at this point).
+    #    The collision mesh is built from the SAME processed mesh that
+    #    went into the DFF (identity world space) => DFF and COL
+    #    transforms/scale/rotation/position match exactly.
+    # ================================================================
+    if args.col:
+        log("INFO", "=== Collision (COL) stage ===")
+        col = status["col"]
+        col_obj = None
+        last_err = None
+        budget = None
+
+        def clog(msg):
+            # collision_generator logs single-arg messages with [LEVEL] prefixes
+            for lvl in ("ERROR", "WARN", "SUCCESS"):
+                if f"[{lvl}]" in msg:
+                    log(lvl, msg)
+                    return
+            log("INFO", msg)
+
+        try:
+            import collision_generator as cgen
+
+            orig_tris = sum(len(o.data.polygons) for o in mesh_objs)
+            col["original_tris"] = orig_tris
+            budget = cgen.pick_collision_budget(
+                orig_tris, args.col_quality, args.col_triangles or None, clog)
+
+            # auto-retry ladder: rebuild collision mesh -> re-clean ->
+            # remove invalid faces -> reduce triangle count -> re-export
+            target = budget
+            for attempt in (1, 2):
+                col["budget_tris"] = target
+                if attempt > 1:
+                    log("WARN", f"COL auto-retry {attempt - 1}: rebuilding collision mesh "
+                        f"(re-clean + reduced target {target} tris)")
+                try:
+                    col_obj, stats = cgen.build_collision_mesh(mesh_objs, target, clog)
+                    col["final_tris"] = stats["final_tris"]
+                    col["verts"] = stats["verts"]
+                    cgen.export_col(col_obj, col_out, clog)
+                    cgen.remove_collision_obj(col_obj, clog)
+                    col_obj = None
+                    col["success"] = True
+                    col["reason"] = None
+                    col["size_bytes"] = os.path.getsize(col_out)
+                    log("SUCCESS", f"model.col created: {col_out} "
+                        f"({col['size_bytes']} bytes, {col['final_tris']} triangles)")
+                    break
+                except Exception as e:
+                    last_err = str(e)
+                    log("ERROR", f"COL attempt {attempt} failed: {e}")
+                    cgen.remove_collision_obj(col_obj, clog)
+                    col_obj = None
+                    if os.path.exists(col_out) and os.path.getsize(col_out) == 0:
+                        os.remove(col_out)
+                    target = max(1, int(target * 0.75))
+
+            if not col["success"]:
+                col["reason"] = f"COL generation failed after 2 attempts: {last_err}"
+                log("ERROR", f"COL FAILED (DFF unaffected): {last_err}")
+        except Exception as e:
+            col["success"] = False
+            col["reason"] = f"COL stage error: {e}"
+            log("ERROR", f"COL stage error (DFF unaffected): {e}")
+
+        with open(args.status, "w") as f:
+            json.dump(status, f, indent=2)
 
 if __name__ == "__main__":
     # NOTE: use os._exit() - the bpy wheel can segfault during normal CPython

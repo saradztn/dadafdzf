@@ -1,0 +1,43 @@
+{
+  "file": "/home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.col",
+  "valid": true,
+  "errors": [],
+  "checks": {
+    "bounds": true,
+    "geometry_exists": true,
+    "vertices_valid": true,
+    "face_indices_valid": true,
+    "structure": true
+  },
+  "info": {
+    "size_bytes": 52572,
+    "models": 1,
+    "model_name": "Scene Collection",
+    "version": 3,
+    "bounds_min": [
+      -75.95559692382812,
+      -0.10904312133789062,
+      -78.12089538574219
+    ],
+    "bounds_max": [
+      75.95809936523438,
+      30.679428100585938,
+      29.814254760742188
+    ],
+    "bounds_size": [
+      151.9136962890625,
+      30.788471221923828,
+      107.93515014648438
+    ],
+    "mesh_vertices": 2410,
+    "mesh_triangles": 4749,
+    "spheres": 0,
+    "boxes": 0,
+    "vertex_extent": [
+      75.9609375,
+      30.6796875,
+      78.1171875
+    ],
+    "degenerate_faces": 0
+  }
+}

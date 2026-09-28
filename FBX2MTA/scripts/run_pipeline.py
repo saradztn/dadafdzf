@@ -6,11 +6,19 @@ Scans input/*.fbx, converts every file:
     FBX -> Blender(bpy) + DragonFF -> DFF (GTA SA v3.6.0.3)
     -> standalone DFF validation (DragonFF gtaLib)
     -> round-trip test (DragonFF import -> Blender)
-    -> output/<name>.dff
+    -> REAL COLLISION (COL) generation (DragonFF COL export, COL3 for GTA SA/MTA)
+    -> standalone COL validation (DragonFF gtaLib col parser)
+    -> output/<name>.dff + output/<name>.col
 Writes reports/model_report.txt and appends to logs/converter.log.
 Never touches input files.
 
-Usage: python3 run_pipeline.py [--budget AUTO|N]
+COL is fully isolated: a COL failure records COL=FAILED (with reason)
+while the DFF still succeeds (DFF=PASS).
+
+Usage:
+    python3 run_pipeline.py [--budget AUTO|N]
+                            [--no-col] [--col-quality AUTO|LOW|MEDIUM|HIGH|CUSTOM]
+                            [--col-triangles N]
 """
 import os, sys, json, glob, subprocess, time, shutil
 
@@ -49,48 +57,52 @@ def find_mta():
             return c
     return None
 
-def make_mta_test(name, dff):
-    d = os.path.join(ROOT, "mta_test")
-    os.makedirs(d, exist_ok=True)
-    meta = f"""<meta>
-    <min_mta_version auth_id="" auth_version="1.5.9"></min_mta_version>
-    <info author="FBX2MTA" name="{name} DFF test" type="map" version="1.0" description="Automatic DFF load test"/>
-    <script src="client.lua" type="client" cache="false" />
-    <file src="model.dff"/>
-    <file src="model.txd" />
-</meta>
-"""
-    open(os.path.join(d, "meta.xml"), "w").write(meta)
-    open(os.path.join(d, "client.lua"), "w").write(
-        "-- Automatic MTA:SA DFF load test (FBX2MTA)\n"
-        "local ok, err = engineLoadDFF(0, getRealTime() and 'model.dff' or 'model.dff')\n"
-        "if not ok then\n"
-        "    print('DFF LOAD FAILED: ' .. tostring(err))\n"
-        "else\n"
-        "    engineReplaceModel(206, 'model.dff', 'model.txd') -- 206 = adder (test slot)\n"
-        "    print('DFF LOADED + MODEL REPLACED OK')\n"
-        "end\n"
-    )
-    dst = os.path.join(d, "model.dff")
-    shutil.copyfile(dff, dst)
-    log(f"MTA test resource written to {d} (drop into MTASA/resources/{name}_test)")
-    return d
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from mta_resource import make_test_resource  # noqa: E402
+
 
 def main():
     budget = "AUTO"
+    col_enabled = True
+    col_quality = "AUTO"
+    col_tris = 0
+    only_files = []
     if "--budget" in sys.argv:
         budget = sys.argv[sys.argv.index("--budget") + 1]
+    if "--no-col" in sys.argv:
+        col_enabled = False
+    if "--col-quality" in sys.argv:
+        col_quality = sys.argv[sys.argv.index("--col-quality") + 1]
+    if "--col-triangles" in sys.argv:
+        col_tris = int(sys.argv[sys.argv.index("--col-triangles") + 1])
+    if "--files" in sys.argv:
+        i = sys.argv.index("--files")
+        while i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith("--"):
+            only_files.append(sys.argv[i + 1])
+            i += 1
 
     inputs = sorted(glob.glob(os.path.join(ROOT, "input", "*.fbx")))
+    if only_files:
+        inputs = [p for p in inputs
+                  if os.path.splitext(os.path.basename(p))[0] in only_files]
     log("Starting converter (driver)")
     log(f"Blender backend: headless bpy via {BLENDER}")
     log("DragonFF: official Parik27/DragonFF addon (Blender 4.2+)")
+    if col_enabled:
+        if col_quality == "CUSTOM":
+            log(f"Collision: enabled (CUSTOM, max {col_tris} tris)")
+        elif col_quality == "AUTO":
+            log("Collision: enabled (AUTO - budget chosen by model size)")
+        else:
+            log(f"Collision: enabled (preset {col_quality})")
+    else:
+        log("Collision: DISABLED (--no-col)")
     if not inputs:
         log("ERROR: no .fbx files found in input/")
         return
 
     summary = {"success": [], "failed": [], "skipped": []}
-    reports = []
+    reports = []  # (name, inp, status, validation, rt, val, colres)
 
     for inp in inputs:
         name = os.path.splitext(os.path.basename(inp))[0].replace(" ", "_")
@@ -98,18 +110,25 @@ def main():
         log(f"Processing: {os.path.basename(inp)}")
 
         out_dff = os.path.join(ROOT, "output", name + ".dff")
+        out_col = os.path.join(ROOT, "output", name + ".col")
         tmp_dff = os.path.join(ROOT, "temp", name + ".dff")
+        tmp_col = os.path.join(ROOT, "temp", name + ".col")
         status_f = os.path.join(ROOT, "temp", name + ".status.json")
         rt_status_f = os.path.join(ROOT, "temp", name + ".rt.json")
         log_f = os.path.join(ROOT, "logs", name + ".log")
         rt_log_f = os.path.join(ROOT, "logs", name + ".rt.log")
-        for f in (tmp_dff, status_f, rt_status_f):
+        for f in (tmp_dff, tmp_col, status_f, rt_status_f):
             if os.path.exists(f): os.remove(f)
 
-        # ---- 1) convert
-        p = run([BLENDER, os.path.join(ROOT, "scripts", "convert.py"),
-                 "--input", inp, "--output", tmp_dff,
-                 "--budget", budget, "--log", log_f, "--status", status_f])
+        # ---- 1) convert (DFF + COL in the same Blender session)
+        conv_cmd = [BLENDER, os.path.join(ROOT, "scripts", "convert.py"),
+                    "--input", inp, "--output", tmp_dff,
+                    "--budget", budget, "--log", log_f, "--status", status_f]
+        if col_enabled:
+            conv_cmd += ["--col", "--col-quality", col_quality,
+                         "--col-triangles", str(col_tris),
+                         "--col-output", tmp_col]
+        p = run(conv_cmd)
         if p.returncode != 0 or not os.path.exists(tmp_dff):
             log(f"FAILED: conversion of {name} (see {log_f})")
             err = "conversion failed"
@@ -119,7 +138,7 @@ def main():
                     err = "; ".join(s.get("errors", ["conversion failed"])) or err
                 except Exception: pass
             summary["failed"].append((name, err))
-            reports.append((name, inp, None, None, None, None))
+            reports.append((name, inp, None, None, None, None, None))
             continue
 
         # ---- 2) validate DFF (standalone, DragonFF dff module)
@@ -149,7 +168,7 @@ def main():
         if validation == "FAIL":
             log(f"FAILED: DFF validation for {name}")
             summary["failed"].append((name, "DFF validation failed"))
-            reports.append((name, inp, status, None, None, val))
+            reports.append((name, inp, status, validation, None, val, None))
             continue
 
         # ---- 3) round-trip test
@@ -161,29 +180,94 @@ def main():
         if not rt_ok:
             log(f"FAILED: round-trip test for {name}: {rt.get('reason')}")
             summary["failed"].append((name, f"round-trip: {rt.get('reason')}"))
-            reports.append((name, inp, status, validation, None, val))
+            reports.append((name, inp, status, validation, None, val, None))
             continue
 
-        # ---- 4) finalize
-        shutil.copyfile(tmp_dff, out_dff)
-        summary["success"].append(name)
-        log(f"SUCCESS: {name} -> {out_dff}")
-        reports.append((name, inp, status, validation, rt, val))
+        # ---- 4) COL stage (isolated - DFF is already verified at this point)
+        colres = None
+        col_status = status.get("col", {})
+        if col_enabled:
+            if not col_status.get("success"):
+                colres = {"status": "FAILED",
+                          "reason": col_status.get("reason") or "COL not generated",
+                          "final_tris": col_status.get("final_tris", 0),
+                          "verts": col_status.get("verts", 0),
+                          "original_tris": col_status.get("original_tris", 0),
+                          "validation": None}
+                log(f"COL FAILED for {name}: {colres['reason']} (DFF still PASS)")
+            else:
+                # standalone COL validation with DragonFF's own col parser
+                p = run([PY, os.path.join(ROOT, "scripts", "validate_col.py"),
+                         tmp_col, "--report", tmp_col + ".validation.json"])
+                col_val = "PASS" if p.returncode == 0 else "FAIL"
+                cv = None
+                if os.path.exists(tmp_col + ".validation.json"):
+                    try:
+                        cv = json.load(open(tmp_col + ".validation.json"))
+                    except Exception:
+                        pass
+                colres = {
+                    "status": "PASS" if col_val == "PASS" else "FAILED",
+                    "reason": None if col_val == "PASS" else
+                              ("; ".join(cv.get("errors", ["COL validation failed"])) if cv
+                               else "COL validation failed"),
+                    "final_tris": col_status.get("final_tris", 0),
+                    "col_tris_in_file": (cv or {}).get("info", {}).get("mesh_triangles"),
+                    "verts": (cv or {}).get("info", {}).get("mesh_vertices",
+                              col_status.get("verts", 0)),
+                    "original_tris": col_status.get("original_tris", 0),
+                    "size_bytes": (cv or {}).get("info", {}).get("size_bytes", 0),
+                    "quality": col_status.get("quality"),
+                    "validation": col_val,
+                }
+                if col_val == "PASS":
+                    log(f"COL validation passed for {name} "
+                        f"({colres['col_tris_in_file']} triangles in file)")
+                else:
+                    log(f"COL validation FAILED for {name}: {colres['reason']} (DFF still PASS)")
+        else:
+            colres = {"status": "SKIPPED", "reason": "--no-col",
+                      "final_tris": 0, "verts": 0, "validation": None}
 
-    # ---- MTA test
+        # ---- 5) finalize
+        shutil.copyfile(tmp_dff, out_dff)
+        col_out_final = None
+        if colres and colres["status"] == "PASS" and os.path.exists(tmp_col):
+            shutil.copyfile(tmp_col, out_col)
+            col_out_final = out_col
+            shutil.copyfile(tmp_col + ".validation.json",
+                            out_col + ".validation.json")
+            log(f"SUCCESS: {name} -> {out_dff} + {out_col}")
+        else:
+            log(f"SUCCESS: {name} -> {out_dff} (COL: {colres['status'] if colres else 'SKIPPED'})")
+        summary["success"].append(name)
+        reports.append((name, inp, status, validation, rt, val, colres))
+
+    # ---- MTA test resource (DFF + COL)
     mta = find_mta()
     if mta:
         log(f"MTA:SA found at {mta} - runtime test would run in-game (headless not possible here)")
     else:
         log("MTA runtime test unavailable (MTA:SA not installed on this machine) - "
             "writing drop-in test resource instead")
-    for name, inp, status, validation, rt, val in reports:
+    # the test resource is generated for the LAST successful model of the batch
+    last_ok = None
+    for name, inp, status, validation, rt, val, colres in reports:
         if status:
-            make_mta_test(name, os.path.join(ROOT, "output", name + ".dff"))
+            last_ok = (name, colres)
+    if last_ok:
+        name, colres = last_ok
+        make_test_resource(
+            name,
+            os.path.join(ROOT, "output", name + ".dff"),
+            col=os.path.join(ROOT, "output", name + ".col")
+                if (colres and colres["status"] == "PASS") else None,
+            col_failed_reason=colres.get("reason") if colres else None)
+        log(f"Test resource model: {name}")
 
     # ---- report
     rpt = ["=" * 40, "FBX2MTA CONVERSION REPORT", "=" * 40, ""]
-    for name, inp, status, validation, rt, val in reports:
+    for name, inp, status, validation, rt, val, colres in reports:
         rpt.append(f"Input: {os.path.basename(inp)}")
         if status:
             o = status.get("original", {})
@@ -212,6 +296,26 @@ def main():
                 f"Orientation: {status.get('orientation', {}).get('label', '?')} "
                 f"(upright score {status.get('orientation', {}).get('upright_score', '?')})",
                 "",
+                "Collision (COL):",
+            ]
+            if colres:
+                if colres["status"] == "PASS":
+                    rpt += [
+                        f"Status: PASS",
+                        f"Quality: {colres.get('quality', '?')} (budget by model size)",
+                        f"Original triangles: {colres.get('original_tris', 0):,}",
+                        f"Collision triangles: {colres.get('col_tris_in_file') or colres.get('final_tris') or 0:,}",
+                        f"Collision vertices: {colres.get('verts', 0):,}",
+                        f"File: {name}.col ({colres.get('size_bytes', 0):,} bytes)",
+                        "Transform: identical to DFF (same processed mesh, identity world space)",
+                    ]
+                else:
+                    rpt += [f"Status: FAILED ({colres.get('reason', '?')})",
+                            "DFF is NOT affected - it remains valid and usable"]
+            else:
+                rpt.append("Status: SKIPPED")
+            rpt += [
+                "",
                 "DragonFF Export:",
                 "SUCCESS" if validation else "FAILED",
                 f"Export Version: {status.get('export_version', '?')}",
@@ -219,6 +323,16 @@ def main():
                 "",
                 "DFF Validation:", validation or "FAILED",
                 "Round Trip:", rt.get("roundtrip", "FAILED") if rt else "FAILED",
+                "",
+                "RESULT:",
+                "Conversion Complete",
+                f"DFF: {validation or 'FAILED'}",
+                f"COL: {colres['status'] if colres else 'SKIPPED'}",
+                f"Triangles: {pr.get('triangles', 0):,}",
+                f"Collision Triangles: {(colres or {}).get('col_tris_in_file') or 0:,}",
+                "Output: " + ", ".join(
+                    [f"output/{name}.dff"] +
+                    ([f"output/{name}.col"] if (colres and colres["status"] == "PASS") else [])),
             ]
             if dff.get("skin_bones", 0) > 32:
                 rpt.append(f"NOTE: model has {dff['skin_bones']} bones - above the standard 32-bone SA "
@@ -226,17 +340,19 @@ def main():
                            "a SA ped, the game will remap to its own skeleton.")
         else:
             rpt += ["", "CONVERSION FAILED"]
-        rpt += ["", "Output:", f"output/{name}.dff" if status else "(none)", "=" * 40, ""]
+        rpt += ["", "=" * 40, ""]
 
     # batch summary
+    ok_n = sum(1 for r in reports if r[2] and r[6] and r[6]["status"] == "PASS")
     rpt += ["BATCH SUMMARY",
-            f"success: {len(summary['success'])}",
+            f"success (DFF+COL): {ok_n}",
+            f"success (DFF only): {len([r for r in reports if r[2]]) - ok_n}",
             f"failed: {len(summary['failed'])}",
             f"skipped: {len(summary['skipped'])}"]
     for n, e in summary["failed"]:
         rpt.append(f"  FAILED {n}: {e}")
     if not mta:
-        rpt.append("MTA runtime test: unavailable (test resource provided in mta_test/)")
+        rpt.append("MTA runtime test: unavailable (test resource provided in test_resource/)")
     rpt.append("=" * 40)
 
     rep_path = os.path.join(ROOT, "reports", "model_report.txt")

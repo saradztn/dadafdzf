@@ -1,93 +1,141 @@
-# FBX2MTA — FBX → Blender → DragonFF → MTA:SA DFF
+# FBX2MTA — FBX → Blender → DragonFF → MTA:SA (DFF + COL)
 
-خط أنابيب تلقائي كامل (Autonomous pipeline) لتحويل ملفات **FBX** إلى ملفات **DFF**
-متوافقة مع **GTA San Andreas PC / MTA:SA / RenderWare**، باستخدام:
+خط أنابيب تلقائي كامل (Autonomous pipeline) لتحويل ملفات **FBX** إلى ملفات
+**DFF + COL** متوافقة مع **GTA San Andreas PC / MTA:SA / RenderWare**، باستخدام:
 
 - **Blender 4.2.23 LTS** (محرك `bpy` يعمل بلا واجهة — headless)
 - **DragonFF** — الإضافة الرسمية من مستودعها الرسمي
-  [`Parik27/DragonFF`](https://github.com/Parik27/DragonFF) — وهي المسؤولة فعلياً عن تصدير الـ DFF
+  [`Parik27/DragonFF`](https://github.com/Parik27/DragonFF) — وهي المسؤولة فعلياً عن
+  تصدير الـ DFF **والـ COL** (نفس الـ COL export الرسمي، بدون أي مُصدِّر مكتوب يدوياً)
 
 ```
-FBX → Blender FBX Import → Scene Processing → Geometry Validation → Triangulation
-→ Optimization → Triangle Analysis / Budget → Materials / UV / Normals
-→ DragonFF (GTA SA v3.6.0.3) → DFF → DFF Validation → Round-Trip Test → output/
+FBX → Blender Import → Processing (cleanup/triangulate/normals/UV)
+    → GTA SA Y-up conversion → DFF export (DragonFF, v3.6.0.3)
+    → DFF validation + round-trip
+    → COLLISION GENERATION (duplicate → decimate → cleanup → DragonFF COL export, COL3)
+    → COL validation (بنفس gtaLib/col.py الخاص بـ DragonFF)
+    → output/<name>.dff + output/<name>.col + test_resource/
 ```
+
+> **الفصل بين DFF وCOL**: فشل الـ COL لا يُفشل الـ DFF أبداً (DFF=PASS / COL=FAILED
+> مع السبب) — وفي حال الخطأ القابل للإصلاح تُعاد المحاولة تلقائياً
+> (إعادة بناء شبكة الكوليشن + التنظيف + تقليل عدد المثلثات + إعادة التصدير + إعادة الفحص).
 
 ---
 
 ## التشغيل / Usage
 
 ```bash
-# كل ما تحتاجه (يحوّل كل ملفات FBX داخل input/ دفعة واحدة):
-python3 scripts/run_pipeline.py                 # budget AUTO
-python3 scripts/run_pipeline.py --budget 20000  # حد مثلثات مخصص
+# ▶️ نقطة الدخول الوحيدة:
+python start.py                 # واجهة ويب على http://localhost:8321
+python start.py --cli           # بلا واجهة: يشغّل الخط كامل على input/*.fbx
+python start.py --cli --file Dragon_2.5.fbx
+python start.py --cli --no-col  # بدون كوليشن
+python start.py --cli --col-quality HIGH
+python start.py --cli --col-quality CUSTOM --col-triangles 2500
 
-# أو ملف واحد مباشرة:
-blender/run_blender.sh scripts/convert.py \
-    --input input/your_model.fbx \
-    --output output/your_model.dff \
-    --budget AUTO \
-    --log logs/your_model.log \
-    --status temp/your_model.status.json
+# أو المشغّل المباشر (نفس ما تشغّله الواجهة):
+python3 scripts/run_pipeline.py --budget AUTO
+python3 scripts/run_pipeline.py --files Dragon_2.5 --col-quality MEDIUM
 ```
 
-- الملفات المدخلة في `input/` **لا تُعدَّل أبداً** (قاعدة 24) — كل العمليات على نسخة داخل الذاكرة/`temp/`.
-- أكثر من ملف = batch mode تلقائي مع ملخص `success / failed / skipped`.
-- عند الفشل: إعادة محاولة تلقائية (Bin Mesh PLG → إعادة تنظيف normals/دوال → decimation) بحد أقصى 4 محاولات.
+واجهة الويب (افتراضياً) تعرض:
+
+- قائمة ملفات `input/*.fbx` + زر **+ Generate Test FBX** (توليد FBX اختباري حقيقي
+  بنموذج منخفض المضلعات يصدره Blender — للاختبار بدون ملفات خارجية)
+- قسم **COLLISION**: [✓] Generate COL، الجودة AUTO/LOW/MEDIUM/HIGH/CUSTOM،
+  حقل Maximum Collision Triangles، presets سريعة: 500 / 1000 / 2000 / 3000 / 5000 / 10000
+- زر **Convert selected → DFF + COL**
+- زر **Generate MTA Test Resource**
+- لوحة النتائج: `Conversion Complete / DFF: PASS / COL: PASS / Triangles /
+  Collision Triangles / outputs` + سجل حي (log)
 
 ## المخرجات / Outputs
 
 | المسار | المحتوى |
 |---|---|
-| `output/<name>.dff` | الملف النهائي (GTA SA v3.6.0.3) |
-| `reports/model_report.txt` | تقرير كامل (أرقام، مواد، نصائح توافق) |
-| `logs/converter.log` | سجل الدفعة + سجل لكل ملف |
-| `mta_test/` | MTA resource جاهز (meta.xml + client.lua + model.dff) |
+| `output/<name>.dff` | نموذج العرض (GTA SA v3.6.0.3، Y-up) |
+| `output/<name>.col` | **كوليشن حقيقي** (GTA SA COL3 — `engineLoadCOL()`/`engineReplaceCOL()`) |
+| `output/<name>.{dff,col}.validation.json` | تقارير الفحص المستقل |
+| `test_resource/` | MTA resource جاهز (meta.xml + client.lua + model.dff + model.col) |
+| `reports/model_report.txt` | تقرير كامل |
+| `logs/converter.log` + `logs/<name>.log` | السجلات |
 | `temp/*.status.json` | تفاصيل JSON لكل ملف |
+
+## نظام الكوليشن (COL) / Collision System
+
+- **غير مزوَّر وليس ملفاً جاهزاً**: شبكة الكوليشن تُبنى آلياً من نفس الشبكة
+  المُصدَّرة للـ DFF (نسخ → decimate (COLLAPSE) → تنظيف bmesh → تصدير DragonFF).
+- **نفس التحويل تماماً**: الـ DFF والـ COL ينتمان لنفس فضاء الإحداثيات
+  (نفس الشبكة Y-up بمصفوفة identity) — لا كوليشن منزلق أمتاراً عن النموذج.
+- **AUTO**: نموذج صغير (≤2000 مثلث) → لا تخفيض · متوسط (≤10000) → 3000 ·
+  كبير → 5000 مثلث كحد أقصى (لا يزيد أبداً عن عدد المثلثات الأصلي).
+- **التنظيف قبل التصدير**: إزالة الرؤوس المكررة، الوجوه المتدهورة (degenerate)،
+  الرؤوس العارية، الجزر المنفصلة الدقيقة (<0.5% من المساحة — هندسة داخلية/تفاصيل
+  غير مفيدة)، التحقق من عدم وجود NaN/Infinity.
+- **التصدير**: `bpy.ops.export_col.scene` (version 3 = GTA SA COL3) — quantization
+  1/128 وحساب الحدود (bounds) تلقائياً.
+- **الفحص المستقل** (`scripts/validate_col.py`) بنفس مُحلل DragonFF: الملف موجود
+  وحجمه >0، البنية صالحة، هناك هندسة كوليشن فعلية (وجوه/كرات/صناديق)، الرؤوس
+  محدودة، فهارس الوجوه صالحة وغير متدهورة، الحدود (bounds) صالحة.
 
 ## بنية المشروع / Structure
 
 ```
 FBX2MTA/
-├── input/      # ملفات FBX (تُكتشف تلقائياً)
-├── output/     # DFF النهائي
-├── blender/    # محرك bpy (venv) + stubs لـ X11/GL + run_blender.sh
-├── dragonff/   # DragonFF الرسمي (cloned from Parik27/DragonFF)
+├── start.py        # نقطة الدخول (ويب افتراضياً / --cli)
+├── webgui.py       # واجهة الويب (stdlib فقط — بدون أي اعتمادية خارجية)
+├── input/          # ملفات FBX (تُكتشف تلقائياً)
+├── output/         # DFF + COL النهائية
+├── test_resource/  # MTA resource (meta.xml, client.lua, model.dff, model.col)
+├── blender/        # محرك bpy (venv) + stubs لـ X11/GL + run_blender.sh + setup_env.sh
+├── dragonff/       # DragonFF الرسمي (cloned from Parik27/DragonFF)
 ├── scripts/
-│   ├── convert.py        # خط التحويل داخل Blender
-│   ├── validate_dff.py   # فحص DFF مستقل (بنفس gtaLib/dff.py الخاص بـ DragonFF)
-│   ├── roundtrip.py      # اختبار الإعادة: DFF → DragonFF Import → Blender
-│   └── run_pipeline.py   # المشغّل: batch + تقرير + MTA test
+│   ├── convert.py            # خط التحويل داخل Blender (DFF ثم COL)
+│   ├── collision_generator.py# بناء شبكة الكوليشن + تصديرها عبر DragonFF COL
+│   ├── validate_dff.py       # فحص DFF مستقل (gtaLib/dff.py)
+│   ├── validate_col.py       # فحص COL مستقل (gtaLib/col.py)
+│   ├── roundtrip.py          # DFF → DragonFF Import → Blender
+│   ├── generate_test_fbx.py  # توليد FBX اختباري (نموذج + UV + material)
+│   ├── mta_resource.py       # توليد test_resource/
+│   └── run_pipeline.py       # المشغّل: batch + COL + تقرير
 ├── logs/  reports/  temp/
-└── mta_test/   # MTA resource للاختبار داخل اللعبة
 ```
 
 ## ملاحظات تقنية / Technical Notes
 
-- **نظام إحداثيات GTA SA**: Blender هو Z-up (مثل SA)، والتحويل مُتحقق منه آلياً
-  (4 تركيبات محاور) باختيار الأُقصى لدرجة "الاستقامة" — لا تحويلات تخمينية.
-  DragonFF نفسه يعكس UV-v ويرتّب winding عند التصدير.
-- **حدود DFF الصارمة**: 65535 رأس/geometry (يُقدَّم قبل التصدير ويُرفض إن تجاوز) —
-  نموذج التنين هنا: 22,827 رأس → ضمن الحد دون أي تخفيض.
-- **Geometry Budget = AUTO**: لا يُخفَّض نموذج سليم تلقائياً؛ `--budget N` يفرض حداً
-  مع decimation يحافظ على UV/normals/skinning.
-- **Skinned mesh**: العظام تُصدَّر كـ frames مع HAnim + SkinPLG (230 عظمة هنا،
-  118 منها موزونة). ملاحظة: العدد أكبر من هيكل SA المكون من 32 عظمة — صالح كنموذج
-  مستقل، أما استبدال موديل ped فسيُعاد للهيكل القياسي.
-- **الخصائص**: UV (الخريطة الأولى) + normals لكل-رأس + bump map (Rockstar effect)
-  + أسماء مواد نظيفة + أسماء textures مطابقة لأسماء الملفات.
+- **اتجاه النموذج (Y-up)**: Blender يعمل Z-up بينما فضاء نماذج GTA SA هو **Y-up**
+  (إطارات الـ clump الأصلية identity). لذلك مرحلة 4.5 تدوّر النموذج كاملاً
+  (شبكة + عظام + empties) بـ -90° حول X: `(x,y,z) → (x,z,-y)` — دوران ميسور
+  (بدون mirroring) فتبقى winding/normals صالحة. دقة المطابقة تم التحقق منها:
+  حدود الـ COL ضمن حدود الـ DFF بفارق ≤0.7m (تأثير decimation فقط).
+- **حدود DFF الصارمة**: 65535 رأس/geometry (يُقدَّم قبل التصدير ويُرفض إن تجاوز).
+- **Geometry Budget = AUTO**: لا يُخفَّض نموذج سليم تلقائياً؛ `--budget N` يفرض حداً.
+- **Skinned mesh**: العظام تُصدَّر كـ frames مع SkinPLG (230 عظمة في التنين).
+  ملاحظة: العدد أكبر من هيكل SA المكون من 32 عظمة — صالح كنموذج مستقل،
+  أما استبدال موديل ped فسيُعاد للهيكل القياسي.
+- **الملفات المدخلة في `input/` لا تُعدَّل أبداً** — كل العمليات على نسخ.
 
 ## الاختبار داخل MTA:SA / In-game test
 
-انسخ مجلد `mta_test/` إلى `MTASA/resources/dragon_test/` (مع ملف TXD بنفس أسماء
-الtextures: `Dragon_Bump_Col2` و `Dragon_Nor_mirror2`) ثم شغّل الـ resource.
-`client.lua` يستخدم `engineLoadDFF()` و `engineReplaceModel()` للطباعة الفورية.
+انسخ مجلد `test_resource/` إلى `MTASA/resources/dragon_test/` (ومع تنينك أضف
+ملف TXD بأسماء textures: `Dragon_Bump_Col2` و `Dragon_Nor_mirror2`) ثم شغّل
+الـ resource. `client.lua` يستخدم:
+
+```lua
+engineLoadDFF(0, 'model.dff')      + engineReplaceModel(206, 'model.dff', 'model.txd')
+engineLoadCOL('model.col')         + engineReplaceCOL(206, 'model.col')
+createObject(206, 100.0, 1.5, -1000.0, 0, 0, 0)   -- spawn للاختبار الفوري
+```
+
 (لم يتم تشغيل MTA هنا — غير مثبت — لذا: **MTA runtime test unavailable**).
 
 ## إعادة التهيئة / Reset
 
 ```bash
-# إعادة تثبيت محرك Blender (عند نقل الجهاز):
+# إعادة إنشاء محرك Blender (الملف كبير (~1GB) وقد لا يُحفظ عند نقل البيئة):
+blender/setup_env.sh
+# أو يدوياً:
 python3 -m venv blender/venv && blender/venv/bin/pip install bpy==4.2.23
 # stubs جاهزة في blender/stublibs + blender/x11_missing.so (X11 headless)
 ```
