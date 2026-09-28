@@ -2,7 +2,7 @@
 FBX2MTA CONVERSION REPORT
 ========================================
 
-Input: my_model.fbx
+Input: generated_test.fbx
 
 Original:
 Vertices: 384
@@ -33,13 +33,13 @@ Quality: AUTO (budget by model size)
 Original triangles: 728
 Collision triangles: 728
 Collision vertices: 384
-File: my_model.col (8,248 bytes)
+File: generated_test.col (8,248 bytes)
 Transform: identical to DFF (same processed mesh, identity world space)
 
 DragonFF Export:
 SUCCESS
 Export Version: GTA SA (v3.6.0.3) 0x36003
-File: my_model.dff (32,216 bytes)
+File: generated_test.dff (32,216 bytes)
 
 DFF Validation:
 PASS
@@ -52,7 +52,7 @@ DFF: PASS
 COL: PASS
 Triangles: 728
 Collision Triangles: 728
-Output: output/my_model.dff, output/my_model.col
+Output: output/generated_test.dff, output/generated_test.col
 
 ========================================
 

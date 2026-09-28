@@ -2211,3 +2211,71 @@
 [18:34:53] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
 [18:34:53] BATCH: success=1 failed=0 skipped=0
 [18:34:53]   OK: my_model
+[18:53:16] Blender bpy venv missing - rebuilding via blender/setup_env.sh (~30s)...
+[18:53:32]   [setup] [setup] Creating Blender bpy venv (downloads ~350MB)...
+[18:53:32]   [setup] [setup] Blender 4.2.23 LTS ready
+[18:53:32] Blender bpy venv rebuilt OK
+[18:53:32] Starting converter (driver)
+[18:53:32] Blender backend: headless bpy via /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh
+[18:53:32] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[18:53:32] Collision: enabled (AUTO - budget chosen by model size)
+[18:53:32] ============================================================
+[18:53:32] Processing: generated_test.fbx
+[18:53:32] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/generated_test.fbx --output /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/generated_test.log --status /home/user/dadafdzf/FBX2MTA/temp/generated_test.status.json --col --col-quality AUTO --col-triangles 0 --col-output /home/user/dadafdzf/FBX2MTA/temp/generated_test.col
+    [INFO] Processing mesh 'TestCreature': verts=384 polys=620
+    [INFO]   triangulated 60 quads/ngons -> tris=728
+    [INFO]   closed mesh: recalculated normals outward
+    [INFO]   UV layer 'UVMap': 2184 coords (loops=2184)
+    [INFO] No residual object transforms to apply
+    [INFO] Converted model to GTA SA Y-up model space (-90 deg about X, no mirroring)
+    [INFO] OBJECT: TestCreature
+    Vertices: 384
+    Triangles: 728
+    [INFO] MATERIAL: TestMaterial
+    Triangles: 728
+    [INFO] Geometry Budget: AUTO - 728 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO]   'TestCreature': estimated DFF vertices 650 (limit 65535)
+    Info: Finished export in 0.06s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff (32216 bytes) in 0.53s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff
+    [INFO] === Collision (COL) stage ===
+    [INFO] Original collision triangles: 728
+    [INFO] Target collision triangles: 728 (small model - collision kept at full detail)
+    [INFO] [INFO] Creating collision mesh from 1 object(s)
+    [INFO] Collision optimized: 384 vertices / 728 triangles
+    [INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/generated_test.col
+    [SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/generated_test.col (8248 bytes)
+    [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/generated_test.col (8248 bytes, 728 triangles)
+[18:53:33] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff --expect-tris 728
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/generated_test.dff)
+      [PASS] size>0  (32216 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=1 geos=1 atomics=1 tris=728 verts=650 mats=1 skin_bones=0
+      textures: ['']
+      material effects: none
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (728 tris / 650 verts)
+      [PASS] tri_count_matches  (expected 728, got 728)
+    VALIDATION PASS
+[18:53:33] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff --status /home/user/dadafdzf/FBX2MTA/temp/generated_test.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/generated_test.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/generated_test.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=728 verts=384 armatures=0 bones=0 mats=1 vgroups=0 uv_layers=1
+    [INFO] Expected:      tris=728 verts=384 frames=0 mats=1
+    Info: Saved "generated_test_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/generated_test_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[18:53:33] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_col.py /home/user/dadafdzf/FBX2MTA/temp/generated_test.col --report /home/user/dadafdzf/FBX2MTA/temp/generated_test.col.validation.json
+    COL VALIDATION PASSED: generated_test.col (8248 bytes, 728 collision triangles, 384 vertices)
+[18:53:33] COL validation passed for generated_test (728 triangles in file)
+[18:53:33] SUCCESS: generated_test -> /home/user/dadafdzf/FBX2MTA/output/generated_test.dff + /home/user/dadafdzf/FBX2MTA/output/generated_test.col
+[18:53:33] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[18:53:33] Test resource model: generated_test
+[18:53:33] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[18:53:33] BATCH: success=1 failed=0 skipped=0
+[18:53:33]   OK: generated_test

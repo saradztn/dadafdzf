@@ -27,7 +27,8 @@ FBX → Blender Import → Processing (cleanup/triangulate/normals/UV)
 
 ```bash
 # ▶️ نقطة الدخول الوحيدة:
-python start.py                 # واجهة ويب على http://localhost:8321
+python start.py                 # واجهة tkinter (سطح مكتب) — الافتراضية
+python start.py --web           # بديل: واجهة ويب على http://localhost:8321
 python start.py --cli           # بلا واجهة: يشغّل الخط كامل على input/*.fbx
 python start.py --cli --file Dragon_2.5.fbx
 python start.py --cli --no-col  # بدون كوليشن
@@ -39,16 +40,22 @@ python3 scripts/run_pipeline.py --budget AUTO
 python3 scripts/run_pipeline.py --files Dragon_2.5 --col-quality MEDIUM
 ```
 
-واجهة الويب (افتراضياً) تعرض:
+واجهة **tkinter** (الافتراضية — تُفتح مباشرة بلا متصفح/سيرفر) تعرض:
 
-- قائمة ملفات `input/*.fbx` + زر **+ Generate Test FBX** (توليد FBX اختباري حقيقي
-  بنموذج منخفض المضلعات يصدره Blender — للاختبار بدون ملفات خارجية)
+- **Choose FBX file ...**: زر يفتح نافذة اختيار النظام → تختار أي `.fbx` من
+  جهازك → يُنسخ إلى `input/` ويظهر في القائمة جاهزاً للتحويل
+- قائمة ملفات `input/*.fbx` + زر **+ Generate Test FBX** (توليد FBX اختباري
+  حقيقي بنموذج منخفض المضلعات يصدره Blender — للاختبار بدون ملفات خارجية)
 - قسم **COLLISION**: [✓] Generate COL، الجودة AUTO/LOW/MEDIUM/HIGH/CUSTOM،
   حقل Maximum Collision Triangles، presets سريعة: 500 / 1000 / 2000 / 3000 / 5000 / 10000
 - زر **Convert selected → DFF + COL**
-- زر **Generate MTA Test Resource**
+- زر **Generate MTA Test Resource** + زر **Open output folder**
 - لوحة النتائج: `Conversion Complete / DFF: PASS / COL: PASS / Triangles /
   Collision Triangles / outputs` + سجل حي (log)
+- ملاحظة: tkinter مدمج في Python القياسي على Windows/macOS؛ على لينكس إن لم
+  يتوفر: `sudo apt install python3-tk` — أو استخدم `python start.py --web`
+
+واجهة الويب (`--web`) نفس الميزات بالضبط (بدل الاختيار من الجهاز: زر رفع).
 
 ## المخرجات / Outputs
 
@@ -83,8 +90,11 @@ python3 scripts/run_pipeline.py --files Dragon_2.5 --col-quality MEDIUM
 
 ```
 FBX2MTA/
-├── start.py        # نقطة الدخول (ويب افتراضياً / --cli)
-├── webgui.py       # واجهة الويب (stdlib فقط — بدون أي اعتمادية خارجية)
+├── start.py        # نقطة الدخول (tkinter افتراضياً / --web / --cli)
+├── tkgui.py        # واجهة tkinter (سطح مكتب — الافتراضية)
+├── joblib.py       # منطق مشترك (وظائف خلفية + نتائج) — مشترك بين الواجهتين
+├── webgui.py       # واجهة الويب (بديل اختياري عبر --web)
+├── tests/smoke_tkgui.py  # اختبار دخان للواجهة بدون شاشة (للبنية/الاتصال)
 ├── input/          # ملفات FBX (تُكتشف تلقائياً)
 ├── output/         # DFF + COL النهائية
 ├── test_resource/  # MTA resource (meta.xml, client.lua, model.dff, model.col)
