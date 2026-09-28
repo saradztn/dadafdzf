@@ -103,7 +103,7 @@ def main():
             log("ERROR: could not rebuild the Blender engine - aborting batch "
                 "(see [setup] lines above; on Windows install Python 3.11 "
                 "from python.org and press Convert again)")
-            return
+            sys.exit(2)
         log("Blender bpy venv rebuilt OK")
 
     inputs = sorted(glob.glob(os.path.join(ROOT, "input", "*.fbx")))
@@ -124,7 +124,7 @@ def main():
         log("Collision: DISABLED (--no-col)")
     if not inputs:
         log("ERROR: no .fbx files found in input/")
-        return
+        sys.exit(2)
 
     summary = {"success": [], "failed": [], "skipped": []}
     reports = []  # (name, inp, status, validation, rt, val, colres)
@@ -391,6 +391,8 @@ def main():
         log(f"  OK: {n}")
     for n, e in summary["failed"]:
         log(f"  FAILED: {n} ({e})")
+    if summary["failed"]:
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

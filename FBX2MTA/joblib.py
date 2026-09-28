@@ -33,6 +33,7 @@ class JobState:
         self.busy = False
         self.job = None
         self.last_job_ok = None
+        self.last_job_error = None
         self.last_run_at = None
 
     def log(self, line):
@@ -71,6 +72,12 @@ class JobState:
                 self.busy = False
                 self.job = None
                 self.last_job_ok = ok
+                self.last_job_error = None
+                if ok is False:
+                    for ln in reversed(self.lines):
+                        if "ERROR" in ln or "job error" in ln:
+                            self.last_job_error = ln.split("] ", 1)[-1][:300]
+                            break
                 self.last_run_at = time.time()
 
         threading.Thread(target=worker, daemon=True).start()

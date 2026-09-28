@@ -310,6 +310,10 @@ class Fbx2MtaApp:
         if busy:
             b.configure(bg="#1a2430", fg="#f0c93c",
                         text="Working... " + (STATE.job or ""))
+        elif STATE.last_job_ok is False:
+            b.configure(bg="#3a1518", fg="#e05252",
+                        text="Conversion FAILED\n"
+                             + (STATE.last_job_error or "see log above")[:220])
         elif any_row and all_ok and last:
             b.configure(bg="#12351f", fg="#37b45f",
                         text="Conversion Complete\n"
