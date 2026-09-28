@@ -30,7 +30,7 @@ import joblib  # noqa: E402
 
 PY = sys.executable
 PIPELINE = os.path.join(ROOT, "scripts", "run_pipeline.py")
-BLENDER = os.path.join(ROOT, "blender", "run_blender.sh")
+RUN_BLENDER = os.path.join(ROOT, "blender", "run_blender.py")  # cross-platform
 GEN_FBX = os.path.join(ROOT, "scripts", "generate_test_fbx.py")
 RESOURCE = os.path.join(ROOT, "scripts", "mta_resource.py")
 
@@ -209,7 +209,7 @@ class Fbx2MtaApp:
 
     def generate_fbx(self):
         out = os.path.join(joblib.INPUT_DIR, "generated_test.fbx")
-        cmd = [BLENDER, GEN_FBX, "--output", out,
+        cmd = [PY, RUN_BLENDER, GEN_FBX, "--output", out,
                "--log", os.path.join(ROOT, "logs", "test_fbx.log")]
         if not STATE.run(cmd, "generate test FBX"):
             self._busy_warning()

@@ -31,7 +31,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 ROOT = os.path.dirname(os.path.abspath(__file__))          # FBX2MTA/
 PY = sys.executable
 PIPELINE = os.path.join(ROOT, "scripts", "run_pipeline.py")
-BLENDER = os.path.join(ROOT, "blender", "run_blender.sh")
+RUN_BLENDER = os.path.join(ROOT, "blender", "run_blender.py")  # cross-platform
 GEN_FBX = os.path.join(ROOT, "scripts", "generate_test_fbx.py")
 RESOURCE = os.path.join(ROOT, "scripts", "mta_resource.py")
 
@@ -176,7 +176,7 @@ def start_convert(files, col, quality, col_tris):
 
 def start_generate_fbx():
     out = os.path.join(INPUT_DIR, "generated_test.fbx")
-    cmd = [BLENDER, GEN_FBX, "--output", out,
+    cmd = [PY, RUN_BLENDER, GEN_FBX, "--output", out,
            "--log", os.path.join(ROOT, "logs", "test_fbx.log")]
     return run_job(cmd, "generate test FBX")
 

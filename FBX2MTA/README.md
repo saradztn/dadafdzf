@@ -57,6 +57,30 @@ python3 scripts/run_pipeline.py --files Dragon_2.5 --col-quality MEDIUM
 
 واجهة الويب (`--web`) نفس الميزات بالضبط (بدل الاختيار من الجهاز: زر رفع).
 
+## أنظمة التشغيل / Platforms (Windows · Linux · macOS)
+
+المشروع يعمل بالكامل على **Windows و Linux و macOS** — كل الأوامر تمر عبر
+`blender/run_blender.py` و `blender/setup_env.py` (Python نقّاء، بدون أي `.sh`
+أو bash). لا توجد خطوة يدوية: عند الضغط على **Convert** أول مرة يبني الخط بيئة
+Blender تلقائياً (self-heal) ويعيد المحاولة.
+
+بيتان مهمان:
+
+1. **الواجهة (tkinter)** تعمل بأي Python ≥ 3.9 (ومدمجة أصلاً في ثوابت
+   Windows/macOS). هذه هي الـ Python التي تشغّل بها `python start.py`.
+2. **محرك التحويل** هو `bpy 4.2.23` (نسخة DragonFF المعتمدة)، وتوفّر حزمه
+   (wheels) **لـ Python 3.11 فقط**. لذلك:
+   - عند الضغط على Convert أول مرة يبحث `blender/setup_env.py` عن Python 3.11
+     على جهازك (على Windows يفحص `AppData\Local\Programs\Python` و Program Files
+     والمسارات القياسية، وعلى لينكس `python3.11`/`/usr/bin`/`/opt`).
+   - **وجد 3.11** ← ينشئ `blender/venv` وينصّب bpy تلقائياً (~350MB، قد تأخذ
+     الدقائق الأولى وقتاً — هذا طبيعي).
+   - **لا يوجد 3.11** ← يكتب في السجل خطوات التثبيت الدقيقة من
+     [python.org](https://www.python.org/downloads/windows/) ثم اضغط Convert
+     مرة أخرى. **لا تحذف Python الحالي** — 3.11 يُثبّت بجانبه.
+   - مثال (Windows 3.13 + 3.11): الواجهة تعمل بـ 3.13 (`py -3.13 start.py`)
+     والمحرك يُبنى على 3.11 (`blender/venv`) — كلاهما يجده النظام تلقائياً.
+
 ## المخرجات / Outputs
 
 | المسار | المحتوى |
@@ -98,7 +122,8 @@ FBX2MTA/
 ├── input/          # ملفات FBX (تُكتشف تلقائياً)
 ├── output/         # DFF + COL النهائية
 ├── test_resource/  # MTA resource (meta.xml, client.lua, model.dff, model.col)
-├── blender/        # محرك bpy (venv) + stubs لـ X11/GL + run_blender.sh + setup_env.sh
+├── blender/        # محرك bpy (venv) + setup_env.py + run_blender.py (عابر للنظام)
+│   │               # + stubs لـ X11/GL (لينكس فقط) + setup_env.sh/run_blender.sh (غلاف)
 ├── dragonff/       # DragonFF الرسمي (cloned from Parik27/DragonFF)
 ├── scripts/
 │   ├── convert.py            # خط التحويل داخل Blender (DFF ثم COL)
@@ -143,9 +168,8 @@ createObject(206, 100.0, 1.5, -1000.0, 0, 0, 0)   -- spawn للاختبار ال
 ## إعادة التهيئة / Reset
 
 ```bash
-# إعادة إنشاء محرك Blender (الملف كبير (~1GB) وقد لا يُحفظ عند نقل البيئة):
-blender/setup_env.sh
-# أو يدوياً:
-python3 -m venv blender/venv && blender/venv/bin/pip install bpy==4.2.23
-# stubs جاهزة في blender/stublibs + blender/x11_missing.so (X11 headless)
+# إعادة إنشاء محرك Blender (عابر للنظام — يوجِد Python 3.11 ويبني venv وينصّب bpy):
+python blender/setup_env.py
+# (setup_env.sh غلاف له في لينكس؛ وفي ويندوز شغّل الـ .py مباشرة)
+# stubs جاهزة في blender/stublibs + blender/x11_missing.so (X11 headless — لينكس فقط)
 ```

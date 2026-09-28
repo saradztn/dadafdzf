@@ -23,8 +23,10 @@ Usage:
 import os, sys, json, glob, subprocess, time, shutil
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # FBX2MTA/
-BLENDER = os.path.join(ROOT, "blender", "run_blender.sh")
+sys.path.insert(0, ROOT)  # make joblib importable
 PY = sys.executable
+# cross-platform headless Blender runner (Windows: no bash needed)
+RUN_BLENDER = os.path.join(ROOT, "blender", "run_blender.py")
 
 LOG = open(os.path.join(ROOT, "logs", "converter.log"), "a")
 def log(msg):
@@ -33,7 +35,10 @@ def log(msg):
     LOG.write(line + "\n"); LOG.flush()
 
 def run(cmd, timeout=3600):
-    log("CMD: " + " ".join(cmd))
+    flat = []
+    for part in cmd:
+        flat.extend(part if isinstance(part, (list, tuple)) else [part])
+    log("CMD: " + " ".join(flat))
     p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
     tail = (p.stdout or "").strip().splitlines()[-25:]
     for l in tail:
@@ -83,16 +88,21 @@ def main():
 
     # ---- 0) self-heal: the headless Blender venv (~1GB) may not survive
     #         environment resets/snapshots - rebuild it automatically
-    venv_py = os.path.join(ROOT, "blender", "venv", "bin", "python")
+    import joblib
+    venv_py = joblib.venv_python_path()
     if not os.path.exists(venv_py):
-        log("Blender bpy venv missing - rebuilding via blender/setup_env.sh (~30s)...")
-        p = subprocess.run([os.path.join(ROOT, "blender", "setup_env.sh")],
-                           capture_output=True, text=True, timeout=1800)
-        tail = (p.stdout or p.stderr or "").strip().splitlines()[-3:]
+        log("Blender bpy venv missing - rebuilding via blender/setup_env.py "
+            "(first time downloads ~350MB, can take a few minutes)...")
+        p = subprocess.run([sys.executable,
+                            os.path.join(ROOT, "blender", "setup_env.py")],
+                           capture_output=True, text=True, timeout=3600)
+        tail = (p.stdout or p.stderr or "").strip().splitlines()[-8:]
         for l in tail:
             log("  [setup] " + l)
         if p.returncode != 0 or not os.path.exists(venv_py):
-            log("ERROR: could not rebuild Blender env - aborting batch")
+            log("ERROR: could not rebuild the Blender engine - aborting batch "
+                "(see [setup] lines above; on Windows install Python 3.11 "
+                "from python.org and press Convert again)")
             return
         log("Blender bpy venv rebuilt OK")
 
@@ -101,7 +111,7 @@ def main():
         inputs = [p for p in inputs
                   if os.path.splitext(os.path.basename(p))[0] in only_files]
     log("Starting converter (driver)")
-    log(f"Blender backend: headless bpy via {BLENDER}")
+    log(f"Blender backend: headless bpy via {PY} {RUN_BLENDER}")
     log("DragonFF: official Parik27/DragonFF addon (Blender 4.2+)")
     if col_enabled:
         if col_quality == "CUSTOM":
@@ -136,7 +146,7 @@ def main():
             if os.path.exists(f): os.remove(f)
 
         # ---- 1) convert (DFF + COL in the same Blender session)
-        conv_cmd = [BLENDER, os.path.join(ROOT, "scripts", "convert.py"),
+        conv_cmd = [PY, RUN_BLENDER, os.path.join(ROOT, "scripts", "convert.py"),
                     "--input", inp, "--output", tmp_dff,
                     "--budget", budget, "--log", log_f, "--status", status_f]
         if col_enabled:
@@ -187,7 +197,7 @@ def main():
             continue
 
         # ---- 3) round-trip test
-        p = run([BLENDER, os.path.join(ROOT, "scripts", "roundtrip.py"),
+        p = run([PY, RUN_BLENDER, os.path.join(ROOT, "scripts", "roundtrip.py"),
                  "--dff", tmp_dff, "--status", status_f,
                  "--rt-status", rt_status_f, "--log", rt_log_f])
         rt = json.load(open(rt_status_f)) if os.path.exists(rt_status_f) else {}

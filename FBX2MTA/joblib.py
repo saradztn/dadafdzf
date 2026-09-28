@@ -17,6 +17,13 @@ OUTPUT_DIR = os.path.join(ROOT, "output")
 TEMP_DIR = os.path.join(ROOT, "temp")
 
 
+def venv_python_path():
+    """Platform path of the bpy venv python (Windows: Scripts/, else bin/)."""
+    if os.name == "nt":
+        return os.path.join(ROOT, "blender", "venv", "Scripts", "python.exe")
+    return os.path.join(ROOT, "blender", "venv", "bin", "python")
+
+
 class JobState:
     """Thread-safe state for background jobs (log stream + busy flag)."""
 
