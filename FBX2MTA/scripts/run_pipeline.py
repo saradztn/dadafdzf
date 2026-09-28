@@ -231,6 +231,9 @@ def main():
 
         # ---- 5) finalize
         shutil.copyfile(tmp_dff, out_dff)
+        if os.path.exists(tmp_dff + ".validation.json"):
+            shutil.copyfile(tmp_dff + ".validation.json",
+                            out_dff + ".validation.json")
         col_out_final = None
         if colres and colres["status"] == "PASS" and os.path.exists(tmp_col):
             shutil.copyfile(tmp_col, out_col)

@@ -72,6 +72,8 @@ def latest_results():
                "triangles": None, "col_triangles": None,
                "col_reason": None, "outputs": []}
         status_f = os.path.join(TEMP_DIR, name + ".status.json")
+        out_dff = os.path.join(OUTPUT_DIR, name + ".dff")
+        out_col = os.path.join(OUTPUT_DIR, name + ".col")
         if os.path.exists(status_f):
             try:
                 s = json.load(open(status_f))
@@ -86,7 +88,23 @@ def latest_results():
                         res["col"] = "SKIPPED"
             except Exception:
                 pass
+        # fallback (e.g. temp/ was reset): output files only exist after the
+        # pipeline validated them, so presence implies a passing conversion
+        if res["dff"] == "MISSING" and os.path.exists(out_dff):
+            res["dff"] = "PASS"
+        if res["col"] in ("MISSING", "FAILED") and not os.path.exists(
+                os.path.join(TEMP_DIR, name + ".col.validation.json")) \
+                and os.path.exists(out_col):
+            res["col"] = "PASS"
+        if res.get("triangles") is None and os.path.exists(out_dff + ".validation.json"):
+            try:
+                res["triangles"] = json.load(
+                    open(out_dff + ".validation.json")).get("info", {}).get("triangles")
+            except Exception:
+                pass
         colval_f = os.path.join(TEMP_DIR, name + ".col.validation.json")
+        if not os.path.exists(colval_f) and os.path.exists(out_col + ".validation.json"):
+            colval_f = out_col + ".validation.json"
         if os.path.exists(colval_f):
             try:
                 cv = json.load(open(colval_f))
@@ -361,7 +379,9 @@ function renderResults(data){
     const dffOk = r.dff === "PASS";
     const colOk = r.col === "PASS";
     if (dffOk && (r.col === "PASS" || r.col === "SKIPPED")) {} else allOk = false;
-    const outs = (r.outputs || []).map(o => `${o.file} (${(o.bytes/1024).toFixed(1)} KB)`).join("<br>");
+    const outs = (r.outputs || []).map(o =>
+      `<a href="/api/file?path=${encodeURIComponent(o.file)}" style="color:#8fd0ff">${esc(o.file)}</a>
+       <span class="hint">(${(o.bytes/1024).toFixed(1)} KB)</span>`).join("<br>");
     const reason = r.col === "FAILED" ? ` <span class="hint">${esc(r.col_reason||"")}</span>` : "";
     tb.innerHTML += `<tr>
       <td>${esc(r.name)}</td>
@@ -415,9 +435,19 @@ async function refresh(){
   try {
     const r = await fetch("/api/state");
     const d = await r.json();
+    const b = $("#banner");
+    if (b) delete b.dataset.offline;
     renderFiles(d.files);
     renderResults(d);
-  } catch(e){}
+  } catch(e){
+    const b = $("#banner");
+    if (b && !b.dataset.offline){
+      b.dataset.offline = "1";
+      b.className = "banner bad";
+      b.innerHTML = "Cannot reach the converter backend &mdash; restart the server with "
+        + "<code>python start.py</code>. This page updates automatically.";
+    }
+  }
 }
 
 refresh();
@@ -457,8 +487,27 @@ class Handler(BaseHTTPRequestHandler):
                 "files": list_input_files(),
                 "results": latest_results(),
             })
+        elif self.path.startswith("/api/file"):
+            self._serve_file()
         else:
             self._json({"error": "not found"}, 404)
+
+    def _serve_file(self):
+        from urllib.parse import urlparse, parse_qs
+        qs = parse_qs(urlparse(self.path).query)
+        rel = (qs.get("path") or [""])[0].replace("\\", "/")
+        p = os.path.normpath(os.path.join(ROOT, rel))
+        if not (p.startswith(ROOT + os.sep) and os.path.isfile(p)):
+            self._json({"error": "forbidden"}, 403)
+            return
+        data = open(p, "rb").read()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/octet-stream")
+        self.send_header("Content-Disposition",
+                         f'attachment; filename="{os.path.basename(p)}"')
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
 
     def do_POST(self):
         try:

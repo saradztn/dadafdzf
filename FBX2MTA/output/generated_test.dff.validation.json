@@ -1,5 +1,5 @@
 {
-  "file": "/home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff",
+  "file": "/home/user/dadafdzf/FBX2MTA/temp/generated_test.dff",
   "checks": {
     "exists": "PASS",
     "size>0": "PASS",
@@ -15,30 +15,27 @@
   },
   "failures": [],
   "info": {
-    "exists": "/home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff",
-    "size>0": "1764246 bytes",
+    "exists": "/home/user/dadafdzf/FBX2MTA/temp/generated_test.dff",
+    "size>0": "32216 bytes",
     "signature": "RWClump fourcc at offset 8",
     "rw_version": "v3.6.0.3 (0x36003)",
     "has_clump": "1 clump(s)",
     "clumps": 1,
-    "frames": 231,
+    "frames": 1,
     "geometries": 1,
     "atomics": 1,
-    "triangles": 37985,
-    "vertices": 22827,
-    "materials": 3,
+    "triangles": 728,
+    "vertices": 650,
+    "materials": 1,
     "textures": [
-      "Dragon_Bump_Col2",
-      "Dragon_Nor_mirror2"
+      ""
     ],
-    "effects": [
-      "bump_map"
-    ],
-    "skin_bones": 230,
+    "effects": [],
+    "skin_bones": 0,
     "finite_data": "bad values: 0",
     "valid_indices": "bad indices: 0",
     "valid_uvs": "uv problems: 0",
-    "has_geometry": "37985 tris / 22827 verts",
-    "tri_count_matches": "expected 37985, got 37985"
+    "has_geometry": "728 tris / 650 verts",
+    "tri_count_matches": "expected 728, got 728"
   }
 }

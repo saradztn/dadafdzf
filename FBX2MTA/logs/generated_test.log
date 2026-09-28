@@ -22,7 +22,7 @@ Triangles: 728
 [INFO] Geometry Budget: AUTO - 728 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
 [INFO]   'TestCreature': estimated DFF vertices 650 (limit 65535)
 [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
-[INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff (32216 bytes) in 0.67s
+[INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff (32216 bytes) in 0.66s
 [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff
 [INFO] === Collision (COL) stage ===
 [INFO] Original collision triangles: 728
