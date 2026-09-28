@@ -2,61 +2,6 @@
 FBX2MTA CONVERSION REPORT
 ========================================
 
-Input: Dragon_2.5.fbx
-
-Original:
-Vertices: 19,386
-Triangles: 37,985
-Objects: 1
-Kind: skinned
-
-Processed (mesh):
-Vertices: 19,386
-Triangles: 37,985
-Objects: 1
-Decimated: False
-
-DFF content (measured from the DFF file):
-Vertices: 22,827
-Triangles: 37,985
-Frames: 231  (bones in skin: 230)
-Materials: 3
-Textures: Dragon_Bump_Col2, Dragon_Nor_mirror2
-Material effects: bump_map
-RW version: v3.6.0.3 (0x36003)
-
-Orientation: default (Y-up source) (upright score 0.2131)
-
-Collision (COL):
-Status: PASS
-Quality: AUTO (budget by model size)
-Original triangles: 37,985
-Collision triangles: 4,749
-Collision vertices: 2,410
-File: Dragon_2.5.col (52,572 bytes)
-Transform: identical to DFF (same processed mesh, identity world space)
-
-DragonFF Export:
-SUCCESS
-Export Version: GTA SA (v3.6.0.3) 0x36003
-File: Dragon_2.5.dff (1,764,246 bytes)
-
-DFF Validation:
-PASS
-Round Trip:
-PASS
-
-RESULT:
-Conversion Complete
-DFF: PASS
-COL: PASS
-Triangles: 37,985
-Collision Triangles: 4,749
-Output: output/Dragon_2.5.dff, output/Dragon_2.5.col
-NOTE: model has 230 bones - above the standard 32-bone SA ped skeleton; valid as a standalone skinned model, but if you engineReplaceModel() a SA ped, the game will remap to its own skeleton.
-
-========================================
-
 Input: generated_test.fbx
 
 Original:
@@ -112,7 +57,7 @@ Output: output/generated_test.dff, output/generated_test.col
 ========================================
 
 BATCH SUMMARY
-success (DFF+COL): 2
+success (DFF+COL): 1
 success (DFF only): 0
 failed: 0
 skipped: 0

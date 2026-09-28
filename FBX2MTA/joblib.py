@@ -170,8 +170,14 @@ def upload_fbx(src_path):
     if not os.path.isfile(src_path) or os.path.getsize(src_path) == 0:
         return False, "file not found or empty: " + src_path
     os.makedirs(INPUT_DIR, exist_ok=True)
+    dst = os.path.join(INPUT_DIR, fname)
+    # picking a file that already lives in input/ (the dialog opens there)
+    # would make shutil.copyfile raise SameFileError - accept it as-is
+    if os.path.normcase(os.path.abspath(src_path)) == \
+            os.path.normcase(os.path.abspath(dst)):
+        return True, fname
     shutil_copy = __import__("shutil").copyfile
-    shutil_copy(src_path, os.path.join(INPUT_DIR, fname))
+    shutil_copy(src_path, dst)
     return True, fname
 
 
