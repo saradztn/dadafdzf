@@ -1,0 +1,410 @@
+[17:37:43] Starting converter (driver)
+[17:37:43] Blender backend: headless bpy via /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh
+[17:37:43] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[17:37:43] ============================================================
+[17:37:43] Processing: Dragon_2.5.fbx
+[17:37:43] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/Dragon_2.5.fbx --output /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/Dragon_2.5.log --status /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.status.json
+    Info: Removed 509 vertices
+    Info: Removed: 0 vertices, 0 edges, 0 faces
+    [INFO]   closed mesh: recalculated normals outward
+    [INFO]   UV layer 'UV_mirror': 113955 coords (loops=113955)
+    [INFO]   UV layer 'UV_NO_mirror': 113955 coords (loops=113955)
+    [INFO] Applied residual transforms on 2 object(s) (kept model shape, normalized root matrices)
+    [INFO] OBJECT: Cube
+    Vertices: 19386
+    Triangles: 37985
+    [INFO] MATERIAL: EYES
+    Triangles: 1104
+    [INFO] MATERIAL: Game_dragon
+    Triangles: 226
+    [INFO] MATERIAL: Game_dragon.001
+    Triangles: 36655
+    [INFO] Geometry Budget: AUTO - 37985 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO] Armature 'a': bone_id/type set on 230 bones
+    [INFO]   'Cube': estimated DFF vertices 22827 (limit 65535)
+    [INFO]   material 'EYES': bump map -> 'Dragon_Nor_mirror2'
+    [INFO]   material 'Game_dragon': bump map -> 'Dragon_Nor_mirror2'
+    [INFO]   material 'Game_dragon.001': bump map -> 'Dragon_Nor_mirror2'
+    Info: Finished export in 18.69s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff (1764246 bytes) in 20.3s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff
+[17:38:03] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff --expect-tris 37985
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff)
+      [PASS] size>0  (1764246 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=231 geos=1 atomics=1 tris=37985 verts=22827 mats=3 skin_bones=230
+      textures: ['Dragon_Bump_Col2', 'Dragon_Nor_mirror2']
+      material effects: ['bump_map']
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (37985 tris / 22827 verts)
+      [PASS] tri_count_matches  (expected 37985, got 37985)
+    VALIDATION PASS
+[17:38:04] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff --status /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/Dragon_2.5.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=37985 verts=19381 armatures=1 bones=230 mats=3 vgroups=230 uv_layers=1
+    [INFO] Expected:      tris=37985 verts=19386 frames=230 mats=3
+    Info: Saved "Dragon_2.5_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[17:38:05] SUCCESS: Dragon_2.5 -> /home/user/dadafdzf/FBX2MTA/output/Dragon_2.5.dff
+[17:38:05] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[17:38:05] MTA test resource written to /home/user/dadafdzf/FBX2MTA/mta_test (drop into MTASA/resources/Dragon_2.5_test)
+[17:38:05] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[17:38:05] BATCH: success=1 failed=0 skipped=0
+[17:38:05]   OK: Dragon_2.5
+[17:38:22] Starting converter (driver)
+[17:38:22] Blender backend: headless bpy via /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh
+[17:38:22] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[17:38:22] ============================================================
+[17:38:22] Processing: Dragon_2.5.fbx
+[17:38:22] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/Dragon_2.5.fbx --output /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/Dragon_2.5.log --status /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.status.json
+    Info: Removed 509 vertices
+    Info: Removed: 0 vertices, 0 edges, 0 faces
+    [INFO]   closed mesh: recalculated normals outward
+    [INFO]   UV layer 'UV_mirror': 113955 coords (loops=113955)
+    [INFO]   UV layer 'UV_NO_mirror': 113955 coords (loops=113955)
+    [INFO] Applied residual transforms on 2 object(s) (kept model shape, normalized root matrices)
+    [INFO] OBJECT: Cube
+    Vertices: 19386
+    Triangles: 37985
+    [INFO] MATERIAL: EYES
+    Triangles: 1104
+    [INFO] MATERIAL: Game_dragon
+    Triangles: 226
+    [INFO] MATERIAL: Game_dragon.001
+    Triangles: 36655
+    [INFO] Geometry Budget: AUTO - 37985 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO] Armature 'a': bone_id/type set on 230 bones
+    [INFO]   'Cube': estimated DFF vertices 22827 (limit 65535)
+    [INFO]   material 'EYES': bump map -> 'Dragon_Nor_mirror2'
+    [INFO]   material 'Game_dragon': bump map -> 'Dragon_Nor_mirror2'
+    [INFO]   material 'Game_dragon.001': bump map -> 'Dragon_Nor_mirror2'
+    Info: Finished export in 17.39s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff (1764246 bytes) in 18.88s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff
+[17:38:41] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff --expect-tris 37985
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff)
+      [PASS] size>0  (1764246 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=231 geos=1 atomics=1 tris=37985 verts=22827 mats=3 skin_bones=230
+      textures: ['Dragon_Bump_Col2', 'Dragon_Nor_mirror2']
+      material effects: ['bump_map']
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (37985 tris / 22827 verts)
+      [PASS] tri_count_matches  (expected 37985, got 37985)
+    VALIDATION PASS
+[17:38:41] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff --status /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/Dragon_2.5.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=37985 verts=19381 armatures=1 bones=230 mats=3 vgroups=230 uv_layers=1
+    [INFO] Expected:      tris=37985 verts=19386 frames=230 mats=3
+    Info: Saved "Dragon_2.5_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[17:38:42] SUCCESS: Dragon_2.5 -> /home/user/dadafdzf/FBX2MTA/output/Dragon_2.5.dff
+[17:38:42] ============================================================
+[17:38:42] Processing: test_static.fbx
+[17:38:42] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/test_static.fbx --output /home/user/dadafdzf/FBX2MTA/temp/test_static.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/test_static.log --status /home/user/dadafdzf/FBX2MTA/temp/test_static.status.json
+    [INFO] Starting converter (Blender side)
+    [INFO] Blender 4.2.23 LTS headless
+    [INFO] DragonFF addon registered (official Parik27/DragonFF)
+    [INFO] Importing FBX: /home/user/dadafdzf/FBX2MTA/input/test_static.fbx
+    FBX version: 7400
+    [INFO]   axis check: forward=-Z up=Y -> extents X=10.00 Y=10.00 Z=10.00 (upright score 1.000) [default (Y-up source)]
+    FBX version: 7400
+    [INFO] FBX imported (axis forward=-Z, up=Y, extents X/Y/Z = 10.00/10.00/10.00)
+    [INFO] GTA SA coordinate layer: Blender is Z-up right-handed, matching GTA SA (+Z up). Model verified upright in Blender space -> no mirror/hand-flip needed. DragonFF exports Blender coords verbatim and handles UV v-flip + winding internally.
+    [INFO] Static mesh model (no armature)
+    [INFO] Processing mesh 'TestSphere': verts=482 polys=512
+    [ERROR] Conversion FAILED:
+    Traceback (most recent call last):
+      File "/home/user/dadafdzf/FBX2MTA/scripts/convert.py", line 543, in <module>
+        main()
+      File "/home/user/dadafdzf/FBX2MTA/scripts/convert.py", line 224, in main
+        bpy.ops.mesh.triangulate(quad_method="BEAUTY", ngon_method="BEAUTY")
+      File "/home/user/dadafdzf/FBX2MTA/blender/venv/lib/python3.11/site-packages/bpy/4.2/scripts/modules/bpy/ops.py", line 109, in __call__
+        ret = _op_call(self.idname_py(), kw)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    AttributeError: Calling operator "bpy.ops.mesh.triangulate" error, could not be found
+[17:38:43] FAILED: conversion of test_static (see /home/user/dadafdzf/FBX2MTA/logs/test_static.log)
+[17:38:43] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[17:38:43] MTA test resource written to /home/user/dadafdzf/FBX2MTA/mta_test (drop into MTASA/resources/Dragon_2.5_test)
+[17:38:43] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[17:38:43] BATCH: success=1 failed=1 skipped=0
+[17:38:43]   OK: Dragon_2.5
+[17:38:43]   FAILED: test_static (conversion failed)
+[17:39:31] Starting converter (driver)
+[17:39:31] Blender backend: headless bpy via /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh
+[17:39:31] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[17:39:31] ============================================================
+[17:39:31] Processing: Dragon_2.5.fbx
+[17:39:31] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/Dragon_2.5.fbx --output /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/Dragon_2.5.log --status /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.status.json
+    [INFO]   already triangulated
+    [INFO]   merged 509 duplicate vertices
+    [INFO]   open mesh (780 boundary edges): keeping original normals (validated finite+normalized)
+    [INFO]   UV layer 'UV_mirror': 113955 coords (loops=113955)
+    [INFO]   UV layer 'UV_NO_mirror': 113955 coords (loops=113955)
+    [INFO] Applied residual transforms on 2 object(s) (kept model shape, normalized root matrices)
+    [INFO] OBJECT: Cube
+    Vertices: 19386
+    Triangles: 37985
+    [INFO] MATERIAL: EYES
+    Triangles: 1104
+    [INFO] MATERIAL: Game_dragon
+    Triangles: 226
+    [INFO] MATERIAL: Game_dragon.001
+    Triangles: 36655
+    [INFO] Geometry Budget: AUTO - 37985 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO] Armature 'a': bone_id/type set on 230 bones
+    [INFO]   'Cube': estimated DFF vertices 22827 (limit 65535)
+    [INFO]   material 'EYES': bump map -> 'Dragon_Nor_mirror2'
+    [INFO]   material 'Game_dragon': bump map -> 'Dragon_Nor_mirror2'
+    [INFO]   material 'Game_dragon.001': bump map -> 'Dragon_Nor_mirror2'
+    Info: Finished export in 19.28s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff (1764246 bytes) in 20.87s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff
+[17:39:52] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff --expect-tris 37985
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff)
+      [PASS] size>0  (1764246 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=231 geos=1 atomics=1 tris=37985 verts=22827 mats=3 skin_bones=230
+      textures: ['Dragon_Bump_Col2', 'Dragon_Nor_mirror2']
+      material effects: ['bump_map']
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (37985 tris / 22827 verts)
+      [PASS] tri_count_matches  (expected 37985, got 37985)
+    VALIDATION PASS
+[17:39:52] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff --status /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/Dragon_2.5.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=37985 verts=19381 armatures=1 bones=230 mats=3 vgroups=230 uv_layers=1
+    [INFO] Expected:      tris=37985 verts=19386 frames=230 mats=3
+    Info: Saved "Dragon_2.5_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[17:39:53] SUCCESS: Dragon_2.5 -> /home/user/dadafdzf/FBX2MTA/output/Dragon_2.5.dff
+[17:39:53] ============================================================
+[17:39:53] Processing: test_static.fbx
+[17:39:53] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/test_static.fbx --output /home/user/dadafdzf/FBX2MTA/temp/test_static.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/test_static.log --status /home/user/dadafdzf/FBX2MTA/temp/test_static.status.json
+    [INFO] Starting converter (Blender side)
+    [INFO] Blender 4.2.23 LTS headless
+    [INFO] DragonFF addon registered (official Parik27/DragonFF)
+    [INFO] Importing FBX: /home/user/dadafdzf/FBX2MTA/input/test_static.fbx
+    FBX version: 7400
+    [INFO]   axis check: forward=-Z up=Y -> extents X=10.00 Y=10.00 Z=10.00 (upright score 1.000) [default (Y-up source)]
+    FBX version: 7400
+    [INFO] FBX imported (axis forward=-Z, up=Y, extents X/Y/Z = 10.00/10.00/10.00)
+    [INFO] GTA SA coordinate layer: Blender is Z-up right-handed, matching GTA SA (+Z up). Model verified upright in Blender space -> no mirror/hand-flip needed. DragonFF exports Blender coords verbatim and handles UV v-flip + winding internally.
+    [INFO] Static mesh model (no armature)
+    [INFO] Processing mesh 'TestSphere': verts=482 polys=512
+    [INFO]   triangulated 448 quads/ngons -> tris=960
+    [INFO]   closed mesh: recalculated normals outward
+    [INFO]   UV layer 'UVMap': 2880 coords (loops=2880)
+    [ERROR] Conversion FAILED:
+    Traceback (most recent call last):
+      File "/home/user/dadafdzf/FBX2MTA/scripts/convert.py", line 535, in <module>
+        main()
+      File "/home/user/dadafdzf/FBX2MTA/scripts/convert.py", line 275, in main
+        need = [o for o in targs if (abs(o.location.length) > 1e-7 or abs(o.rotation_euler.length) > 1e-7
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      File "/home/user/dadafdzf/FBX2MTA/scripts/convert.py", line 275, in <listcomp>
+        need = [o for o in targs if (abs(o.location.length) > 1e-7 or abs(o.rotation_euler.length) > 1e-7
+                                                                          ^^^^^^^^^^^^^^^^^^^^^^^
+    AttributeError: 'Euler' object has no attribute 'length'
+[17:39:54] FAILED: conversion of test_static (see /home/user/dadafdzf/FBX2MTA/logs/test_static.log)
+[17:39:54] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[17:39:54] MTA test resource written to /home/user/dadafdzf/FBX2MTA/mta_test (drop into MTASA/resources/Dragon_2.5_test)
+[17:39:54] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[17:39:54] BATCH: success=1 failed=1 skipped=0
+[17:39:54]   OK: Dragon_2.5
+[17:39:54]   FAILED: test_static (conversion failed)
+[17:40:02] Starting converter (driver)
+[17:40:02] Blender backend: headless bpy via /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh
+[17:40:02] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[17:40:02] ============================================================
+[17:40:02] Processing: Dragon_2.5.fbx
+[17:40:02] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/Dragon_2.5.fbx --output /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/Dragon_2.5.log --status /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.status.json
+    [INFO]   already triangulated
+    [INFO]   merged 509 duplicate vertices
+    [INFO]   open mesh (780 boundary edges): keeping original normals (validated finite+normalized)
+    [INFO]   UV layer 'UV_mirror': 113955 coords (loops=113955)
+    [INFO]   UV layer 'UV_NO_mirror': 113955 coords (loops=113955)
+    [INFO] Applied residual transforms on 2 object(s) (kept model shape, normalized root matrices)
+    [INFO] OBJECT: Cube
+    Vertices: 19386
+    Triangles: 37985
+    [INFO] MATERIAL: EYES
+    Triangles: 1104
+    [INFO] MATERIAL: Game_dragon
+    Triangles: 226
+    [INFO] MATERIAL: Game_dragon.001
+    Triangles: 36655
+    [INFO] Geometry Budget: AUTO - 37985 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO] Armature 'a': bone_id/type set on 230 bones
+    [INFO]   'Cube': estimated DFF vertices 22827 (limit 65535)
+    [INFO]   material 'EYES': bump map -> 'Dragon_Nor_mirror2'
+    [INFO]   material 'Game_dragon': bump map -> 'Dragon_Nor_mirror2'
+    [INFO]   material 'Game_dragon.001': bump map -> 'Dragon_Nor_mirror2'
+    Info: Finished export in 17.25s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff (1764246 bytes) in 18.78s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff
+[17:40:21] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff --expect-tris 37985
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff)
+      [PASS] size>0  (1764246 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=231 geos=1 atomics=1 tris=37985 verts=22827 mats=3 skin_bones=230
+      textures: ['Dragon_Bump_Col2', 'Dragon_Nor_mirror2']
+      material effects: ['bump_map']
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (37985 tris / 22827 verts)
+      [PASS] tri_count_matches  (expected 37985, got 37985)
+    VALIDATION PASS
+[17:40:21] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff --status /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/Dragon_2.5.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=37985 verts=19381 armatures=1 bones=230 mats=3 vgroups=230 uv_layers=1
+    [INFO] Expected:      tris=37985 verts=19386 frames=230 mats=3
+    Info: Saved "Dragon_2.5_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[17:40:22] SUCCESS: Dragon_2.5 -> /home/user/dadafdzf/FBX2MTA/output/Dragon_2.5.dff
+[17:40:22] ============================================================
+[17:40:22] Processing: test_static.fbx
+[17:40:22] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/test_static.fbx --output /home/user/dadafdzf/FBX2MTA/temp/test_static.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/test_static.log --status /home/user/dadafdzf/FBX2MTA/temp/test_static.status.json
+    [INFO] Blender 4.2.23 LTS headless
+    [INFO] DragonFF addon registered (official Parik27/DragonFF)
+    [INFO] Importing FBX: /home/user/dadafdzf/FBX2MTA/input/test_static.fbx
+    FBX version: 7400
+    [INFO]   axis check: forward=-Z up=Y -> extents X=10.00 Y=10.00 Z=10.00 (upright score 1.000) [default (Y-up source)]
+    FBX version: 7400
+    [INFO] FBX imported (axis forward=-Z, up=Y, extents X/Y/Z = 10.00/10.00/10.00)
+    [INFO] GTA SA coordinate layer: Blender is Z-up right-handed, matching GTA SA (+Z up). Model verified upright in Blender space -> no mirror/hand-flip needed. DragonFF exports Blender coords verbatim and handles UV v-flip + winding internally.
+    [INFO] Static mesh model (no armature)
+    [INFO] Processing mesh 'TestSphere': verts=482 polys=512
+    [INFO]   triangulated 448 quads/ngons -> tris=960
+    [INFO]   closed mesh: recalculated normals outward
+    [INFO]   UV layer 'UVMap': 2880 coords (loops=2880)
+    [INFO] No residual object transforms to apply
+    [INFO] OBJECT: TestSphere
+    Vertices: 482
+    Triangles: 960
+    [INFO] MATERIAL: TestMat
+    Triangles: 960
+    [INFO] Geometry Budget: AUTO - 960 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO]   'TestSphere': estimated DFF vertices 559 (limit 65535)
+    Info: Finished export in 0.16s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/test_static.dff (31758 bytes) in 0.72s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/test_static.dff
+[17:40:23] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/test_static.dff --expect-tris 960
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/test_static.dff)
+      [PASS] size>0  (31758 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=1 geos=1 atomics=1 tris=960 verts=559 mats=1 skin_bones=0
+      textures: []
+      material effects: none
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (960 tris / 559 verts)
+      [PASS] tri_count_matches  (expected 960, got 960)
+    VALIDATION PASS
+[17:40:23] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/test_static.dff --status /home/user/dadafdzf/FBX2MTA/temp/test_static.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/test_static.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/test_static.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=960 verts=482 armatures=0 bones=0 mats=1 vgroups=0 uv_layers=1
+    [INFO] Expected:      tris=960 verts=482 frames=0 mats=1
+    Info: Saved "test_static_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/test_static_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[17:40:24] SUCCESS: test_static -> /home/user/dadafdzf/FBX2MTA/output/test_static.dff
+[17:40:24] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[17:40:24] MTA test resource written to /home/user/dadafdzf/FBX2MTA/mta_test (drop into MTASA/resources/Dragon_2.5_test)
+[17:40:24] MTA test resource written to /home/user/dadafdzf/FBX2MTA/mta_test (drop into MTASA/resources/test_static_test)
+[17:40:24] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[17:40:24] BATCH: success=2 failed=0 skipped=0
+[17:40:24]   OK: Dragon_2.5
+[17:40:24]   OK: test_static
+[17:40:38] Starting converter (driver)
+[17:40:38] Blender backend: headless bpy via /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh
+[17:40:38] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[17:40:38] ============================================================
+[17:40:38] Processing: Dragon_2.5.fbx
+[17:40:38] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/Dragon_2.5.fbx --output /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/Dragon_2.5.log --status /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.status.json
+    [INFO]   already triangulated
+    [INFO]   merged 509 duplicate vertices
+    [INFO]   open mesh (780 boundary edges): keeping original normals (validated finite+normalized)
+    [INFO]   UV layer 'UV_mirror': 113955 coords (loops=113955)
+    [INFO]   UV layer 'UV_NO_mirror': 113955 coords (loops=113955)
+    [INFO] Applied residual transforms on 2 object(s) (kept model shape, normalized root matrices)
+    [INFO] OBJECT: Cube
+    Vertices: 19386
+    Triangles: 37985
+    [INFO] MATERIAL: EYES
+    Triangles: 1104
+    [INFO] MATERIAL: Game_dragon
+    Triangles: 226
+    [INFO] MATERIAL: Game_dragon.001
+    Triangles: 36655
+    [INFO] Geometry Budget: AUTO - 37985 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO] Armature 'a': bone_id/type set on 230 bones
+    [INFO]   'Cube': estimated DFF vertices 22827 (limit 65535)
+    [INFO]   material 'EYES': bump map -> 'Dragon_Nor_mirror2'
+    [INFO]   material 'Game_dragon': bump map -> 'Dragon_Nor_mirror2'
+    [INFO]   material 'Game_dragon.001': bump map -> 'Dragon_Nor_mirror2'
+    Info: Finished export in 17.95s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff (1764246 bytes) in 19.42s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff
+[17:40:57] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff --expect-tris 37985
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff)
+      [PASS] size>0  (1764246 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=231 geos=1 atomics=1 tris=37985 verts=22827 mats=3 skin_bones=230
+      textures: ['Dragon_Bump_Col2', 'Dragon_Nor_mirror2']
+      material effects: ['bump_map']
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (37985 tris / 22827 verts)
+      [PASS] tri_count_matches  (expected 37985, got 37985)
+    VALIDATION PASS
+[17:40:57] CMD: /home/user/dadafdzf/FBX2MTA/blender/run_blender.sh /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff --status /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/Dragon_2.5.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=37985 verts=19381 armatures=1 bones=230 mats=3 vgroups=230 uv_layers=1
+    [INFO] Expected:      tris=37985 verts=19386 frames=230 mats=3
+    Info: Saved "Dragon_2.5_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[17:40:58] SUCCESS: Dragon_2.5 -> /home/user/dadafdzf/FBX2MTA/output/Dragon_2.5.dff
+[17:40:58] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[17:40:58] MTA test resource written to /home/user/dadafdzf/FBX2MTA/mta_test (drop into MTASA/resources/Dragon_2.5_test)
+[17:40:58] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[17:40:58] BATCH: success=1 failed=0 skipped=0
+[17:40:58]   OK: Dragon_2.5

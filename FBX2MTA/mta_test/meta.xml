@@ -1,0 +1,6 @@
+<meta>
+    <min_mta_version auth_id="" auth_version="1.5.9"></min_mta_version>
+    <info author="FBX2MTA" name="Dragon DFF test" type="map" version="1.0" description="Automatic DFF load test"/>
+    <script src="client.lua" type="client" cache="false" />
+    <file src="model.dff"/>
+</meta>
