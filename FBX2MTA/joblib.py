@@ -104,7 +104,7 @@ def latest_results():
         name = os.path.splitext(f["name"])[0]
         res = {"name": name, "dff": "MISSING", "col": "MISSING",
                "triangles": None, "col_triangles": None,
-               "col_reason": None, "ifp": "NONE", "ifp_reason": None,
+               "col_reason": None, "txd": "NONE", "txd_reason": None,
                "outputs": []}
         status_f = os.path.join(TEMP_DIR, name + ".status.json")
         out_dff = os.path.join(OUTPUT_DIR, name + ".dff")
@@ -113,31 +113,20 @@ def latest_results():
             try:
                 s = json.load(open(status_f))
                 if s.get("success"):
-                    rmode = s.get("mode", "both")
                     res["triangles"] = s.get("processed", {}).get("triangles")
-                    if rmode == "ifp":
-                        res["dff"] = "SKIPPED"
+                    res["dff"] = "PASS"
+                    col = s.get("col", {})
+                    if col.get("enabled"):
+                        res["col"] = "PASS" if col.get("success") else "FAILED"
+                        res["col_reason"] = col.get("reason")
+                    else:
                         res["col"] = "SKIPPED"
+                    txd = s.get("txd", {})
+                    if txd.get("success"):
+                        res["txd"] = "PASS"
                     else:
-                        res["dff"] = "PASS"
-                        col = s.get("col", {})
-                        if col.get("enabled"):
-                            res["col"] = "PASS" if col.get("success") else "FAILED"
-                            res["col_reason"] = col.get("reason")
-                        else:
-                            res["col"] = "SKIPPED"
-                    if rmode == "dff":
-                        res["ifp"] = "SKIPPED"
-                    else:
-                        ifp = s.get("ifp", {})
-                        if ifp.get("success"):
-                            res["ifp"] = "PASS"
-                        elif ifp.get("present"):
-                            res["ifp"] = "FAILED"
-                            res["ifp_reason"] = ifp.get("reason")
-                        else:
-                            res["ifp"] = "NONE"
-                            res["ifp_reason"] = ifp.get("reason")
+                        res["txd"] = "NONE" if txd.get("reason") else "FAILED"
+                        res["txd_reason"] = txd.get("reason")
             except Exception:
                 pass
         # fallback (e.g. temp/ was reset): output files only exist after the
@@ -169,7 +158,10 @@ def latest_results():
                     res["col_reason"] = "; ".join(cv.get("errors", []))
             except Exception:
                 pass
-        for ext in (".dff", ".col", ".ifp"):
+        if res["txd"] in ("MISSING", "NONE") and os.path.exists(
+                os.path.join(OUTPUT_DIR, name + ".txd")):
+            res["txd"] = "PASS"
+        for ext in (".dff", ".txd", ".col"):
             p = os.path.join(OUTPUT_DIR, name + ext)
             if os.path.exists(p):
                 res["outputs"].append({"file": f"output/{name}{ext}",

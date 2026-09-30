@@ -10,7 +10,7 @@ Runs INSIDE a Blender/bpy Python process:
 
 Never modifies the input file; works on the in-memory copy only.
 """
-import sys, os, json, math, time, argparse, traceback
+import sys, os, json, math, time, argparse, traceback, shutil
 from collections import Counter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # FBX2MTA/
@@ -45,39 +45,26 @@ def main():
                     help="maximum collision triangles (used with CUSTOM / as cap)")
     ap.add_argument("--col-output", default="",
                     help="COL output path (default: DFF path with .col extension)")
-    ap.add_argument("--ifp", action="store_true",
-                    help="export the armature animation to a MTA:SA / GTA SA "
-                         "IFP (ANP3) - detects animation automatically")
-    ap.add_argument("--ifp-output", default="",
-                    help="IFP output path (default: DFF path with .ifp extension)")
-    ap.add_argument("--mode", default="both", choices=["both", "dff", "ifp"],
-                    help="export mode: both = DFF+COL + IFP (if animated) | "
-                         "dff = DFF+COL only, no IFP | ifp = IFP only, no DFF/COL")
     args = ap.parse_args()
 
-    do_dff = args.mode in ("both", "dff")
-    do_ifp = args.mode == "ifp" or (args.mode == "both" and args.ifp)
-
     col_out = args.col_output or os.path.splitext(args.output)[0] + ".col"
-    ifp_out = args.ifp_output or os.path.splitext(args.output)[0] + ".ifp"
+    txd_out = os.path.splitext(args.output)[0] + ".txd"
 
     LOG_PATH = args.log
-    for _p in (args.log, args.status, args.output, ifp_out, col_out):
+    for _p in (args.log, args.status, args.output, txd_out, col_out):
         _d = os.path.dirname(os.path.abspath(_p))
         if _d:
             os.makedirs(_d, exist_ok=True)
     open(args.log, "w").close()
-    log("INFO", f"Export mode: {args.mode.upper()}")
     status = {
-        "input": args.input, "output": args.output, "mode": args.mode,
+        "input": args.input, "output": args.output,
         "success": False, "attempts": [], "errors": [], "warnings": [],
-        "col": {"enabled": bool(args.col) and do_dff, "output": col_out,
+        "col": {"enabled": bool(args.col), "output": col_out,
                 "success": False, "reason": None,
                 "quality": args.col_quality, "original_tris": 0,
                 "budget_tris": 0, "final_tris": 0, "verts": 0},
-        "ifp": {"enabled": do_ifp, "output": ifp_out,
-                "present": False, "success": False, "reason": None,
-                "anim": None, "frames": 0, "fps": 0.0, "bones": 0},
+        "txd": {"output": txd_out, "success": False, "reason": None,
+                "textures": 0, "names": [], "size_bytes": 0},
     }
 
     t0 = time.time()
@@ -122,7 +109,8 @@ def main():
             filepath=args.input,
             axis_forward=forward, axis_up=up,
             global_scale=1.0,
-            use_anim=do_ifp,
+            use_anim=True,  # animations are imported so the rest pose can
+                            # be parked on the first keyframe (stage 4.5)
         )
         return res
 
@@ -140,6 +128,13 @@ def main():
         ex, ey, ez = max(xs) - min(xs), max(ys) - min(ys), max(zs) - min(zs)
         footprint = max(ex, ey)
         return (ez / footprint if footprint > 1e-6 else 0.0), ex, ey, ez
+
+    # the FBX importer extracts embedded textures to a sidecar folder
+    # <input>.fbm next to the file - remember if we are the ones creating
+    # it so it can be cleaned up at the end (user-provided sidecars are
+    # never touched)
+    fbm_dir = os.path.splitext(args.input)[0] + ".fbm"
+    fbm_existed = os.path.isdir(fbm_dir)
 
     best = None
     for fwd, up, label in ORIENT_CANDIDATES:
@@ -360,7 +355,7 @@ def main():
     #      that have one. Bind each skinned mesh to the armature whose
     #      bones match its vertex groups (or its parent), and park the
     #      scene on the first animation keyframe so the exported DFF/COL
-    #      rest pose equals keyframe 1 (same frame the IFP starts from).
+    #      rest pose equals keyframe 1 of the FBX animation.
     if arm_objs:
         bone_names_by_arm = {a.name: {b.name for b in a.data.bones}
                              for a in arm_objs}
@@ -400,7 +395,7 @@ def main():
         if anim_start is not None:
             bpy.context.scene.frame_set(anim_start)
             log("INFO", f"Scene parked on animation start frame {anim_start} "
-                        f"(DFF/COL rest pose = first keyframe = IFP frame 1)")
+                        f"(DFF/COL rest pose = first keyframe)")
         # DragonFF's exporter processes each armature IMMEDIATELY during
         # the object pass, while empties are only processed when their own
         # turn comes (FBX import collection order is arbitrary). If the
@@ -449,10 +444,7 @@ def main():
     # ================================================================
     HARD_VERTS = 65535
     decimated = False
-    if args.mode == "ifp":
-        log("INFO", "Geometry Budget: skipped (IFP-only mode - no DFF export, "
-                    "mesh is not touched)")
-    elif budget_n is not None and total_tris > budget_n:
+    if budget_n is not None and total_tris > budget_n:
         log("INFO", f"Decimation required: {total_tris} tris > budget {budget_n}")
         ratio = max(budget_n / total_tris, 0.01)
         for ob in mesh_objs:
@@ -470,179 +462,178 @@ def main():
         log("INFO", f"Geometry Budget: AUTO - {total_tris} triangles within limits, no reduction "
                     f"(hard DFF limit 65535 verts/geometry respected)")
 
-    if do_dff:
-        # ================================================================
-        # 7. DRAGONFF SETUP
-        # ================================================================
-        # 7a. bone props (replicates DragonFF's object.dff_generate_bone_props)
-        for arm in arm_objs:
-            used_ids = set()
-            for i, bone in enumerate(arm.data.bones):
-                bid = i
-                while bid in used_ids:
-                    bid += 1
-                bone["bone_id"] = bid
-                used_ids.add(bid)
-                if not bone.children:
-                    btype = 1
-                elif not bone.parent or bone.parent.children[-1] is bone:
-                    btype = 0
-                else:
-                    btype = 2
-                bone["type"] = btype
-            log("INFO", f"Armature {arm.name!r}: bone_id/type set on {len(arm.data.bones)} bones")
+    # ================================================================
+    # 7. DRAGONFF SETUP
+    # ================================================================
+    # 7a. bone props (replicates DragonFF's object.dff_generate_bone_props)
+    for arm in arm_objs:
+        used_ids = set()
+        for i, bone in enumerate(arm.data.bones):
+            bid = i
+            while bid in used_ids:
+                bid += 1
+            bone["bone_id"] = bid
+            used_ids.add(bid)
+            if not bone.children:
+                btype = 1
+            elif not bone.parent or bone.parent.children[-1] is bone:
+                btype = 0
+            else:
+                btype = 2
+            bone["type"] = btype
+        log("INFO", f"Armature {arm.name!r}: bone_id/type set on {len(arm.data.bones)} bones")
 
-        # 7b. object-level dff props
+    # 7b. object-level dff props
+    for ob in mesh_objs:
+        ob.dff.type = "OBJ"
+        ob.dff.uv_map1 = True
+        ob.dff.uv_map2 = False           # single UV set (MTA standard diffuse)
+        ob.dff.export_split_normals = False  # per-vertex normals (smoothing + fewer verts)
+        ob.dff.export_normals = True
+        ob.dff.light = True
+        ob.dff.modulate_color = True
+        ob.dff.export_binsplit = True
+        # estimate exported vertex count (EXACT same dedup key as DragonFF:
+        # (vertex, per-vertex normal, ALL uv layers) - uv_map2 only gates
+        # writing, not deduplication)
+        me = ob.data
+        uv_data = [[(uv.uv[0], uv.uv[1]) for uv in layer.data] for layer in me.uv_layers]
+        keys = set()
+        for p in me.polygons:
+            for li in p.loop_indices:
+                vi = me.loops[li].vertex_index
+                n = me.vertices[vi].normal
+                uvs = tuple(layer[li] for layer in uv_data)
+                keys.add((vi, (n.x, n.y, n.z), uvs))
+        est = len(keys)
+        if est > HARD_VERTS:
+            raise RuntimeError(
+                f"Estimated {est} DFF vertices for {ob.name!r} exceeds hard limit {HARD_VERTS}; "
+                f"decimation is required (budget must be lowered)")
+        log("INFO", f"  {ob.name!r}: estimated DFF vertices {est} (limit {HARD_VERTS})")
+    for arm in arm_objs:
+        arm.dff.type = "OBJ"
+
+    # 7c. material-level dff props (bump mapping via DragonFF Rockstar effect)
+    tex_report = {}
+    for mat in bpy.data.materials:
+        d = mat.dff
+        # find normal-map texture name (via Normal input / Normal Map node)
+        bump = None
+        if mat.use_nodes:
+            for n in mat.node_tree.nodes:
+                if n.type == "NORMAL_MAP":
+                    inp = n.inputs["Color"]
+                    if inp.is_linked and inp.links[0].from_node.type == "TEX_IMAGE":
+                        img = inp.links[0].from_node.image
+                        if img:
+                            bump = img.name
+        if bump:
+            d.export_bump_map = True
+            d.bump_map_tex = bump
+            d.bump_map_intensity = 1.0
+            log("INFO", f"  material {mat.name!r}: bump map -> {bump!r}")
+        # diffuse texture name from Base Color link
+        diff = None
+        if mat.use_nodes:
+            for n in mat.node_tree.nodes:
+                if n.type == "BSDF_PRINCIPLED":
+                    inp = n.inputs["Base Color"]
+                    if inp.is_linked and inp.links[0].from_node.type == "TEX_IMAGE":
+                        img = inp.links[0].from_node.image
+                        if img:
+                            diff = img.name
+                    break
+        d.ambient = 0.5
+        d.specular = 0.5
+        d.diffuse = 0.5
+        d.tex_filters = "0"
+        d.tex_u_addr = "0"
+        d.tex_v_addr = "0"
+        tex_report[mat.name] = {"diffuse": diff, "bump": bump}
+    status["materials"] = {
+        "count": len(bpy.data.materials),
+        "textures": sorted(set(v for e in tex_report.values() for k, v in e.items() if v)),
+        "details": tex_report,
+    }
+
+    # ================================================================
+    # 8. EXPORT through DragonFF (with automatic retry)
+    # ================================================================
+    os.makedirs(os.path.dirname(args.output), exist_ok=True)
+    if os.path.exists(args.output):
+        os.remove(args.output)
+
+    def try_export(tag, exclude_geo_faces=False, split_normals=False):
         for ob in mesh_objs:
-            ob.dff.type = "OBJ"
-            ob.dff.uv_map1 = True
-            ob.dff.uv_map2 = False           # single UV set (MTA standard diffuse)
-            ob.dff.export_split_normals = False  # per-vertex normals (smoothing + fewer verts)
-            ob.dff.export_normals = True
-            ob.dff.light = True
-            ob.dff.modulate_color = True
-            ob.dff.export_binsplit = True
-            # estimate exported vertex count (EXACT same dedup key as DragonFF:
-            # (vertex, per-vertex normal, ALL uv layers) - uv_map2 only gates
-            # writing, not deduplication)
-            me = ob.data
-            uv_data = [[(uv.uv[0], uv.uv[1]) for uv in layer.data] for layer in me.uv_layers]
-            keys = set()
-            for p in me.polygons:
-                for li in p.loop_indices:
-                    vi = me.loops[li].vertex_index
-                    n = me.vertices[vi].normal
-                    uvs = tuple(layer[li] for layer in uv_data)
-                    keys.add((vi, (n.x, n.y, n.z), uvs))
-            est = len(keys)
-            if est > HARD_VERTS:
-                raise RuntimeError(
-                    f"Estimated {est} DFF vertices for {ob.name!r} exceeds hard limit {HARD_VERTS}; "
-                    f"decimation is required (budget must be lowered)")
-            log("INFO", f"  {ob.name!r}: estimated DFF vertices {est} (limit {HARD_VERTS})")
-        for arm in arm_objs:
-            arm.dff.type = "OBJ"
+            ob.dff.export_split_normals = split_normals
+        bpy.ops.object.select_all(action="DESELECT")
+        for o in mesh_objs + arm_objs:
+            o.select_set(True)
+        bpy.context.view_layer.objects.active = mesh_objs[0]
+        r = bpy.ops.export_dff.scene(
+            filepath=args.output,
+            mass_export=False,
+            export_coll=True,
+            coll_ext_type="39056127",   # SA-MP collision extension type (MTA:SA)
+            apply_coll_trans=True,
+            export_frame_names=True,
+            exclude_geo_faces=exclude_geo_faces,
+            only_selected=True,
+            preserve_positions=True,
+            preserve_rotations=True,
+            export_version="0x36003",   # GTA SA (v3.6.0.3)
+        )
+        ok = r == {"FINISHED"} and os.path.exists(args.output) and os.path.getsize(args.output) > 0
+        log("INFO", f"Export attempt [{tag}]: result={r} file_ok={ok}")
+        return ok
 
-        # 7c. material-level dff props (bump mapping via DragonFF Rockstar effect)
-        tex_report = {}
-        for mat in bpy.data.materials:
-            d = mat.dff
-            # find normal-map texture name (via Normal input / Normal Map node)
-            bump = None
-            if mat.use_nodes:
-                for n in mat.node_tree.nodes:
-                    if n.type == "NORMAL_MAP":
-                        inp = n.inputs["Color"]
-                        if inp.is_linked and inp.links[0].from_node.type == "TEX_IMAGE":
-                            img = inp.links[0].from_node.image
-                            if img:
-                                bump = img.name
-            if bump:
-                d.export_bump_map = True
-                d.bump_map_tex = bump
-                d.bump_map_intensity = 1.0
-                log("INFO", f"  material {mat.name!r}: bump map -> {bump!r}")
-            # diffuse texture name from Base Color link
-            diff = None
-            if mat.use_nodes:
-                for n in mat.node_tree.nodes:
-                    if n.type == "BSDF_PRINCIPLED":
-                        inp = n.inputs["Base Color"]
-                        if inp.is_linked and inp.links[0].from_node.type == "TEX_IMAGE":
-                            img = inp.links[0].from_node.image
-                            if img:
-                                diff = img.name
-                        break
-            d.ambient = 0.5
-            d.specular = 0.5
-            d.diffuse = 0.5
-            d.tex_filters = "0"
-            d.tex_u_addr = "0"
-            d.tex_v_addr = "0"
-            tex_report[mat.name] = {"diffuse": diff, "bump": bump}
-        status["materials"] = {
-            "count": len(bpy.data.materials),
-            "textures": sorted(set(v for e in tex_report.values() for k, v in e.items() if v)),
-            "details": tex_report,
-        }
+    export_ok = False
+    try:
+        export_ok = try_export("base")
+    except Exception as e:
+        log("ERROR", f"Export attempt [base] raised: {e}")
+        status["errors"].append(f"base export: {e}")
 
-        # ================================================================
-        # 8. EXPORT through DragonFF (with automatic retry)
-        # ================================================================
-        os.makedirs(os.path.dirname(args.output), exist_ok=True)
-        if os.path.exists(args.output):
-            os.remove(args.output)
-
-        def try_export(tag, exclude_geo_faces=False, split_normals=False):
-            for ob in mesh_objs:
-                ob.dff.export_split_normals = split_normals
-            bpy.ops.object.select_all(action="DESELECT")
-            for o in mesh_objs + arm_objs:
-                o.select_set(True)
-            bpy.context.view_layer.objects.active = mesh_objs[0]
-            r = bpy.ops.export_dff.scene(
-                filepath=args.output,
-                mass_export=False,
-                export_coll=True,
-                coll_ext_type="39056127",   # SA-MP collision extension type (MTA:SA)
-                apply_coll_trans=True,
-                export_frame_names=True,
-                exclude_geo_faces=exclude_geo_faces,
-                only_selected=True,
-                preserve_positions=True,
-                preserve_rotations=True,
-                export_version="0x36003",   # GTA SA (v3.6.0.3)
-            )
-            ok = r == {"FINISHED"} and os.path.exists(args.output) and os.path.getsize(args.output) > 0
-            log("INFO", f"Export attempt [{tag}]: result={r} file_ok={ok}")
-            return ok
-
-        export_ok = False
+    if not export_ok:
+        log("WARN", "Auto-retry 1: forcing Bin Mesh PLG (exclude_geo_faces=True)")
         try:
-            export_ok = try_export("base")
+            export_ok = try_export("binmesh", exclude_geo_faces=True)
         except Exception as e:
-            log("ERROR", f"Export attempt [base] raised: {e}")
-            status["errors"].append(f"base export: {e}")
+            log("ERROR", f"Export attempt [binmesh] raised: {e}")
+            status["errors"].append(f"binmesh export: {e}")
 
-        if not export_ok:
-            log("WARN", "Auto-retry 1: forcing Bin Mesh PLG (exclude_geo_faces=True)")
-            try:
-                export_ok = try_export("binmesh", exclude_geo_faces=True)
-            except Exception as e:
-                log("ERROR", f"Export attempt [binmesh] raised: {e}")
-                status["errors"].append(f"binmesh export: {e}")
+    if not export_ok:
+        log("WARN", "Auto-retry 2: recalculate normals + merge duplicates, then re-export")
+        for ob in mesh_objs:
+            bmesh_cleanup(ob.data, recalc_open_too=True)
+        try:
+            export_ok = try_export("reclean")
+        except Exception as e:
+            log("ERROR", f"Export attempt [reclean] raised: {e}")
+            status["errors"].append(f"reclean export: {e}")
 
-        if not export_ok:
-            log("WARN", "Auto-retry 2: recalculate normals + merge duplicates, then re-export")
-            for ob in mesh_objs:
-                bmesh_cleanup(ob.data, recalc_open_too=True)
-            try:
-                export_ok = try_export("reclean")
-            except Exception as e:
-                log("ERROR", f"Export attempt [reclean] raised: {e}")
-                status["errors"].append(f"reclean export: {e}")
+    if not export_ok:
+        log("WARN", "Auto-retry 3: 25% decimation as last resort")
+        for ob in mesh_objs:
+            mod = ob.modifiers.new("Decimate2", 'DECIMATE')
+            mod.ratio = 0.75
+            bpy.ops.object.select_all(action="DESELECT")
+            ob.select_set(True)
+            bpy.context.view_layer.objects.active = ob
+            bpy.ops.object.modifier_apply(modifier=mod.name)
+        try:
+            export_ok = try_export("decimated")
+        except Exception as e:
+            log("ERROR", f"Export attempt [decimated] raised: {e}")
+            status["errors"].append(f"decimated export: {e}")
 
-        if not export_ok:
-            log("WARN", "Auto-retry 3: 25% decimation as last resort")
-            for ob in mesh_objs:
-                mod = ob.modifiers.new("Decimate2", 'DECIMATE')
-                mod.ratio = 0.75
-                bpy.ops.object.select_all(action="DESELECT")
-                ob.select_set(True)
-                bpy.context.view_layer.objects.active = ob
-                bpy.ops.object.modifier_apply(modifier=mod.name)
-            try:
-                export_ok = try_export("decimated")
-            except Exception as e:
-                log("ERROR", f"Export attempt [decimated] raised: {e}")
-                status["errors"].append(f"decimated export: {e}")
-
-        if not export_ok:
-            status["errors"].append("All export attempts failed")
-            log("ERROR", "DFF export FAILED after all retries")
-            with open(args.status, "w") as f:
-                json.dump(status, f, indent=2)
-            raise SystemExit(1)
+    if not export_ok:
+        status["errors"].append("All export attempts failed")
+        log("ERROR", "DFF export FAILED after all retries")
+        with open(args.status, "w") as f:
+            json.dump(status, f, indent=2)
+        raise SystemExit(1)
 
     # ---- final stats
     final_tris = sum(len(o.data.polygons) for o in mesh_objs)
@@ -654,58 +645,141 @@ def main():
         "decimated": decimated,
     }
     status["frames"] = sum(len(a.data.bones) for a in arm_objs)
-    if do_dff:
-        status["success"] = True
-        status["export_version"] = "GTA SA (v3.6.0.3) 0x36003"
-        status["size_bytes"] = os.path.getsize(args.output)
-        status["elapsed_s"] = round(time.time() - t0, 2)
-        log("INFO", f"DFF exported: {args.output} ({status['size_bytes']} bytes) in {status['elapsed_s']}s")
-        log("SUCCESS", f"DFF created: {args.output}")
+    status["success"] = True
+    status["export_version"] = "GTA SA (v3.6.0.3) 0x36003"
+    status["size_bytes"] = os.path.getsize(args.output)
+    status["elapsed_s"] = round(time.time() - t0, 2)
+    log("INFO", f"DFF exported: {args.output} ({status['size_bytes']} bytes) in {status['elapsed_s']}s")
+    log("SUCCESS", f"DFF created: {args.output}")
 
     # ================================================================
-    # 7.5 ANIMATION (IFP) - ISOLATED LIKE COL: an IFP problem NEVER
-    #     fails the DFF/COL. Runs before the COL stage so the collision
-    #     cleanup cannot touch the armature pose.
+    # 7.5 TEXTURES (TXD) - ISOLATED LIKE COL: a TXD problem NEVER fails
+    #     the DFF/COL. Uses the official DragonFF TXD writer
+    #     (DragonFF/gtaLib/txd.py - the same module family as the DFF and
+    #     COL exports): a proper RenderWare 3.6.0.3 (0x1803FFFF) "PC" TXD
+    #     v5 dictionary with BGRA8888 (D3DFMT_A8R8G8B8) textures.
+    #     The DFF and TXD share EXACTLY the same texture names - both are
+    #     derived from the material's base-color image with DragonFF's own
+    #     naming helpers (extract_texture_info_from_name + clear_extension)
+    #     - so SA/MTA resolves each DFF material to its texture
+    #     automatically (engineReplaceModel(dff, txd)).
     # ================================================================
-    if do_ifp:
-        log("INFO", "=== Animation (IFP) stage ===")
-        try:
-            import ifp_stage
-            # IFP-only mode: no DFF exists - bone ids are assigned in rig
-            # order (matches the frame ids a DFF from this same rig would get)
-            r = ifp_stage.export_ifp(None if args.mode == "ifp" else args.output,
-                                     ifp_out,
-                                     os.path.splitext(os.path.basename(
-                                         args.input))[0],
-                                     fbx_path=args.input)
-            status["ifp"].update(r)
-            if r["success"]:
-                if args.mode == "ifp":
-                    status["success"] = True
-                    status["size_bytes"] = os.path.getsize(ifp_out)
-                    status["elapsed_s"] = round(time.time() - t0, 2)
-                log("SUCCESS", f"model.ifp created: {ifp_out} "
-                    f"({r['bones']} bones, {r['frames']} frames @ {r['fps']:.0f}fps, "
-                    f"anim name '{r['anim']}')")
-                if r["reason"]:
-                    log("WARN", f"IFP note: {r['reason']}")
-            elif r["present"]:
-                if args.mode == "ifp":
-                    log("ERROR", f"IFP FAILED (IFP-only mode): {r['reason']}")
-                else:
-                    log("ERROR", f"IFP FAILED (DFF unaffected): {r['reason']}")
-            else:
-                if args.mode == "ifp":
-                    log("ERROR", f"IFP FAILED (IFP-only mode - FBX has no "
-                                  f"animation): {r['reason']}")
-                else:
-                    log("INFO", f"IFP: no animation - {r['reason']}")
-        except Exception as e:
-            status["ifp"]["success"] = False
-            status["ifp"]["reason"] = f"IFP stage error: {e}"
-            log("ERROR", f"IFP stage error ({'DFF unaffected' if do_dff else 'IFP-only mode'}): {e}")
-        with open(args.status, "w") as f:
-            json.dump(status, f, indent=2)
+    log("INFO", "=== Texture (TXD) stage ===")
+    txd = status["txd"]
+    try:
+        from DragonFF.gtaLib.txd import txd as TxDCls, TextureNative
+        from DragonFF.gtaLib.txd import (ImageEncoder, DeviceType,
+                                         D3DFormat, RasterFormat)
+        from DragonFF.gtaLib.dff import NativePlatformType
+        from DragonFF.ops.exporter_common import (clear_extension,
+                                                  extract_texture_info_from_name)
+        from bpy_extras.node_shader_utils import PrincipledBSDFWrapper
+        import numpy as np
+
+        MAX_TEX = 1024  # safe max for the SA renderer
+        entries = {}    # texture name -> (w, h, bgra8888 bytes), deduped
+        for ob in mesh_objs:
+            for mat in (ob.data.materials or []):
+                if mat is None or mat.name in entries:
+                    continue
+                # --- same image + naming path as the DFF exporter --------
+                wrapper = PrincipledBSDFWrapper(mat, is_readonly=False)
+                bct = wrapper.base_color_texture
+                if bct is None or bct.image is None:
+                    continue
+                img = bct.image
+                node_label = bct.node_image.label
+                image_name = img.name
+                if node_label in image_name and node_label != "":
+                    image_name = node_label
+                tname, _ = extract_texture_info_from_name(image_name)
+                tname = clear_extension(tname)
+                if not tname:
+                    continue
+                # --- make sure the image is actually loaded --------------
+                # (FBX-embedded textures arrive with an .fbm sidecar path
+                #  that may need an explicit load in headless mode)
+                if not img.has_data:
+                    try:
+                        img.load()
+                    except Exception:
+                        pass
+                if not img.has_data or img.size[0] <= 0 or img.size[1] <= 0:
+                    log("WARN", f"Texture '{tname}': image data not "
+                                f"available ({img.filepath or 'no path'}) - "
+                                f"skipped")
+                    txd.setdefault("skipped", []).append(tname)
+                    continue
+                # --- size cap (SA renderer max 1024) ----------------------
+                w, h = img.size
+                if max(w, h) > MAX_TEX:
+                    s = MAX_TEX / float(max(w, h))
+                    nw, nh = max(1, int(w * s)), max(1, int(h * s))
+                    img.scale(nw, nh)
+                    log("WARN", f"Texture '{tname}': {w}x{h} -> {nw}x{nh} "
+                                f"(SA renderer max {MAX_TEX})")
+                    w, h = nw, nh
+                # --- pixels: RGBA -> BGRA8888, rows top-down -------------
+                # (Blender pixels are bottom-up, RenderWare/D3D rows are
+                #  top-down - flip vertically)
+                buf = np.empty(w * h * 4, dtype=np.float32)
+                img.pixels.foreach_get(buf)
+                buf = np.clip(buf.reshape(h, w, 4), 0.0, 1.0)[::-1]
+                rgba = np.round(buf * 255.0).astype(np.uint8).tobytes()
+                entries[tname] = (w, h, ImageEncoder.rgba_to_bgra8888(rgba))
+
+        if not entries:
+            txd["reason"] = ("no textures found in materials "
+                             "(model will render untextured)")
+            log("INFO", "TXD: no image textures found in materials - skipped")
+        else:
+            tobj = TxDCls()
+            tobj.device_id = DeviceType.DEVICE_D3D9
+            for tname, (w, h, bgra) in entries.items():
+                tex = TextureNative()
+                tex.platform_id = NativePlatformType.D3D9   # 9 = PC/D3D9
+                tex.filter_mode = 0x02                      # bilinear
+                tex.uv_addressing = 0x11                    # u=WRAP, v=WRAP
+                tex.name = tname
+                tex.mask = ""
+                tex.raster_format_flags = RasterFormat.RASTER_8888
+                tex.d3d_format = D3DFormat.D3D_8888         # D3DFMT_A8R8G8B8
+                tex.width = w
+                tex.height = h
+                tex.depth = 1
+                tex.num_levels = 1
+                tex.raster_type = 0
+                from collections import namedtuple
+                PP = namedtuple("PlatformProperties",
+                                ["alpha", "cube_texture", "auto_mipmaps",
+                                 "compressed"])
+                tex.platform_properties = PP(True, False, False, False)
+                tex.palette = b""
+                tex.pixels = [bgra]
+                tobj.native_textures.append(tex)
+            tobj.write_file(txd_out, 0x36003)  # RW 3.6.0.3 -> 0x1803FFFF
+            txd["success"] = True
+            txd["textures"] = len(entries)
+            txd["names"] = list(entries)
+            txd["size_bytes"] = os.path.getsize(txd_out)
+            # read-back validation with DragonFF's own TXD parser
+            check = TxDCls()
+            check.load_file(txd_out)
+            if len(check.native_textures) != len(entries):
+                raise RuntimeError(
+                    f"TXD read-back mismatch: wrote {len(entries)}, "
+                    f"read {len(check.native_textures)}")
+            log("SUCCESS", f"model.txd created: {txd_out} "
+                f"({len(entries)} texture(s), {txd['size_bytes']} bytes) - "
+                f"validated with DragonFF TXD reader")
+            log("INFO", "TXD textures: " + ", ".join(
+                f"{n} ({w}x{h})" for n, (w, h, _b) in entries.items()))
+    except Exception as e:
+        txd["success"] = False
+        txd["reason"] = f"TXD stage error: {e}"
+        log("ERROR", f"TXD stage error (DFF unaffected): {e}")
+        if os.path.exists(txd_out) and os.path.getsize(txd_out) == 0:
+            os.remove(txd_out)
 
     with open(args.status, "w") as f:
         json.dump(status, f, indent=2)
@@ -718,7 +792,7 @@ def main():
     #    went into the DFF (identity world space) => DFF and COL
     #    transforms/scale/rotation/position match exactly.
     # ================================================================
-    if args.col and do_dff:
+    if args.col:
         log("INFO", "=== Collision (COL) stage ===")
         col = status["col"]
         col_obj = None
@@ -781,6 +855,10 @@ def main():
 
         with open(args.status, "w") as f:
             json.dump(status, f, indent=2)
+
+    # ---- clean up the .fbm sidecar the FBX import created (if we created it)
+    if not fbm_existed and os.path.isdir(fbm_dir):
+        shutil.rmtree(fbm_dir, ignore_errors=True)
 
 if __name__ == "__main__":
     # NOTE: use os._exit() - the bpy wheel can segfault during normal CPython

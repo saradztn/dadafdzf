@@ -28,7 +28,8 @@ def log(msg):
 
 def main_animated(output):
     """Small rigged test character (3 bones, skinned mesh, 30-frame arm
-    swing) - used to test the IFP (animation) pipeline end-to-end."""
+    swing) - used to test the animated-FBX handling end-to-end (rest pose
+    parking on the first keyframe)."""
     import bpy
 
     log(f"Blender {bpy.app.version_string} - generating ANIMATED test FBX")
@@ -225,7 +226,7 @@ if __name__ == "__main__":
     ap.add_argument("--log", default="")
     ap.add_argument("--animated", action="store_true",
                     help="rigged character with a 30-frame arm swing "
-                         "(tests the IFP animation pipeline)")
+                         "(tests animated-FBX handling / rest-pose parking)")
     args = ap.parse_args()
     try:
         if args.log:

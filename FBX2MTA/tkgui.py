@@ -59,7 +59,6 @@ class Fbx2MtaApp:
         self.quality = tk.StringVar(value="AUTO")
         self.gen_col = tk.BooleanVar(value=True)
         self.col_tris = tk.StringVar(value="3000")
-        self.gen_ifp = tk.BooleanVar(value=True)
         self._last_log_len = 0
         self._last_log_text = ""
 
@@ -86,7 +85,7 @@ class Fbx2MtaApp:
         self.pick_btn.pack(side="left")
         ttk.Button(row, text="+ Generate Test FBX",
                    command=self.generate_fbx).pack(side="left", padx=8)
-        ttk.Button(row, text="+ Animated Test FBX (IFP test)",
+        ttk.Button(row, text="+ Animated Test FBX",
                    command=lambda: self.generate_fbx(animated=True)
                    ).pack(side="left", padx=2)
         ttk.Label(row, foreground="#7f8c9b",
@@ -130,19 +129,16 @@ class Fbx2MtaApp:
                        "floors / walls, removes interior detail).").pack(
                       anchor="w", padx=10, pady=(0, 8))
 
-        # ---- 2b. animation (IFP) -----------------------------------------
-        f2b = ttk.LabelFrame(main, text=" 2b - ANIMATION (IFP) ")
+        # ---- 2b. textures (TXD) ------------------------------------------
+        f2b = ttk.LabelFrame(main, text=" 2b - TEXTURES (TXD) ")
         f2b.pack(fill="x", **pad)
-        ra = ttk.Frame(f2b)
-        ra.pack(fill="x", padx=8, pady=(8, 4))
-        ttk.Checkbutton(ra, text="Export animation to IFP (MTA:SA / GTA SA ANP3)",
-                        variable=self.gen_ifp).pack(side="left")
         ttk.Label(f2b, foreground="#7f8c9b", justify="left",
-                  text="Automatic detection: if the FBX has an armature animation it is "
-                       "baked to output/<name>.ifp (bone ids match the DFF frames - "
-                       "load with engineLoadIFP + setPedAnimation). No animation -> "
-                       "skipped, nothing exported.").pack(
-                      anchor="w", padx=10, pady=(0, 8))
+                  text="Automatic: material textures found in the FBX are packed into "
+                       "output/<name>.txd (RenderWare TXD v5, PC/SA format) using "
+                       "DragonFF's own TXD writer. Texture names match the DFF "
+                       "materials exactly, so the game pairs them automatically. "
+                       "No textures -> no TXD (model renders untextured).").pack(
+                      anchor="w", padx=10, pady=8)
 
         # ---- 3. convert --------------------------------------------------
         f3 = ttk.LabelFrame(main, text=" 3 - CONVERT ")
@@ -150,17 +146,12 @@ class Fbx2MtaApp:
         r3m = ttk.Frame(f3)
         r3m.pack(fill="x", padx=8, pady=(8, 0))
         ttk.Label(r3m, text="Output:").pack(side="left")
-        self.mode = tk.StringVar(value="both")
-        mode_box = ttk.Combobox(r3m, textvariable=self.mode, state="readonly",
-                                width=42,
-                                values=["both", "dff", "ifp"])
-        mode_box.pack(side="left", padx=6)
-        ttk.Label(r3m, foreground="#7f8c9b",
-                  text="both = DFF+COL+IFP (auto)  |  dff = no IFP  |  "
-                       "ifp = IFP only (no DFF/COL)").pack(side="left", padx=6)
+        ttk.Label(r3m, foreground="#9fc2e0",
+                  text="DFF  +  TXD (when textures exist)  +  COL (when enabled)"
+                  ).pack(side="left", padx=6)
         r4 = ttk.Frame(f3)
         r4.pack(fill="x", padx=8, pady=8)
-        self.convert_btn = ttk.Button(r4, text="Convert selected  ->  DFF + COL",
+        self.convert_btn = ttk.Button(r4, text="Convert selected  ->  DFF + TXD + COL",
                                       command=self.do_convert)
         self.convert_btn.pack(side="left")
         self.res_btn = ttk.Button(r4, text="Generate MTA Test Resource",
@@ -171,8 +162,9 @@ class Fbx2MtaApp:
         ttk.Label(f3, foreground="#7f8c9b", justify="left",
                   text="Pipeline: FBX -> Blender processing -> DragonFF DFF export "
                        "(GTA SA v3.6.0.3) -> DFF validation + round-trip -> DragonFF "
-                       "COL export (COL3) -> COL validation -> output/<model>.dff + .col. "
-                       "COL failure never fails the DFF.").pack(anchor="w", padx=10, pady=(0, 8))
+                       "TXD export (textures) -> DragonFF COL export (COL3) -> "
+                       "COL validation -> output/<model>.dff + .txd + .col. "
+                       "TXD/COL failures never fail the DFF.").pack(anchor="w", padx=10, pady=(0, 8))
 
         # ---- 4. results ---------------------------------------------------
         f4 = ttk.LabelFrame(main, text=" 4 - RESULTS ")
@@ -181,10 +173,10 @@ class Fbx2MtaApp:
                                bg="#1a2430", fg="#9fc2e0", relief="solid",
                                bd=1, padx=10, pady=8, justify="left")
         self.banner.pack(fill="x", padx=8, pady=(8, 4))
-        cols = ("model", "dff", "col", "ifp", "tris", "coltris", "outputs")
+        cols = ("model", "dff", "txd", "col", "tris", "coltris", "outputs")
         self.tree = ttk.Treeview(f4, columns=cols, show="headings", height=6)
         for c, t, w in (("model", "Model", 120), ("dff", "DFF", 65),
-                        ("col", "COL", 80), ("ifp", "IFP (anim)", 80),
+                        ("txd", "TXD (textures)", 90), ("col", "COL", 80),
                         ("tris", "Triangles", 90),
                         ("coltris", "Collision Triangles", 130),
                         ("outputs", "Outputs", 300)):
@@ -240,7 +232,7 @@ class Fbx2MtaApp:
     def generate_fbx(self, animated=False):
         if animated:
             out = os.path.join(joblib.INPUT_DIR, "generated_anim.fbx")
-            desc = "generate animated test FBX (IFP test)"
+            desc = "generate animated test FBX"
         else:
             out = os.path.join(joblib.INPUT_DIR, "generated_test.fbx")
             desc = "generate test FBX"
@@ -267,14 +259,8 @@ class Fbx2MtaApp:
                     pass
         else:
             cmd += ["--no-col"]
-        # the IFP checkbox refines mode=both (uncheck = DFF+COL only);
-        # mode=dff/ifp are explicit and ignore the checkbox
-        m = self.mode.get()
-        if m == "both" and not self.gen_ifp.get():
-            m = "dff"
-        cmd += ["--mode", m]
-        if not STATE.run(cmd, f"convert ({len(files)} file(s), mode={m}"
-                              f"{', COL ' + q if self.gen_col.get() and m != 'ifp' else ''})"):
+        if not STATE.run(cmd, f"convert ({len(files)} file(s)"
+                              f"{', COL ' + q if self.gen_col.get() else ''})"):
             self._busy_warning()
 
     def make_resource(self):
@@ -333,21 +319,21 @@ class Fbx2MtaApp:
             last = r
             dff_ok = r["dff"] in ("PASS", "SKIPPED")
             col_ok = r["col"] in ("PASS", "SKIPPED")
-            ifp = r.get("ifp", "NONE")
-            ifp_ok = ifp in ("PASS", "NONE", "SKIPPED")
-            if not (dff_ok and col_ok and ifp_ok):
+            txd = r.get("txd", "NONE")
+            txd_ok = txd in ("PASS", "NONE", "SKIPPED")
+            if not (dff_ok and col_ok and txd_ok):
                 all_ok = False
             outs = ", ".join(f"{o['file']} ({o['bytes']/1024:.1f} KB)"
                              for o in r["outputs"])
             col_txt = r["col"]
             if r["col"] == "FAILED":
                 col_txt += " - " + (r.get("col_reason") or "see log")[:80]
-            ifp_txt = ifp
-            if ifp == "FAILED":
-                ifp_txt += " - " + (r.get("ifp_reason") or "see log")[:80]
-            tag = "fail" if not (dff_ok and col_ok and ifp_ok) else "pass"
+            txd_txt = txd
+            if txd == "FAILED":
+                txd_txt += " - " + (r.get("txd_reason") or "see log")[:80]
+            tag = "fail" if not (dff_ok and col_ok and txd_ok) else "pass"
             self.tree.insert("", "end", values=(
-                r["name"], r["dff"], col_txt, ifp_txt,
+                r["name"], r["dff"], txd_txt, col_txt,
                 f"{r['triangles']:,}" if r.get("triangles") is not None else "-",
                 f"{r['col_triangles']:,}" if r.get("col_triangles") is not None else "-",
                 outs), tags=(tag,))
@@ -363,8 +349,8 @@ class Fbx2MtaApp:
         elif any_row and all_ok and last:
             b.configure(bg="#12351f", fg="#37b45f",
                         text="Conversion Complete\n"
-                             f"DFF: {last['dff']}   |   COL: {last['col']}   |   "
-                             f"IFP: {last.get('ifp', 'NONE')}   |   "
+                             f"DFF: {last['dff']}   |   TXD: {last.get('txd', 'NONE')}   |   "
+                             f"COL: {last['col']}   |   "
                              f"Triangles: {last.get('triangles') or 0:,}   |   "
                              f"Collision Triangles: {last.get('col_triangles') or 0:,}\n"
                              "Outputs: " + ", ".join(
@@ -372,7 +358,7 @@ class Fbx2MtaApp:
         elif any_row:
             bad = next((r for r in results
                         if r["dff"] != "PASS" or r["col"] == "FAILED"
-                        or r.get("ifp") == "FAILED"), None)
+                        or r.get("txd") == "FAILED"), None)
             b.configure(bg="#3a1518", fg="#e05252",
                         text="Conversion finished with errors - "
                              + (bad["name"] if bad else "") +

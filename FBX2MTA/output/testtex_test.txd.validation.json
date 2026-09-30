@@ -1,0 +1,22 @@
+{
+  "info": {
+    "textures": [
+      {
+        "name": "testtex_main",
+        "width": 128,
+        "height": 128,
+        "bytes": 65536
+      },
+      {
+        "name": "testtex_logo",
+        "width": 64,
+        "height": 64,
+        "bytes": 16384
+      }
+    ],
+    "rw_version": 221187,
+    "device_id": 2,
+    "rw_stamp": "0x1803ffff"
+  },
+  "errors": []
+}

@@ -86,10 +86,10 @@ Blender تلقائياً (self-heal) ويعيد المحاولة.
 | المسار | المحتوى |
 |---|---|
 | `output/<name>.dff` | نموذج العرض (GTA SA v3.6.0.3، Y-up) |
+| `output/<name>.txd` | **الخطط (textures) الحقيقية** (RenderWare TXD v5 / PC — تُكتب بواسطة كاتب DragonFF نفسه) — تُنتج إن وجدت صور مادية في الـ FBX |
 | `output/<name>.col` | **كوليشن حقيقي** (GTA SA COL3 — `engineLoadCOL()`/`engineReplaceCOL()`) |
-| `output/<name>.ifp` | **الأنيميشن** (GTA SA ANP3) — فقط إن كان الـ FBX يحوي سكيلتون متحركاً |
-| `output/<name>.{dff,col}.validation.json` | تقارير الفحص المستقل |
-| `test_resource/` | MTA resource جاهز (meta.xml + client.lua + model.dff + model.col [+ model.ifp]) |
+| `output/<name>.{dff,txd,col}.validation.json` | تقارير الفحص المستقل |
+| `test_resource/` | MTA resource جاهز (meta.xml + client.lua + model.dff + model.txd + model.col) |
 | `reports/model_report.txt` | تقرير كامل |
 | `logs/converter.log` + `logs/<name>.log` | السجلات |
 | `temp/*.status.json` | تفاصيل JSON لكل ملف |
@@ -111,52 +111,39 @@ Blender تلقائياً (self-heal) ويعيد المحاولة.
   وحجمه >0، البنية صالحة، هناك هندسة كوليشن فعلية (وجوه/كرات/صناديق)، الرؤوس
   محدودة، فهارس الوجوه صالحة وغير متدهورة، الحدود (bounds) صالحة.
 
-## نظام الأنيميشن (IFP) / Animation System
+## نظام الخطط (TXD) / Texture System
 
-- **كشف تلقائي**: إن وُجد في الـ FBX سكيلتون (armature) بمفاتيح حركة (pose bone
-  keys) → يُصدَّر الأنيميشن؛ وإلا → **NONE** (لا ملف يُنتج، لا خطأ).
-- **النوع**: مبدّل في الواجهة `Export animation to IFP` (فعّال افتراضياً) —
-  `--no-ifp` يقفله في السطر.
-- **النسخة**: `engineLoadIFP` / `setPedAnimation` (مسار MTA الموثّق — لا ITP).
-- **الصيغة**: GTA SA **ANP3** (int16: دوران ×4096، زمن 1/60s، إزاحة ×1024) —
-  تُكتب وتُعاد قراءتها بالفحص المستقل `scripts/gta_ifp.py` (magic + حجم +
-  هيكل + keyframes).
-- **مطابقة العظام**: `bone_id` في الـ IFP = **رقم frame** في الـ DFF المُصدَّر
-  (نفس الاسم، نفس الترتيب) — يقرؤها MTA ويربطها بالإطار الصحيح.
-- **نفس الفضاء**: يُحمَّر (bake) بعد تحويل Y-up نفسه الخاص بالـ DFF؛ كل مفاتيح
-  الحركة تُحسب كمصفوفة العظمة المحلية في فضاء الأب (root في فضاء الـ clump).
-  **الإطار 0 = وضع الراحة = الإطار الأول للحركة** (يُثبَّت المشهد عليه قبل
-  تصدير DFF/COL أيضاً) — الأنيميشن يبدأ من نفس الوضع الذي يظهَر به النموذج.
-- **الفصل عن DFF/COL**: فشل IFP (أو غيابه) **لا** يفشل النموذج — يظهر
-  `IFP: FAILED/…` في التقرير مع السبب بينما تبقى DFF/COL بـ PASS.
-- **المصدر**: `scripts/gta_ifp.py` (كاتب/قارئ ANP3 نقي) +
-  `scripts/ifp_stage.py` (bake داخل جلسة Blender) — مرحلة 7.5 في
-  `convert.py`، مرحلة 4.5 في `run_pipeline.py`.
-- **حدود**: زمن < 1092s (int16 ticks)، إزاحة **متحركة** < 31.5 وحدة
-  (int16 ×1024)، حد 6553 إطاراً (يُختزل تلقائياً).
-- **النطاق الضيق للإزاحة (مهم لريجات RDR/STK)**: معظم العظام لا تتحرك
-  موضعياً — إزاحتها المحلية ثابتة (وضعية الراحة في الـ DFF). لذلك تُصدَّر
-  هذه العظام بمفاتيح **دوران فقط** (type 3) لا تخزن إزاحة إطلاقاً، والـ DFF
-  يحمل الإزاحة (فلوت — بلا حدود). بهذا تصدّر ريجات بOffsets كبيرة (مثل
-  عظمة Hips على بعد 32 وحدة) بشكل سليم — نفس طريقة IFPs أصلية SA
-  ("عادة جذر الهيكل فقط هو الذي يحوي مفاتيح إزاحة"). العظم الذي يتحرك
-  فعلاً أكثر من ±31.5 وحدة المحلية يرفض بفشل واضح (حد الصيغة).
+- **كشف تلقائي**: كل مادة (material) في الـ FBX تحمل صورة عبر عقدة
+  Image Texture (Base Color) → تُستخرج صورتها وتُحزم في
+  `output/<name>.txd`. لا صور → **NONE** (لا ملف يُنتج، لا خطأ — النموذج
+  يظهر بلا خط).
+- **غير مزوَّر**: يُكتب بصيغة **RenderWare TXD v5 (PC)** — نفس الصيغة التي
+  يقرأها SA/MTA (chunk `0x16` + stamp `0x1803FFFF` = RW 3.6.0.3)، وبواسطة
+  **كاتب DragonFF نفسه** (`DragonFF/gtaLib/txd.py`) — لا كاتب جديد مكتوب
+  من الصفر. صيغة البكسل: BGRA8888 (D3DFMT_A8R8G8B8) — بلا فقدان.
+- **مطابقة أسماء دقيقة**: اسم كل خط في الـ TXD = اسم الصورة (بعد إزالة
+  الامتداد) — نفس دالة التسمية التي يستخدمها مُصدِّر DFF
+  (`extract_texture_info_from_name` + `clear_extension`) — فيجد SA/MTA كل
+  مادة في الـ DFF خطها تلقائياً (`engineReplaceModel(dff, txd)`).
+- **اتجاه البكسلات**: صفوف الـ TXD تُكتب من الأعلى (PNG order) — تُقلب
+  صفوف Blender (bottom-up) رأساً على عقب قبل الكتابة.
+- **حدود SA**: الخط أكبر من 1024px يُصغَّر إلى 1024 (حد مُصيِّر SA) مع
+  تحذير في السجل.
+- **الفصل عن DFF/COL**: فشل TXD (أو غيابه) **لا** يفشل النموذج — يظهر
+  `TXD: FAILED/…` في التقرير مع السبب بينما يبقى DFF/COL بـ PASS.
+- **الفحص المستقل** (`scripts/validate_txd.py`) بمُحَلِّل DragonFF نفسه:
+  الملف موجود وحجمه >0، root chunk = `0x16`، stamp = `0x1803FFFF`، عدد
+  الخطوط مطابق، أسماء غير فارغة، أبعاد صحيحة، حجم بيانات البكسلات =
+  `width × height × 4`.
 
-## أوضاع الإخراج / Output Modes
+## مخرجات كل ملف
 
-| الوضع | المخرجات | متى |
-|---|---|---|
-| `both` (الافتراضي) | DFF + COL + IFP (الأنيميشن يُكشف تلقائياً) | الموديل الكامل |
-| `dff` | DFF + COL فقط (لا IFP) | نموذج ثابت / لا تريد أنيميشن |
-| `ifp` | **IFP فقط** (لا DFF/COL) | استخراج الأنيميشن وحده |
-
-- الواجهة: حقل **Output** في قسم 3 (both/dff/ifp)؛ مبدّل 2b "Export animation
-  to IFP" يعمل داخل `both` (إلغاء اختياره = `dff`).
-- سطر الأوامر: `python3 scripts/run_pipeline.py --files name --mode ifp`
-  (`--no-ifp` = `dff` في الوضع `both`).
-- في وضع `ifp`: أرقام العظام تُعطى **بترتيب الرِج** (1..N) — وهي نفسها أرقام
-  frames التي سينالها DFF مُصدَّر لاحقاً من نفس الملف، فالـ IFP يبقى متوافقاً
-  معه. لا يُنتج test_resource (لأنه يحتاج model.dff).
+كل ملف FBX يعطي (بلا أوضاع اختيار):
+- **DFF** — دائماً (النموذج الأساسي).
+- **TXD** — تلقائياً عند وجود صور مواد (لا يمكن تعطيله — جزء من حزمة
+  الموديل القياسية DFF+TXD).
+- **COL** — عند تفعيله (مبدّل `Generate COL` في الواجهة / `--no-col` في
+  السطر).
 
 ## بنية المشروع / Structure
 
@@ -168,22 +155,21 @@ FBX2MTA/
 ├── webgui.py       # واجهة الويب (بديل اختياري عبر --web)
 ├── tests/smoke_tkgui.py  # اختبار دخان للواجهة بدون شاشة (للبنية/الاتصال)
 ├── input/          # ملفات FBX (تُكتشف تلقائياً)
-├── output/         # DFF + COL النهائية
-├── test_resource/  # MTA resource (meta.xml, client.lua, model.dff, model.col [, model.ifp])
+├── output/         # DFF + TXD + COL النهائية
+├── test_resource/  # MTA resource (meta.xml, client.lua, model.dff, model.txd, model.col)
 ├── blender/        # محرك bpy (venv) + setup_env.py + run_blender.py (عابر للنظام)
 │   │               # + stubs لـ X11/GL (لينكس فقط) + setup_env.sh/run_blender.sh (غلاف)
 ├── dragonff/       # DragonFF الرسمي (cloned from Parik27/DragonFF)
 ├── scripts/
-│   ├── convert.py            # خط التحويل داخل Blender (DFF ثم IFP ثم COL)
+│   ├── convert.py            # خط التحويل داخل Blender (DFF ثم TXD ثم COL)
 │   ├── collision_generator.py# بناء شبكة الكوليشن + تصديرها عبر DragonFF COL
-│   ├── gta_ifp.py            # كاتب/قارئ ANP3 (IFP) نقي + فحص read-back
-│   ├── ifp_stage.py          # bake الأنيميشن → IFP (مرحلة 7.5)
 │   ├── validate_dff.py       # فحص DFF مستقل (gtaLib/dff.py)
+│   ├── validate_txd.py       # فحص TXD مستقل (gtaLib/txd.py)
 │   ├── validate_col.py       # فحص COL مستقل (gtaLib/col.py)
 │   ├── roundtrip.py          # DFF → DragonFF Import → Blender
 │   ├── generate_test_fbx.py  # توليد FBX اختباري (--animated: سكيلتون متحرك)
 │   ├── mta_resource.py       # توليد test_resource/
-│   └── run_pipeline.py       # المشغّل: batch + COL + IFP + تقرير
+│   └── run_pipeline.py       # المشغّل: batch + TXD + COL + تقرير
 ├── logs/  reports/  temp/
 ```
 
@@ -211,25 +197,18 @@ FBX2MTA/
 
 ## الاختبار داخل MTA:SA / In-game test
 
-انسخ مجلد `test_resource/` إلى `MTASA/resources/dragon_test/` (ومع تنينك أضف
-ملف TXD بأسماء textures: `Dragon_Bump_Col2` و `Dragon_Nor_mirror2`) ثم شغّل
+انسخ مجلد `test_resource/` إلى `MTASA/resources/dragon_test/` ثم شغّل
 الـ resource. `client.lua` يستخدم:
 
 ```lua
 engineLoadDFF(0, 'model.dff')      + engineReplaceModel(206, 'model.dff', 'model.txd')
 engineLoadCOL('model.col')         + engineReplaceCOL(206, 'model.col')
--- إن كان الـ FBX متحركاً (يوجد model.ifp في الـ resource):
-engineLoadIFP('model.ifp')
-setPedAnimation(localPlayer, '<اسم_الأنيميشن>', 0, -1, -1, 1)  -- اسم = اسم الملف
 createObject(206, 100.0, 1.5, -1000.0, 0, 0, 0)   -- spawn للاختبار الفوري
 ```
 
-ملاحظة: `setPedAnimation` يلعب على **ped** (اللاعب في الاختبار) ويتطلب
-تطابق السكيلتون مع هيكل SA — الأنيميشن المصدَّر مربوط بعظام النموذج
-(bone_id = frame id في الـ DFF)، فيُرى صحيحاً على نموذجك عند استخدامه
-كموديل ped مخصص (`engineReplaceModel` + `createPed`):
-
-(لم يتم تشغيل MTA هنا — غير مثبت — لذا: **MTA runtime test unavailable**).
+الخطوط (model.txd) تُولد من صور مواد الـ FBX وتطابق أسماء مواد الـ DFF
+تلقائياً — لا خطوة يدوية. (لم يتم تشغيل MTA هنا — غير مثبت — لذا:
+**MTA runtime test unavailable**).
 
 ## إعادة التهيئة / Reset
 

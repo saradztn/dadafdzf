@@ -2,133 +2,13 @@
 FBX2MTA CONVERSION REPORT
 ========================================
 
-Input: generated_anim.fbx
-
-Original:
-Vertices: 16
-Triangles: 24
-Objects: 1
-Kind: skinned
-
-Processed (mesh):
-Vertices: 16
-Triangles: 24
-Objects: 1
-Decimated: False
-
-DFF content (measured from the DFF file):
-Vertices: 48
-Triangles: 24
-Frames: 4  (bones in skin: 3)
-Materials: 1
-Textures: none
-Material effects: none
-RW version: v3.6.0.3 (0x36003)
-
-Orientation: default (Y-up source) (upright score 0.85)
-
-Collision (COL):
-Status: PASS
-Quality: AUTO (budget by model size)
-Original triangles: 24
-Collision triangles: 24
-Collision vertices: 16
-File: generated_anim.col (408 bytes)
-Transform: identical to DFF (same processed mesh, identity world space)
-
-Animation (IFP):
-Status: PASS (MTA:SA IFP / ANP3)
-Anim name: generated_anim
-Bones: 3  Frames: 30  FPS: 30
-File: generated_anim.ifp (1,080 bytes)
-Load in MTA: engineLoadIFP('model.ifp') + setPedAnimation(ped, 'generated_anim', ...)
-
-DragonFF Export:
-SUCCESS
-Export Version: GTA SA (v3.6.0.3) 0x36003
-File: generated_anim.dff (4,023 bytes)
-
-DFF Validation:
-PASS
-Round Trip:
-PASS
-
-RESULT:
-Conversion Complete
-DFF: PASS
-COL: PASS
-IFP: PASS
-Triangles: 24
-Collision Triangles: 24
-Output: output/generated_anim.dff, output/generated_anim.col, output/generated_anim.ifp
-
-========================================
-
-Input: generated_test.fbx
-
-Original:
-Vertices: 384
-Triangles: 728
-Objects: 1
-Kind: static
-
-Processed (mesh):
-Vertices: 384
-Triangles: 728
-Objects: 1
-Decimated: False
-
-DFF content (measured from the DFF file):
-Vertices: 650
-Triangles: 728
-Frames: 1  (bones in skin: 0)
-Materials: 1
-Textures: none
-Material effects: none
-RW version: v3.6.0.3 (0x36003)
-
-Orientation: default (Y-up source) (upright score 0.3169)
-
-Collision (COL):
-Status: PASS
-Quality: AUTO (budget by model size)
-Original triangles: 728
-Collision triangles: 728
-Collision vertices: 384
-File: generated_test.col (8,248 bytes)
-Transform: identical to DFF (same processed mesh, identity world space)
-
-Animation (IFP):
-Status: NONE (no armature in scene (static model - nothing to animate))
-
-DragonFF Export:
-SUCCESS
-Export Version: GTA SA (v3.6.0.3) 0x36003
-File: generated_test.dff (32,216 bytes)
-
-DFF Validation:
-PASS
-Round Trip:
-PASS
-
-RESULT:
-Conversion Complete
-DFF: PASS
-COL: PASS
-IFP: NONE
-Triangles: 728
-Collision Triangles: 728
-Output: output/generated_test.dff, output/generated_test.col
-
-========================================
-
-Input: parented_test.fbx
+Input: testtex_test.fbx
 
 Original:
 Vertices: 8
 Triangles: 12
 Objects: 1
-Kind: skinned
+Kind: static
 
 Processed (mesh):
 Vertices: 8
@@ -139,34 +19,27 @@ Decimated: False
 DFF content (measured from the DFF file):
 Vertices: 24
 Triangles: 12
-Frames: 3  (bones in skin: 2)
-Materials: 1
-Textures: none
+Frames: 1  (bones in skin: 0)
+Materials: 3
+Textures: testtex_logo, testtex_main
 Material effects: none
 RW version: v3.6.0.3 (0x36003)
 
 Orientation: default (Y-up source) (upright score 1.0)
 
 Collision (COL):
-Status: PASS
-Quality: AUTO (budget by model size)
-Original triangles: 12
-Collision triangles: 12
-Collision vertices: 8
-File: parented_test.col (264 bytes)
-Transform: identical to DFF (same processed mesh, identity world space)
+Status: FAILED (--no-col)
+DFF is NOT affected - it remains valid and usable
 
-Animation (IFP):
-Status: PASS (MTA:SA IFP / ANP3)
-Anim name: parented_test
-Bones: 2  Frames: 30  FPS: 30
-File: parented_test.ifp (744 bytes)
-Load in MTA: engineLoadIFP('model.ifp') + setPedAnimation(ped, 'parented_test', ...)
+Textures (TXD):
+Status: PASS (RenderWare TXD v5, RW 3.6.0.3)
+Textures: 2 (BGRA8888, names match the DFF materials)
+File: testtex_test.txd (82,216 bytes)
 
 DragonFF Export:
 SUCCESS
 Export Version: GTA SA (v3.6.0.3) 0x36003
-File: parented_test.dff (2,352 bytes)
+File: testtex_test.dff (1,748 bytes)
 
 DFF Validation:
 PASS
@@ -176,18 +49,18 @@ PASS
 RESULT:
 Conversion Complete
 DFF: PASS
-COL: PASS
-IFP: PASS
+COL: SKIPPED
+TXD: PASS
 Triangles: 12
-Collision Triangles: 12
-Output: output/parented_test.dff, output/parented_test.col, output/parented_test.ifp
+Collision Triangles: 0
+Output: output/testtex_test.dff, output/testtex_test.txd
 
 ========================================
 
 BATCH SUMMARY
-success (DFF+COL): 3
-success (DFF only): 0
-success (IFP only): 0
+success (DFF+COL): 0
+success (DFF only): 1
+with textures (TXD): 1
 failed: 0
 skipped: 0
 MTA runtime test: unavailable (test resource provided in test_resource/)

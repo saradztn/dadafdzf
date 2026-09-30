@@ -7,10 +7,11 @@ pipeline the CLI uses (scripts/run_pipeline.py + Blender/bpy + DragonFF):
   * file list of input/*.fbx  +  "Generate Test FBX" (FBX generation feature)
   * COLLISION section:  [x] Generate COL,  quality AUTO/LOW/MEDIUM/HIGH/CUSTOM,
     maximum collision triangles,  quick presets 500/1000/2000/3000/5000/10000
-  * Convert  ->  FBX -> DFF (DragonFF) + COL (DragonFF COL export) -> validation
+  * Convert  ->  FBX -> DFF (DragonFF) + TXD (textures) + COL (DragonFF COL
+    export) -> validation
   * "Generate MTA Test Resource"  ->  test_resource/ (meta.xml, client.lua,
-    model.dff, model.col)
-  * result panel:  Conversion Complete / DFF: PASS / COL: PASS /
+    model.dff, model.txd, model.col)
+  * result panel:  Conversion Complete / DFF: PASS / TXD: PASS / COL: PASS /
     Triangles / Collision Triangles / outputs
   * live log tail
 
@@ -160,22 +161,15 @@ def run_job(cmd, desc):
     return True
 
 
-def start_convert(files, col, quality, col_tris, ifp=True, mode="both"):
-    # the IFP checkbox refines mode=both (uncheck = DFF+COL only);
-    # mode=dff/ifp are explicit and ignore the checkbox
-    mode = (mode or "both").lower()
-    if mode not in ("both", "dff", "ifp"):
-        mode = "both"
-    if mode == "both" and not ifp:
-        mode = "dff"
-    cmd = [PY, PIPELINE, "--budget", "AUTO", "--mode", mode]
+def start_convert(files, col, quality, col_tris):
+    cmd = [PY, PIPELINE, "--budget", "AUTO"]
     if files:
         cmd += ["--files"] + files
-    if col and mode in ("both", "dff"):
+    if col:
         cmd += ["--col-quality", quality]
         if quality == "CUSTOM" and col_tris:
             cmd += ["--col-triangles", str(int(col_tris))]
-    elif mode in ("both", "dff"):
+    else:
         cmd += ["--no-col"]
     return run_job(cmd, f"convert ({len(files) or 'all'} files, "
                         f"COL {'AUTO' if quality == 'AUTO' else quality})")
@@ -184,7 +178,7 @@ def start_convert(files, col, quality, col_tris, ifp=True, mode="both"):
 def start_generate_fbx(animated=False):
     if animated:
         out = os.path.join(INPUT_DIR, "generated_anim.fbx")
-        desc = "generate animated test FBX (IFP test)"
+        desc = "generate animated test FBX"
     else:
         out = os.path.join(INPUT_DIR, "generated_test.fbx")
         desc = "generate test FBX"
@@ -288,7 +282,7 @@ PAGE = r"""<!doctype html>
       <input type="file" id="fbxPick" accept=".fbx,.FBX" style="display:none" onchange="uploadFbx(this)">
       <button class="action" id="uploadBtn" onclick="document.getElementById('fbxPick').click()">&#8682; Choose FBX file &hellip;</button>
       <button class="ghost" id="genFbx" onclick="api('generate-fbx')">+ Generate Test FBX</button>
-      <button class="ghost" id="genFbxAnim" onclick="api('generate-fbx', {animated: true})">+ Animated Test FBX (IFP test)</button>
+      <button class="ghost" id="genFbxAnim" onclick="api('generate-fbx', {animated: true})">+ Animated Test FBX</button>
       <span class="hint">Choose FBX: pick any .fbx from your computer &rarr; uploaded to input/ &rarr; then Convert it</span>
     </div>
   </section>
@@ -326,24 +320,18 @@ PAGE = r"""<!doctype html>
   </section>
 
   <section class="col-section">
-    <h2>2b &middot; Animation (IFP)</h2>
-    <div class="row">
-      <label><input type="checkbox" id="genIfp" checked> Export animation to IFP (MTA:SA / GTA SA ANP3)</label>
-    </div>
-    <div class="hint">Automatic: if the FBX has an armature animation it is baked to
-      output/&lt;name&gt;.ifp (bone ids match the DFF frames - engineLoadIFP + setPedAnimation).
-      No animation &rarr; skipped, nothing exported.</div>
+    <h2>2b &middot; Textures (TXD)</h2>
+    <div class="hint">Automatic: material textures found in the FBX are packed into
+      output/&lt;name&gt;.txd (RenderWare TXD v5, PC/SA format) using DragonFF's own TXD writer.
+      Texture names match the DFF materials exactly, so the game pairs them automatically.
+      No textures &rarr; no TXD (model renders untextured).</div>
   </section>
 
   <section>
     <h2>3 &middot; Convert</h2>
     <div class="row">
-      <label>Output mode
-        <select id="mode">
-          <option value="both" selected>both &mdash; DFF + COL + IFP (auto)</option>
-          <option value="dff">dff &mdash; DFF + COL only (no IFP)</option>
-          <option value="ifp">ifp &mdash; IFP only (no DFF/COL)</option>
-        </select>
+      <label>Output:
+        <b style="color:#9fc2e0">DFF + TXD (when textures exist) + COL (when enabled)</b>
       </label>
     </div>
     <div class="row">
@@ -351,8 +339,9 @@ PAGE = r"""<!doctype html>
       <button class="ghost" id="resBtn" onclick="api('resource')">Generate MTA Test Resource</button>
     </div>
     <div class="hint">Pipeline: FBX &rarr; Blender processing &rarr; DragonFF DFF export (GTA SA v3.6.0.3)
-      &rarr; DFF validation + round-trip &rarr; DragonFF COL export (COL3) &rarr; COL validation
-      &rarr; output/&lt;model&gt;.dff + output/&lt;model&gt;.col. COL failure never fails the DFF.</div>
+      &rarr; DFF validation + round-trip &rarr; DragonFF TXD export (textures) &rarr; DragonFF COL export (COL3)
+      &rarr; COL validation &rarr; output/&lt;model&gt;.dff + .txd + .col.
+      TXD/COL failures never fail the DFF.</div>
   </section>
 
   <section>
@@ -491,7 +480,7 @@ function stateLogLocal(msg){
 
 function doConvert(){
   const files = [...document.querySelectorAll("#files input:checked")].map(i => i.dataset.name);
-  api("convert", {files, col: $("#genCol").checked, ifp: $("#genIfp").checked, mode: $("#mode").value, quality: $("#quality").value,
+  api("convert", {files, col: $("#genCol").checked, quality: $("#quality").value,
                   col_tris: parseInt($("#colTris").value || "0", 10)});
 }
 
@@ -632,9 +621,7 @@ class Handler(BaseHTTPRequestHandler):
             started = start_convert(body.get("files") or [],
                                     bool(body.get("col", True)),
                                     str(body.get("quality") or "AUTO").upper(),
-                                    body.get("col_tris") or 0,
-                                    bool(body.get("ifp", True)),
-                                    str(body.get("mode") or "both"))
+                                    body.get("col_tris") or 0)
             self._json({"started": started})
         elif self.path == "/api/generate-fbx":
             self._json({"started": start_generate_fbx(

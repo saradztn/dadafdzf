@@ -1,4 +1,3 @@
-[INFO] Export mode: BOTH
 [INFO] Starting converter (Blender side)
 [INFO] Blender 4.2.23 LTS headless
 [INFO] DragonFF addon registered (official Parik27/DragonFF)
@@ -14,7 +13,7 @@
 [INFO] Applied residual transforms on 2 object(s) (kept model shape, normalized root matrices)
 [INFO] Converted model to GTA SA Y-up model space (-90 deg about X, no mirroring)
 [INFO] All skinned meshes already have Armature modifiers
-[INFO] Scene parked on animation start frame 1 (DFF/COL rest pose = first keyframe = IFP frame 1)
+[INFO] Scene parked on animation start frame 1 (DFF/COL rest pose = first keyframe)
 [INFO] Unparented armature 'Root' from 'Sam' (DragonFF export-order safety; matrices already identity)
 [INFO] OBJECT: Body
 Vertices: 8
@@ -25,11 +24,10 @@ Triangles: 12
 [INFO] Armature 'Root': bone_id/type set on 2 bones
 [INFO]   'Body': estimated DFF vertices 24 (limit 65535)
 [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
-[INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/parented_test.dff (2352 bytes) in 0.55s
+[INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/parented_test.dff (2352 bytes) in 0.52s
 [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/parented_test.dff
-[INFO] === Animation (IFP) stage ===
-[SUCCESS] model.ifp created: /home/user/dadafdzf/FBX2MTA/temp/parented_test.ifp (2 bones, 30 frames @ 30fps, anim name 'parented_test')
-[WARN] IFP note: 2 bone(s) rotation-only (constant local offset kept by the DFF - ANP3 int16 limit)
+[INFO] === Texture (TXD) stage ===
+[INFO] TXD: no image textures found in materials - skipped
 [INFO] === Collision (COL) stage ===
 [INFO] Original collision triangles: 12
 [INFO] Target collision triangles: 12 (small model - collision kept at full detail)

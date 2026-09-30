@@ -2,11 +2,11 @@
 """MTA:SA drop-in test resource generator.
 
 Writes test_resource/ with:
-    meta.xml, client.lua, model.dff (+ model.col when collision exists)
+    meta.xml, client.lua, model.dff + model.txd + model.col (when present)
 
-client.lua loads BOTH the DFF and the COL (engineLoadDFF / engineReplaceModel
-/ engineLoadCOL / engineReplaceCOL) and spawns the model so you can see it
-and test the collision in-game.
+client.lua loads the DFF (textures are auto-paired from the same-named
+model.txd by engineReplaceModel), the COL (engineLoadCOL / engineReplaceCOL)
+and spawns the model so you can see it and test the collision in-game.
 
 Usage:
     python3 mta_resource.py --name <model> --dff <path.dff> [--col <path.col>]
@@ -22,7 +22,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # FBX2MTA/
 
 
 def make_test_resource(name, dff, col=None, col_failed_reason=None,
-                       ifp=None, ifp_anim=None, verbose=True):
+                       txd=None, verbose=True):
     """Generate the MTA:SA drop-in test resource (test_resource/)."""
     def log(msg):
         if verbose:
@@ -33,6 +33,7 @@ def make_test_resource(name, dff, col=None, col_failed_reason=None,
     os.makedirs(d, exist_ok=True)
 
     have_col = bool(col and os.path.exists(col))
+    have_txd = bool(txd and os.path.exists(txd))
     if have_col:
         files = ['<file src="model.dff"/>', '<file src="model.col"/>']
         col_lua = (
@@ -51,34 +52,19 @@ def make_test_resource(name, dff, col=None, col_failed_reason=None,
             f"-- NOTE: no collision available for this conversion: "
             f"{col_failed_reason or 'COL not generated'}\n"
         )
-
-    have_ifp = bool(ifp and os.path.exists(ifp))
-    anim_name = ifp_anim or "anim"
-    if have_ifp:
-        files.append('<file src="model.ifp"/>')
-        ifp_lua = (
-            "-- 3) IFP (animation - MTA engineLoadIFP, GTA SA ANP3)\n"
-            "local ifpOk, ifpErr = engineLoadIFP('model.ifp')\n"
-            "if not ifpOk then\n"
-            "    print('IFP LOAD FAILED: ' .. tostring(ifpErr))\n"
-            "else\n"
-            "    print('IFP LOADED OK')\n"
-            "    -- plays on the player ped (needs matching skeleton, e.g.\n"
-            "    -- use your model as a custom ped: engineReplaceModel + createPed)\n"
-            f"    setPedAnimation(localPlayer, '{anim_name}', 0, -1, -1, 1)\n"
-            "    print('ANIMATION PLAYING: " + anim_name + " (setPedAnimation)')\n"
-            "end\n\n"
-        )
-        spawn_txt = "-- 4) spawn the model so you can see / walk on it\n"
+    if have_txd:
+        files.append('<file src="model.txd"/>')
+        txd_lua = ("-- 3) TXD (textures - auto-paired with the DFF by "
+                   "engineReplaceModel)\n")
     else:
-        ifp_lua = (
-            "-- 3) IFP: no animation in this FBX (nothing exported)\n\n"
+        txd_lua = (
+            "-- 3) TXD: no textures found in this FBX (model renders "
+            "untextured)\n\n"
         )
-        spawn_txt = "-- 4) spawn the model so you can see / walk on it\n"
 
     meta = f"""<meta>
     <min_mta_version auth_id="" auth_version="1.5.9"></min_mta_version>
-    <info author="FBX2MTA" name="{name} test" type="map" version="1.1" description="Automatic DFF + COL load test (FBX2MTA)"/>
+    <info author="FBX2MTA" name="{name} test" type="map" version="1.2" description="Automatic DFF + TXD + COL load test (FBX2MTA)"/>
     <script src="client.lua" type="client" cache="false" />
     {chr(10).join("    " + f for f in files)}
 </meta>
@@ -86,7 +72,7 @@ def make_test_resource(name, dff, col=None, col_failed_reason=None,
     open(os.path.join(d, "meta.xml"), "w").write(meta)
 
     lua = (
-        "-- FBX2MTA automatic MTA:SA test: loads DFF + COL and spawns the model\n"
+        "-- FBX2MTA automatic MTA:SA test: loads DFF + TXD + COL and spawns the model\n"
         "local slot = 206 -- test model slot (adder)\n\n"
         "-- 1) DFF (rendering)\n"
         "local ok, err = engineLoadDFF(0, 'model.dff')\n"
@@ -98,8 +84,8 @@ def make_test_resource(name, dff, col=None, col_failed_reason=None,
         "end\n\n"
         "-- 2) COL (collision)\n"
         f"{col_lua}"
-        f"{ifp_lua}"
-        f"{spawn_txt}"
+        f"{txd_lua}"
+        "-- 4) spawn the model so you can see / walk on it\n"
         "local obj = createObject(slot, 100.0, 1.5, -1000.0, 0, 0, 0)\n"
         "if obj then\n"
         "    print('MODEL SPAWNED at (100.0, 1.5, -1000.0) - /goto obj')\n"
@@ -112,8 +98,8 @@ def make_test_resource(name, dff, col=None, col_failed_reason=None,
     shutil.copyfile(dff, os.path.join(d, "model.dff"))
     if have_col:
         shutil.copyfile(col, os.path.join(d, "model.col"))
-    if have_ifp:
-        shutil.copyfile(ifp, os.path.join(d, "model.ifp"))
+    if have_txd:
+        shutil.copyfile(txd, os.path.join(d, "model.txd"))
     log(f"MTA test resource written to {d} (drop into MTASA/resources/{name}_test)")
     return d
 
