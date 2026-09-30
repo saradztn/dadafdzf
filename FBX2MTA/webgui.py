@@ -160,18 +160,23 @@ def run_job(cmd, desc):
     return True
 
 
-def start_convert(files, col, quality, col_tris, ifp=True):
-    cmd = [PY, PIPELINE, "--budget", "AUTO"]
+def start_convert(files, col, quality, col_tris, ifp=True, mode="both"):
+    # the IFP checkbox refines mode=both (uncheck = DFF+COL only);
+    # mode=dff/ifp are explicit and ignore the checkbox
+    mode = (mode or "both").lower()
+    if mode not in ("both", "dff", "ifp"):
+        mode = "both"
+    if mode == "both" and not ifp:
+        mode = "dff"
+    cmd = [PY, PIPELINE, "--budget", "AUTO", "--mode", mode]
     if files:
         cmd += ["--files"] + files
-    if col:
+    if col and mode in ("both", "dff"):
         cmd += ["--col-quality", quality]
         if quality == "CUSTOM" and col_tris:
             cmd += ["--col-triangles", str(int(col_tris))]
-    else:
+    elif mode in ("both", "dff"):
         cmd += ["--no-col"]
-    if not ifp:
-        cmd += ["--no-ifp"]
     return run_job(cmd, f"convert ({len(files) or 'all'} files, "
                         f"COL {'AUTO' if quality == 'AUTO' else quality})")
 
@@ -333,7 +338,16 @@ PAGE = r"""<!doctype html>
   <section>
     <h2>3 &middot; Convert</h2>
     <div class="row">
-      <button class="action" id="convertBtn" onclick="doConvert()">Convert selected &rarr; DFF + COL</button>
+      <label>Output mode
+        <select id="mode">
+          <option value="both" selected>both &mdash; DFF + COL + IFP (auto)</option>
+          <option value="dff">dff &mdash; DFF + COL only (no IFP)</option>
+          <option value="ifp">ifp &mdash; IFP only (no DFF/COL)</option>
+        </select>
+      </label>
+    </div>
+    <div class="row">
+      <button class="action" id="convertBtn" onclick="doConvert()">Convert selected</button>
       <button class="ghost" id="resBtn" onclick="api('resource')">Generate MTA Test Resource</button>
     </div>
     <div class="hint">Pipeline: FBX &rarr; Blender processing &rarr; DragonFF DFF export (GTA SA v3.6.0.3)
@@ -477,7 +491,7 @@ function stateLogLocal(msg){
 
 function doConvert(){
   const files = [...document.querySelectorAll("#files input:checked")].map(i => i.dataset.name);
-  api("convert", {files, col: $("#genCol").checked, ifp: $("#genIfp").checked, quality: $("#quality").value,
+  api("convert", {files, col: $("#genCol").checked, ifp: $("#genIfp").checked, mode: $("#mode").value, quality: $("#quality").value,
                   col_tris: parseInt($("#colTris").value || "0", 10)});
 }
 
@@ -619,7 +633,8 @@ class Handler(BaseHTTPRequestHandler):
                                     bool(body.get("col", True)),
                                     str(body.get("quality") or "AUTO").upper(),
                                     body.get("col_tris") or 0,
-                                    bool(body.get("ifp", True)))
+                                    bool(body.get("ifp", True)),
+                                    str(body.get("mode") or "both"))
             self._json({"started": started})
         elif self.path == "/api/generate-fbx":
             self._json({"started": start_generate_fbx(

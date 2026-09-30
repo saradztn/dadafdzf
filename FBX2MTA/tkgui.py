@@ -147,6 +147,17 @@ class Fbx2MtaApp:
         # ---- 3. convert --------------------------------------------------
         f3 = ttk.LabelFrame(main, text=" 3 - CONVERT ")
         f3.pack(fill="x", **pad)
+        r3m = ttk.Frame(f3)
+        r3m.pack(fill="x", padx=8, pady=(8, 0))
+        ttk.Label(r3m, text="Output:").pack(side="left")
+        self.mode = tk.StringVar(value="both")
+        mode_box = ttk.Combobox(r3m, textvariable=self.mode, state="readonly",
+                                width=42,
+                                values=["both", "dff", "ifp"])
+        mode_box.pack(side="left", padx=6)
+        ttk.Label(r3m, foreground="#7f8c9b",
+                  text="both = DFF+COL+IFP (auto)  |  dff = no IFP  |  "
+                       "ifp = IFP only (no DFF/COL)").pack(side="left", padx=6)
         r4 = ttk.Frame(f3)
         r4.pack(fill="x", padx=8, pady=8)
         self.convert_btn = ttk.Button(r4, text="Convert selected  ->  DFF + COL",
@@ -256,10 +267,14 @@ class Fbx2MtaApp:
                     pass
         else:
             cmd += ["--no-col"]
-        if not self.gen_ifp.get():
-            cmd += ["--no-ifp"]
-        if not STATE.run(cmd, f"convert ({len(files)} file(s), "
-                              f"{'COL ' + q if self.gen_col.get() else 'no COL'})"):
+        # the IFP checkbox refines mode=both (uncheck = DFF+COL only);
+        # mode=dff/ifp are explicit and ignore the checkbox
+        m = self.mode.get()
+        if m == "both" and not self.gen_ifp.get():
+            m = "dff"
+        cmd += ["--mode", m]
+        if not STATE.run(cmd, f"convert ({len(files)} file(s), mode={m}"
+                              f"{', COL ' + q if self.gen_col.get() and m != 'ifp' else ''})"):
             self._busy_warning()
 
     def make_resource(self):
@@ -316,10 +331,10 @@ class Fbx2MtaApp:
         for r in results:
             any_row = True
             last = r
-            dff_ok = r["dff"] == "PASS"
+            dff_ok = r["dff"] in ("PASS", "SKIPPED")
             col_ok = r["col"] in ("PASS", "SKIPPED")
             ifp = r.get("ifp", "NONE")
-            ifp_ok = ifp in ("PASS", "NONE")
+            ifp_ok = ifp in ("PASS", "NONE", "SKIPPED")
             if not (dff_ok and col_ok and ifp_ok):
                 all_ok = False
             outs = ", ".join(f"{o['file']} ({o['bytes']/1024:.1f} KB)"
@@ -348,7 +363,7 @@ class Fbx2MtaApp:
         elif any_row and all_ok and last:
             b.configure(bg="#12351f", fg="#37b45f",
                         text="Conversion Complete\n"
-                             f"DFF: PASS   |   COL: {last['col']}   |   "
+                             f"DFF: {last['dff']}   |   COL: {last['col']}   |   "
                              f"IFP: {last.get('ifp', 'NONE')}   |   "
                              f"Triangles: {last.get('triangles') or 0:,}   |   "
                              f"Collision Triangles: {last.get('col_triangles') or 0:,}\n"

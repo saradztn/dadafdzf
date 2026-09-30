@@ -142,32 +142,41 @@ def export_ifp(dff_path, ifp_path, model_name, anim_name=None,
         step = len(frames) // 6553
         frames = frames[::step]
 
-    # ---- DFF frame ids (bone id must match the exported DFF)
-    import sys
-    sys.path.insert(0, str(__import__("os").path.join(
-        __import__("os").path.dirname(__file__), "..", "dragonff", "DragonFF")))
-    from gtaLib import dff as dffmod
-    dff = dffmod.dff()
-    dff.load_file(dff_path)
+    # ---- bone ids
+    # With a DFF: bone id = the exported DFF's frame id for the same name.
+    # IFP-only (no DFF): bone id = rig order (index in the armature + 1),
+    # which is EXACTLY the frame id the DFF of this same rig would get
+    # (frame 0 = armature root, bones 1..N in armature order) - so the IFP
+    # stays consistent with a DFF exported later from the same FBX.
     dff_frames = {}
-    dff_order = []
-    for cl in dff.clumps:
-        for i, fr in enumerate(cl.frame_list):
-            if fr.name not in dff_frames:
-                # RenderWare frame id = index in the clump's frame table
-                dff_frames[fr.name] = i
-                dff_order.append(fr.name)
-    if not dff_frames:
-        return done(present=True,
-                    reason="DFF contains no frames - cannot map animation "
-                           "bones to DFF frame ids")
-
-    # keep only bones that exist in the DFF, in DFF (parent-first) order
-    names = [n for n in dff_order if arm.data.bones.get(n)]
-    if not names:
-        return done(present=True,
-                    reason="no animation bones match DFF frame names")
-    skipped = [b.name for b in arm.data.bones if b.name not in dff_frames]
+    if dff_path and os.path.exists(dff_path):
+        import sys
+        sys.path.insert(0, str(__import__("os").path.join(
+            __import__("os").path.dirname(__file__), "..", "dragonff",
+            "DragonFF")))
+        from gtaLib import dff as dffmod
+        d = dffmod.dff()
+        d.load_file(dff_path)
+        for cl in d.clumps:
+            for i, fr in enumerate(cl.frame_list):
+                if fr.name not in dff_frames:
+                    # RenderWare frame id = index in the clump's frame table
+                    dff_frames[fr.name] = i
+        dff_order = list(dff_frames)
+        if not dff_frames:
+            return done(present=True,
+                        reason="DFF contains no frames - cannot map "
+                               "animation bones to DFF frame ids")
+        # keep only bones that exist in the DFF, in DFF (parent-first) order
+        names = [n for n in dff_order if arm.data.bones.get(n)]
+        if not names:
+            return done(present=True,
+                        reason="no animation bones match DFF frame names")
+        skipped = [b.name for b in arm.data.bones if b.name not in dff_frames]
+    else:
+        names = [b.name for b in arm.data.bones]
+        dff_frames = {n: i + 1 for i, n in enumerate(names)}
+        skipped = []
 
     # ---- bake tracks: local matrix in parent space per frame
     pb_map = {b.name: b for b in arm.pose.bones}
@@ -195,7 +204,16 @@ def export_ifp(dff_path, ifp_path, model_name, anim_name=None,
 
     # ---- write ANP3
     anim = anim_name or _sanitized(model_name, "anim")
-    bones = [{"name": n, "bone_id": int(dff_frames[n]),
+    # ANP3 names are truncated to 23 chars - keep them unique after truncation
+    write_names, used = {}, set()
+    for n in names:
+        base = _sanitized(n, "bone")
+        k, c = base, 1
+        while k in used:
+            c += 1
+            k = f"{base[:20]}_{c}"
+        write_names[n], used = k, used | {k}
+    bones = [{"name": write_names[n], "bone_id": int(dff_frames[n]),
               "keyframes": tracks[n]} for n in names]
     n_b, n_kf = gta_ifp.write_anp3(ifp_path, _sanitized(model_name, "anim"),
                                    anim, bones)
@@ -208,4 +226,6 @@ def export_ifp(dff_path, ifp_path, model_name, anim_name=None,
         if len(skipped) > 5:
             reason += f" (+{len(skipped) - 5} more)"
     return done(present=True, success=True, reason=reason, anim=anim,
-                frames=len(frames), fps=fps, bones=n_b, file=ifp_path)
+                frames=len(frames), fps=fps, bones=n_b, file=ifp_path,
+                id_source="DFF" if dff_path and os.path.exists(dff_path)
+                else "rig-order")

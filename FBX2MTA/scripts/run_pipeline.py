@@ -68,15 +68,20 @@ from mta_resource import make_test_resource  # noqa: E402
 
 def main():
     budget = "AUTO"
-    ifp_enabled = True
+    mode = "both"
     col_enabled = True
     col_quality = "AUTO"
     col_tris = 0
     only_files = []
     if "--budget" in sys.argv:
         budget = sys.argv[sys.argv.index("--budget") + 1]
-    if "--no-ifp" in sys.argv:
-        ifp_enabled = False
+    if "--mode" in sys.argv:
+        mode = sys.argv[sys.argv.index("--mode") + 1].lower()
+    if "--no-ifp" in sys.argv and mode == "both":
+        mode = "dff"
+    if mode not in ("both", "dff", "ifp"):
+        log(f"ERROR: unknown --mode {mode!r} (use both|dff|ifp)")
+        sys.exit(2)
     if "--no-col" in sys.argv:
         col_enabled = False
     if "--col-quality" in sys.argv:
@@ -109,16 +114,22 @@ def main():
             sys.exit(2)
         log("Blender bpy venv rebuilt OK")
 
+    for _d in ("temp", "output", "logs", "reports"):
+        os.makedirs(os.path.join(ROOT, _d), exist_ok=True)
     inputs = sorted(glob.glob(os.path.join(ROOT, "input", "*.fbx")))
     if only_files:
         inputs = [p for p in inputs
                   if os.path.splitext(os.path.basename(p))[0] in only_files]
     log("Starting converter (driver)")
     log(f"Blender backend: headless bpy via {PY} {RUN_BLENDER}")
-    log("Animation: IFP export " + ("enabled (auto - only files with animation)"
-        if ifp_enabled else "DISABLED (--no-ifp)"))
+    if mode == "both":
+        log("Mode: BOTH - DFF + COL + IFP (auto - only files with animation)")
+    elif mode == "dff":
+        log("Mode: DFF only - DFF + COL, no IFP")
+    else:
+        log("Mode: IFP only - animation export (ANP3), no DFF/COL")
     log("DragonFF: official Parik27/DragonFF addon (Blender 4.2+)")
-    if col_enabled:
+    if col_enabled and mode in ("both", "dff"):
         if col_quality == "CUSTOM":
             log(f"Collision: enabled (CUSTOM, max {col_tris} tris)")
         elif col_quality == "AUTO":
@@ -126,7 +137,8 @@ def main():
         else:
             log(f"Collision: enabled (preset {col_quality})")
     else:
-        log("Collision: DISABLED (--no-col)")
+        log("Collision: DISABLED " + ("(IFP-only mode)" if mode == "ifp"
+                                      else "(--no-col)"))
     if not inputs:
         log("ERROR: no .fbx files found in input/")
         sys.exit(2)
@@ -151,126 +163,153 @@ def main():
         for f in (tmp_dff, tmp_col, tmp_ifp, status_f, rt_status_f):
             if os.path.exists(f): os.remove(f)
 
-        # ---- 1) convert (DFF + COL in the same Blender session)
+        # ---- 1) convert (DFF + IFP + COL in the same Blender session)
         conv_cmd = [PY, RUN_BLENDER, os.path.join(ROOT, "scripts", "convert.py"),
                     "--input", inp, "--output", tmp_dff,
-                    "--budget", budget, "--log", log_f, "--status", status_f]
-        if col_enabled:
+                    "--budget", budget, "--log", log_f, "--status", status_f,
+                    "--mode", mode]
+        if mode in ("both", "dff") and col_enabled:
             conv_cmd += ["--col", "--col-quality", col_quality,
                          "--col-triangles", str(col_tris),
                          "--col-output", tmp_col]
-        if ifp_enabled:
-            conv_cmd += ["--ifp", "--ifp-output", tmp_ifp]
+        if mode == "both":
+            conv_cmd += ["--ifp"]
+        if mode in ("both", "ifp"):
+            conv_cmd += ["--ifp-output", tmp_ifp]
         p = run(conv_cmd)
-        if p.returncode != 0 or not os.path.exists(tmp_dff):
-            log(f"FAILED: conversion of {name} (see {log_f})")
+        need_dff = mode in ("both", "dff")
+        if p.returncode != 0 or (need_dff and not os.path.exists(tmp_dff)) \
+                or (mode == "ifp" and not os.path.exists(tmp_ifp)):
+            log(f"FAILED: {mode.upper()} conversion of {name} (see {log_f})")
             err = "conversion failed"
             if os.path.exists(status_f):
                 try:
                     s = json.load(open(status_f))
                     err = "; ".join(s.get("errors", ["conversion failed"])) or err
+                    if mode == "ifp":
+                        ip = s.get("ifp", {})
+                        if not ip.get("success"):
+                            err = ip.get("reason") or err
                 except Exception: pass
             summary["failed"].append((name, err))
-            reports.append((name, inp, None, None, None, None, None))
+            reports.append((name, inp, None, None, None, None, None, None))
             continue
 
-        # ---- 2) validate DFF (standalone, DragonFF dff module)
         status = json.load(open(status_f))
-        cmd = [PY, os.path.join(ROOT, "scripts", "validate_dff.py"), tmp_dff,
-               "--expect-tris", str(status["processed"]["triangles"])]
-        p = run(cmd)
-        validation = "PASS" if p.returncode == 0 else "FAIL"
-        val_json_f = tmp_dff + ".validation.json"
-        val = None
-        if os.path.exists(val_json_f):
-            try:
-                val = json.load(open(val_json_f))
-            except Exception:
-                pass
-        if val:
-            status["dff_actual"] = {
-                "vertices": val["info"].get("vertices"),
-                "triangles": val["info"].get("triangles"),
-                "frames": val["info"].get("frames"),
-                "materials": val["info"].get("materials"),
-                "textures": val["info"].get("textures"),
-                "effects": val["info"].get("effects"),
-                "skin_bones": val["info"].get("skin_bones"),
-                "rw_version": val["info"].get("rw_version"),
-            }
-        if validation == "FAIL":
-            log(f"FAILED: DFF validation for {name}")
-            summary["failed"].append((name, "DFF validation failed"))
-            reports.append((name, inp, status, validation, None, val, None))
-            continue
-
-        # ---- 3) round-trip test
-        p = run([PY, RUN_BLENDER, os.path.join(ROOT, "scripts", "roundtrip.py"),
-                 "--dff", tmp_dff, "--status", status_f,
-                 "--rt-status", rt_status_f, "--log", rt_log_f])
-        rt = json.load(open(rt_status_f)) if os.path.exists(rt_status_f) else {}
-        rt_ok = rt.get("roundtrip") == "PASS"
-        if not rt_ok:
-            log(f"FAILED: round-trip test for {name}: {rt.get('reason')}")
-            summary["failed"].append((name, f"round-trip: {rt.get('reason')}"))
-            reports.append((name, inp, status, validation, None, val, None))
-            continue
-
-        # ---- 4) COL stage (isolated - DFF is already verified at this point)
-        colres = None
-        col_status = status.get("col", {})
-        if col_enabled:
-            if not col_status.get("success"):
-                colres = {"status": "FAILED",
-                          "reason": col_status.get("reason") or "COL not generated",
-                          "final_tris": col_status.get("final_tris", 0),
-                          "verts": col_status.get("verts", 0),
-                          "original_tris": col_status.get("original_tris", 0),
-                          "validation": None}
-                log(f"COL FAILED for {name}: {colres['reason']} (DFF still PASS)")
-            else:
-                # standalone COL validation with DragonFF's own col parser
-                p = run([PY, os.path.join(ROOT, "scripts", "validate_col.py"),
-                         tmp_col, "--report", tmp_col + ".validation.json"])
-                col_val = "PASS" if p.returncode == 0 else "FAIL"
-                cv = None
-                if os.path.exists(tmp_col + ".validation.json"):
-                    try:
-                        cv = json.load(open(tmp_col + ".validation.json"))
-                    except Exception:
-                        pass
-                colres = {
-                    "status": "PASS" if col_val == "PASS" else "FAILED",
-                    "reason": None if col_val == "PASS" else
-                              ("; ".join(cv.get("errors", ["COL validation failed"])) if cv
-                               else "COL validation failed"),
-                    "final_tris": col_status.get("final_tris", 0),
-                    "col_tris_in_file": (cv or {}).get("info", {}).get("mesh_triangles"),
-                    "verts": (cv or {}).get("info", {}).get("mesh_vertices",
-                              col_status.get("verts", 0)),
-                    "original_tris": col_status.get("original_tris", 0),
-                    "size_bytes": (cv or {}).get("info", {}).get("size_bytes", 0),
-                    "quality": col_status.get("quality"),
-                    "validation": col_val,
+        validation = rt = val = colres = None
+        if mode == "ifp":
+            log("IFP-only mode: DFF validation / round-trip / COL skipped "
+                "(no DFF produced)")
+        if need_dff:
+            # ---- 2) validate DFF (standalone, DragonFF dff module)
+            cmd = [PY, os.path.join(ROOT, "scripts", "validate_dff.py"), tmp_dff,
+                   "--expect-tris", str(status["processed"]["triangles"])]
+            p = run(cmd)
+            validation = "PASS" if p.returncode == 0 else "FAIL"
+            val_json_f = tmp_dff + ".validation.json"
+            val = None
+            if os.path.exists(val_json_f):
+                try:
+                    val = json.load(open(val_json_f))
+                except Exception:
+                    pass
+            if val:
+                status["dff_actual"] = {
+                    "vertices": val["info"].get("vertices"),
+                    "triangles": val["info"].get("triangles"),
+                    "frames": val["info"].get("frames"),
+                    "materials": val["info"].get("materials"),
+                    "textures": val["info"].get("textures"),
+                    "effects": val["info"].get("effects"),
+                    "skin_bones": val["info"].get("skin_bones"),
+                    "rw_version": val["info"].get("rw_version"),
                 }
-                if col_val == "PASS":
-                    log(f"COL validation passed for {name} "
-                        f"({colres['col_tris_in_file']} triangles in file)")
-                else:
-                    log(f"COL validation FAILED for {name}: {colres['reason']} (DFF still PASS)")
-        else:
-            colres = {"status": "SKIPPED", "reason": "--no-col",
-                      "final_tris": 0, "verts": 0, "validation": None}
+            if validation == "FAIL":
+                log(f"FAILED: DFF validation for {name}")
+                summary["failed"].append((name, "DFF validation failed"))
+                reports.append((name, inp, status, validation, None, val, None, None))
+                continue
 
-        # ---- 4.5) IFP stage (isolated - DFF/COL are already verified)
+            # ---- 3) round-trip test
+            p = run([PY, RUN_BLENDER, os.path.join(ROOT, "scripts", "roundtrip.py"),
+                     "--dff", tmp_dff, "--status", status_f,
+                     "--rt-status", rt_status_f, "--log", rt_log_f])
+            rt = json.load(open(rt_status_f)) if os.path.exists(rt_status_f) else {}
+            rt_ok = rt.get("roundtrip") == "PASS"
+            if not rt_ok:
+                log(f"FAILED: round-trip test for {name}: {rt.get('reason')}")
+                summary["failed"].append((name, f"round-trip: {rt.get('reason')}"))
+                reports.append((name, inp, status, validation, None, val, None, None))
+                continue
+
+            # ---- 4) COL stage (isolated - DFF is already verified at this point)
+            colres = None
+            col_status = status.get("col", {})
+            if col_enabled:
+                if not col_status.get("success"):
+                    colres = {"status": "FAILED",
+                              "reason": col_status.get("reason") or "COL not generated",
+                              "final_tris": col_status.get("final_tris", 0),
+                              "verts": col_status.get("verts", 0),
+                              "original_tris": col_status.get("original_tris", 0),
+                              "validation": None}
+                    log(f"COL FAILED for {name}: {colres['reason']} (DFF still PASS)")
+                else:
+                    # standalone COL validation with DragonFF's own col parser
+                    p = run([PY, os.path.join(ROOT, "scripts", "validate_col.py"),
+                             tmp_col, "--report", tmp_col + ".validation.json"])
+                    col_val = "PASS" if p.returncode == 0 else "FAIL"
+                    cv = None
+                    if os.path.exists(tmp_col + ".validation.json"):
+                        try:
+                            cv = json.load(open(tmp_col + ".validation.json"))
+                        except Exception:
+                            pass
+                    colres = {
+                        "status": "PASS" if col_val == "PASS" else "FAILED",
+                        "reason": None if col_val == "PASS" else
+                                  ("; ".join(cv.get("errors", ["COL validation failed"])) if cv
+                                   else "COL validation failed"),
+                        "final_tris": col_status.get("final_tris", 0),
+                        "col_tris_in_file": (cv or {}).get("info", {}).get("mesh_triangles"),
+                        "verts": (cv or {}).get("info", {}).get("mesh_vertices",
+                                  col_status.get("verts", 0)),
+                        "original_tris": col_status.get("original_tris", 0),
+                        "size_bytes": (cv or {}).get("info", {}).get("size_bytes", 0),
+                        "quality": col_status.get("quality"),
+                        "validation": col_val,
+                    }
+                    if col_val == "PASS":
+                        log(f"COL validation passed for {name} "
+                            f"({colres['col_tris_in_file']} triangles in file)")
+                    else:
+                        log(f"COL validation FAILED for {name}: {colres['reason']} (DFF still PASS)")
+            else:
+                colres = {"status": "SKIPPED", "reason": "--no-col",
+                          "final_tris": 0, "verts": 0, "validation": None}
+
+        # ---- 4.5) IFP stage (isolated - an IFP problem never fails DFF/COL)
         ifpres = None
         ifp_status = status.get("ifp", {})
-        if ifp_enabled:
+        if mode == "dff":
+            ifpres = {"status": "SKIPPED",
+                      "reason": "mode=dff (no IFP requested)",
+                      "anim": None, "frames": 0, "fps": 0.0, "bones": 0,
+                      "size_bytes": 0}
+        elif mode in ("both", "ifp"):
             if not ifp_status.get("present"):
-                ifpres = {"status": "NONE",
-                          "reason": ifp_status.get("reason") or "no animation"}
-                log(f"IFP for {name}: no animation "
-                    f"({ifpres['reason']})")
+                if mode == "ifp":
+                    ifpres = {"status": "FAILED",
+                              "reason": ifp_status.get("reason")
+                              or "no animation in FBX",
+                              "anim": None, "frames": 0, "fps": 0.0,
+                              "bones": 0, "size_bytes": 0}
+                    log(f"IFP FAILED for {name}: {ifpres['reason']} "
+                        f"(IFP-only mode requires an animated FBX)")
+                else:
+                    ifpres = {"status": "NONE",
+                              "reason": ifp_status.get("reason") or "no animation"}
+                    log(f"IFP for {name}: no animation ({ifpres['reason']})")
             elif ifp_status.get("success") and os.path.exists(tmp_ifp):
                 # independent validation: re-read the ANP3 structure
                 p = run([PY, os.path.join(ROOT, "scripts", "gta_ifp.py"),
@@ -284,22 +323,44 @@ def main():
                     "fps": ifp_status.get("fps", 0.0),
                     "bones": ifp_status.get("bones", 0),
                     "size_bytes": os.path.getsize(tmp_ifp) if ok else 0,
+                    "id_source": ifp_status.get("id_source", "DFF"),
                 }
                 if ok:
+                    ids = (" (bone ids from DFF)"
+                           if ifpres["id_source"] == "DFF" else
+                           " (bone ids in rig order - match a DFF exported "
+                           "from this same rig)")
                     log(f"IFP validated for {name}: {ifpres['bones']} bones, "
                         f"{ifpres['frames']} frames @ {ifpres['fps']:.0f}fps, "
-                        f"anim '{ifpres['anim']}'")
+                        f"anim '{ifpres['anim']}'{ids}")
                 else:
                     log(f"IFP FAILED for {name}: ANP3 read-back validation "
-                        f"failed (DFF/COL unaffected)")
+                        f"failed")
             else:
                 ifpres = {"status": "FAILED",
                           "reason": ifp_status.get("reason") or "IFP not generated",
                           "anim": ifp_status.get("anim"), "frames": 0,
                           "fps": 0.0, "bones": 0, "size_bytes": 0}
-                log(f"IFP FAILED for {name}: {ifpres['reason']} (DFF unaffected)")
+                log(f"IFP FAILED for {name}: {ifpres['reason']} "
+                    f"({'DFF unaffected' if mode == 'both' else 'IFP-only mode'})")
 
         # ---- 5) finalize
+        if mode == "ifp":
+            if ifpres and ifpres["status"] == "PASS":
+                shutil.copyfile(tmp_ifp, os.path.join(ROOT, "output",
+                                                      name + ".ifp"))
+                log(f"SUCCESS (IFP only): {name} -> "
+                    f"output/{name}.ifp ({ifpres['bones']} bones, "
+                    f"{ifpres['frames']} frames @ {ifpres['fps']:.0f}fps, "
+                    f"anim '{ifpres.get('anim')}')")
+                summary["success"].append(name)
+            else:
+                reason = (ifpres or {}).get("reason") or "IFP not generated"
+                log(f"FAILED: IFP for {name}: {reason}")
+                summary["failed"].append((name, f"IFP: {reason}"))
+            reports.append((name, inp, status, None, None, None, None,
+                            ifpres))
+            continue
         shutil.copyfile(tmp_dff, out_dff)
         if os.path.exists(tmp_dff + ".validation.json"):
             shutil.copyfile(tmp_dff + ".validation.json",
@@ -334,10 +395,13 @@ def main():
     else:
         log("MTA runtime test unavailable (MTA:SA not installed on this machine) - "
             "writing drop-in test resource instead")
-    # the test resource is generated for the LAST successful model of the batch
+    # the test resource is generated for the LAST successful model of the
+    # batch that has a DFF (a resource needs model.dff; IFP-only runs do not
+    # produce one)
     last_ok = None
     for name, inp, status, validation, rt, val, colres, ifpres in reports:
-        if status:
+        if status and os.path.exists(os.path.join(ROOT, "output",
+                                                  name + ".dff")):
             last_ok = (name, colres, ifpres)
     if last_ok:
         name, colres, ifpres = last_ok
@@ -351,6 +415,9 @@ def main():
                 if (ifpres and ifpres["status"] == "PASS") else None,
             ifp_anim=ifpres.get("anim") if ifpres else None)
         log(f"Test resource model: {name}")
+    else:
+        log("No DFF in this batch (IFP-only mode?) - MTA test resource not "
+            "generated (run with mode=both to get a complete test resource)")
 
     # ---- report
     rpt = ["=" * 40, "FBX2MTA CONVERSION REPORT", "=" * 40, ""]
@@ -360,6 +427,40 @@ def main():
             o = status.get("original", {})
             pr = status.get("processed", {})
             dff = status.get("dff_actual", {})
+            if status.get("mode") == "ifp":
+                # IFP-only run: no DFF/COL sections to report
+                ifp_ok = ifpres and ifpres["status"] == "PASS"
+                rpt += [
+                    "", "Mode: IFP only (no DFF/COL)",
+                    "", "Original:",
+                    f"Vertices: {o.get('vertices', 0):,}",
+                    f"Triangles: {o.get('triangles', 0):,}",
+                    f"Objects: {o.get('objects', 0)}",
+                    f"Kind: {status.get('kind', '?')}",
+                    "", "Animation (IFP):",
+                ]
+                if ifpres and ifp_ok:
+                    rpt += [
+                        "Status: PASS (MTA:SA IFP / ANP3)",
+                        f"Anim name: {ifpres.get('anim', '?')}",
+                        f"Bones: {ifpres.get('bones', 0)}  "
+                        f"Frames: {ifpres.get('frames', 0)}  "
+                        f"FPS: {ifpres.get('fps', 0):.0f}",
+                        f"Bone ids: {ifpres.get('id_source', '?')}",
+                        f"File: {name}.ifp ({ifpres.get('size_bytes', 0):,} bytes)",
+                        "Load in MTA: engineLoadIFP('model.ifp') + "
+                        "setPedAnimation(ped, '" + str(ifpres.get('anim', 'anim')) + "', ...)",
+                    ]
+                else:
+                    rpt += [f"Status: {ifpres['status'] if ifpres else 'FAILED'}"
+                            f" ({(ifpres or {}).get('reason', '?')})"]
+                rpt += ["",
+                        "RESULT:",
+                        "IFP Export Complete" if ifp_ok else "IFP EXPORT FAILED",
+                        f"IFP: {ifpres['status'] if ifpres else 'FAILED'}",
+                        f"Output: output/{name}.ifp" if ifp_ok else "Output: none"]
+                rpt += ["", "=" * 40, ""]
+                continue
             rpt += [
                 "", "Original:",
                 f"Vertices: {o.get('vertices', 0):,}",
@@ -416,6 +517,8 @@ def main():
                     ]
                 elif ifpres["status"] == "NONE":
                     rpt += [f"Status: NONE ({ifpres.get('reason', '?')})"]
+                elif ifpres["status"] == "SKIPPED":
+                    rpt += [f"Status: SKIPPED ({ifpres.get('reason', '?')})"]
                 else:
                     rpt += [f"Status: FAILED ({ifpres.get('reason', '?')})",
                             "DFF/COL are NOT affected"]
@@ -435,11 +538,14 @@ def main():
                 "Conversion Complete",
                 f"DFF: {validation or 'FAILED'}",
                 f"COL: {colres['status'] if colres else 'SKIPPED'}",
+                f"IFP: {ifpres['status'] if ifpres else 'NONE'}",
                 f"Triangles: {pr.get('triangles', 0):,}",
                 f"Collision Triangles: {(colres or {}).get('col_tris_in_file') or 0:,}",
                 "Output: " + ", ".join(
                     [f"output/{name}.dff"] +
-                    ([f"output/{name}.col"] if (colres and colres["status"] == "PASS") else [])),
+                    ([f"output/{name}.col"] if (colres and colres["status"] == "PASS") else []) +
+                    ([f"output/{name}.ifp"]
+                     if (ifpres and ifpres["status"] == "PASS") else [])),
             ]
             if dff.get("skin_bones", 0) > 32:
                 rpt.append(f"NOTE: model has {dff['skin_bones']} bones - above the standard 32-bone SA "
@@ -450,10 +556,15 @@ def main():
         rpt += ["", "=" * 40, ""]
 
     # batch summary
-    ok_n = sum(1 for r in reports if r[2] and r[6] and r[6]["status"] == "PASS")
+    ok_n = sum(1 for r in reports if r[2] and r[2].get("mode") != "ifp"
+               and r[6] and r[6]["status"] == "PASS")
+    dff_n = sum(1 for r in reports if r[2] and r[2].get("mode") != "ifp")
+    ifp_n = sum(1 for r in reports if r[2] and r[2].get("mode") == "ifp"
+                and r[7] and r[7]["status"] == "PASS")
     rpt += ["BATCH SUMMARY",
             f"success (DFF+COL): {ok_n}",
-            f"success (DFF only): {len([r for r in reports if r[2]]) - ok_n}",
+            f"success (DFF only): {dff_n - ok_n}",
+            f"success (IFP only): {ifp_n}",
             f"failed: {len(summary['failed'])}",
             f"skipped: {len(summary['skipped'])}"]
     for n, e in summary["failed"]:

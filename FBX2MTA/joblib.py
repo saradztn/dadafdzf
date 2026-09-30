@@ -113,23 +113,31 @@ def latest_results():
             try:
                 s = json.load(open(status_f))
                 if s.get("success"):
-                    res["dff"] = "PASS"
+                    rmode = s.get("mode", "both")
                     res["triangles"] = s.get("processed", {}).get("triangles")
-                    col = s.get("col", {})
-                    if col.get("enabled"):
-                        res["col"] = "PASS" if col.get("success") else "FAILED"
-                        res["col_reason"] = col.get("reason")
-                    else:
+                    if rmode == "ifp":
+                        res["dff"] = "SKIPPED"
                         res["col"] = "SKIPPED"
-                    ifp = s.get("ifp", {})
-                    if ifp.get("success"):
-                        res["ifp"] = "PASS"
-                    elif ifp.get("present"):
-                        res["ifp"] = "FAILED"
-                        res["ifp_reason"] = ifp.get("reason")
                     else:
-                        res["ifp"] = "NONE"
-                        res["ifp_reason"] = ifp.get("reason")
+                        res["dff"] = "PASS"
+                        col = s.get("col", {})
+                        if col.get("enabled"):
+                            res["col"] = "PASS" if col.get("success") else "FAILED"
+                            res["col_reason"] = col.get("reason")
+                        else:
+                            res["col"] = "SKIPPED"
+                    if rmode == "dff":
+                        res["ifp"] = "SKIPPED"
+                    else:
+                        ifp = s.get("ifp", {})
+                        if ifp.get("success"):
+                            res["ifp"] = "PASS"
+                        elif ifp.get("present"):
+                            res["ifp"] = "FAILED"
+                            res["ifp_reason"] = ifp.get("reason")
+                        else:
+                            res["ifp"] = "NONE"
+                            res["ifp_reason"] = ifp.get("reason")
             except Exception:
                 pass
         # fallback (e.g. temp/ was reset): output files only exist after the

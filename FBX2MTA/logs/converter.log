@@ -3573,3 +3573,262 @@
 [23:09:37] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
 [23:09:37] BATCH: success=1 failed=0 skipped=0
 [23:09:37]   OK: parented_test
+[11:51:58] Blender bpy venv missing - rebuilding via blender/setup_env.py (first time downloads ~350MB, can take a few minutes)...
+[11:52:18]   [setup] [setup] FBX2MTA root: /home/user/dadafdzf/FBX2MTA
+[11:52:18]   [setup] [setup] Creating bpy venv with Python 3.11.2 (/usr/bin/python3) ... (downloads ~350MB, can take a few minutes)
+[11:52:18]   [setup] [setup] Blender 4.2.23 LTS ready
+[11:52:18] Blender bpy venv rebuilt OK
+[11:52:18] Starting converter (driver)
+[11:52:18] Blender backend: headless bpy via /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py
+[11:52:18] Mode: IFP only - animation export (ANP3), no DFF/COL
+[11:52:18] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[11:52:18] Collision: DISABLED (IFP-only mode)
+[11:52:18] ============================================================
+[11:52:18] Processing: generated_anim.fbx
+[11:52:18] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/generated_anim.fbx --output /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/generated_anim.log --status /home/user/dadafdzf/FBX2MTA/temp/generated_anim.status.json --mode ifp --ifp-output /home/user/dadafdzf/FBX2MTA/temp/generated_anim.ifp
+    [INFO] Skinned model detected: 1 armature(s)
+    [INFO] Processing mesh 'TestCharacter': verts=16 polys=12
+    [INFO]   triangulated 12 quads/ngons -> tris=24
+    [INFO]   closed mesh: recalculated normals outward
+    [INFO]   UV layer 'UVMap': 72 coords (loops=72)
+    [INFO] Applied residual transforms on 1 object(s) (kept model shape, normalized root matrices)
+    [INFO] Converted model to GTA SA Y-up model space (-90 deg about X, no mirroring)
+    [INFO] Added missing Armature modifier to 'TestCharacter' (armature 'TestRig') - required for DFF skinning
+    [INFO] Scene parked on animation start frame 1 (DFF/COL rest pose = first keyframe = IFP frame 1)
+    [INFO] OBJECT: TestCharacter
+    Vertices: 16
+    Triangles: 24
+    [INFO] MATERIAL: TestMaterial
+    Triangles: 24
+    [INFO] Geometry Budget: skipped (IFP-only mode - no DFF export, mesh is not touched)
+    [INFO] === Animation (IFP) stage ===
+    [ERROR] IFP stage error (IFP-only mode): [Errno 2] No such file or directory: '/home/user/dadafdzf/FBX2MTA/temp/generated_anim.ifp'
+    [ERROR] Conversion FAILED:
+    Traceback (most recent call last):
+      File "/home/user/dadafdzf/FBX2MTA/scripts/convert.py", line 787, in <module>
+        main()
+      File "/home/user/dadafdzf/FBX2MTA/scripts/convert.py", line 704, in main
+        with open(args.status, "w") as f:
+             ^^^^^^^^^^^^^^^^^^^^^^
+    FileNotFoundError: [Errno 2] No such file or directory: '/home/user/dadafdzf/FBX2MTA/temp/generated_anim.status.json'
+[11:52:19] FAILED: IFP conversion of generated_anim (see /home/user/dadafdzf/FBX2MTA/logs/generated_anim.log)
+[11:52:19] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[11:52:19] No DFF in this batch (IFP-only mode?) - MTA test resource not generated (run with mode=both to get a complete test resource)
+[11:52:19] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[11:52:19] BATCH: success=0 failed=1 skipped=0
+[11:52:19]   FAILED: generated_anim (conversion failed)
+[11:52:29] Starting converter (driver)
+[11:52:29] Blender backend: headless bpy via /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py
+[11:52:29] Mode: IFP only - animation export (ANP3), no DFF/COL
+[11:52:29] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[11:52:29] Collision: DISABLED (IFP-only mode)
+[11:52:29] ============================================================
+[11:52:29] Processing: generated_anim.fbx
+[11:52:29] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/generated_anim.fbx --output /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/generated_anim.log --status /home/user/dadafdzf/FBX2MTA/temp/generated_anim.status.json --mode ifp --ifp-output /home/user/dadafdzf/FBX2MTA/temp/generated_anim.ifp
+    [INFO] Blender 4.2.23 LTS headless
+    [INFO] DragonFF addon registered (official Parik27/DragonFF)
+    [INFO] Importing FBX: /home/user/dadafdzf/FBX2MTA/input/generated_anim.fbx
+    FBX version: 7400
+    [INFO]   axis check: forward=-Z up=Y -> extents X=1.00 Y=0.60 Z=0.85 (upright score 0.850) [default (Y-up source)]
+    FBX version: 7400
+    [INFO] FBX imported (axis forward=-Z, up=Y, extents X/Y/Z = 1.00/0.60/0.85)
+    [INFO] Orientation plan: import in Blender Z-up (axis auto-detected above), then stage 4.5 converts the model to GTA SA Y-up model space (-90 deg about X, no mirroring). Both DFF and COL are exported from the same Y-up mesh.
+    [INFO] Skinned model detected: 1 armature(s)
+    [INFO] Processing mesh 'TestCharacter': verts=16 polys=12
+    [INFO]   triangulated 12 quads/ngons -> tris=24
+    [INFO]   closed mesh: recalculated normals outward
+    [INFO]   UV layer 'UVMap': 72 coords (loops=72)
+    [INFO] Applied residual transforms on 1 object(s) (kept model shape, normalized root matrices)
+    [INFO] Converted model to GTA SA Y-up model space (-90 deg about X, no mirroring)
+    [INFO] Added missing Armature modifier to 'TestCharacter' (armature 'TestRig') - required for DFF skinning
+    [INFO] Scene parked on animation start frame 1 (DFF/COL rest pose = first keyframe = IFP frame 1)
+    [INFO] OBJECT: TestCharacter
+    Vertices: 16
+    Triangles: 24
+    [INFO] MATERIAL: TestMaterial
+    Triangles: 24
+    [INFO] Geometry Budget: skipped (IFP-only mode - no DFF export, mesh is not touched)
+    [INFO] === Animation (IFP) stage ===
+    [SUCCESS] model.ifp created: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.ifp (3 bones, 30 frames @ 30fps, anim name 'generated_anim')
+[11:52:30] IFP-only mode: DFF validation / round-trip / COL skipped (no DFF produced)
+[11:52:30] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/gta_ifp.py /home/user/dadafdzf/FBX2MTA/temp/generated_anim.ifp
+    /home/user/dadafdzf/FBX2MTA/temp/generated_anim.ifp: pkg='generated_anim' anim='generated_anim' bones=3 keyframes=90 t=[0.00s..0.97s] -> read OK
+[11:52:30] IFP validated for generated_anim: 3 bones, 30 frames @ 30fps, anim 'generated_anim' (bone ids in rig order - match a DFF exported from this same rig)
+[11:52:30] SUCCESS (IFP only): generated_anim -> output/generated_anim.ifp (3 bones, 30 frames @ 30fps, anim 'generated_anim')
+[11:52:30] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[11:52:30] No DFF in this batch (IFP-only mode?) - MTA test resource not generated (run with mode=both to get a complete test resource)
+[11:52:30] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[11:52:30] BATCH: success=1 failed=0 skipped=0
+[11:52:30]   OK: generated_anim
+[11:52:32] Starting converter (driver)
+[11:52:32] Blender backend: headless bpy via /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py
+[11:52:32] Mode: DFF only - DFF + COL, no IFP
+[11:52:32] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[11:52:32] Collision: enabled (AUTO - budget chosen by model size)
+[11:52:32] ============================================================
+[11:52:32] Processing: generated_anim.fbx
+[11:52:32] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/generated_anim.fbx --output /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/generated_anim.log --status /home/user/dadafdzf/FBX2MTA/temp/generated_anim.status.json --mode dff --col --col-quality AUTO --col-triangles 0 --col-output /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col
+    [INFO]   closed mesh: recalculated normals outward
+    [INFO]   UV layer 'UVMap': 72 coords (loops=72)
+    [INFO] Applied residual transforms on 1 object(s) (kept model shape, normalized root matrices)
+    [INFO] Converted model to GTA SA Y-up model space (-90 deg about X, no mirroring)
+    [INFO] Added missing Armature modifier to 'TestCharacter' (armature 'TestRig') - required for DFF skinning
+    [INFO] OBJECT: TestCharacter
+    Vertices: 16
+    Triangles: 24
+    [INFO] MATERIAL: TestMaterial
+    Triangles: 24
+    [INFO] Geometry Budget: AUTO - 24 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO] Armature 'TestRig': bone_id/type set on 3 bones
+    [INFO]   'TestCharacter': estimated DFF vertices 48 (limit 65535)
+    Info: Finished export in 0.01s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff (4023 bytes) in 0.5s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff
+    [INFO] === Collision (COL) stage ===
+    [INFO] Original collision triangles: 24
+    [INFO] Target collision triangles: 24 (small model - collision kept at full detail)
+    [INFO] [INFO] Creating collision mesh from 1 object(s)
+    [INFO] Collision optimized: 16 vertices / 24 triangles
+    [INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col
+    [SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col (408 bytes)
+    [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col (408 bytes, 24 triangles)
+[11:52:32] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff --expect-tris 24
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff)
+      [PASS] size>0  (4023 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=4 geos=1 atomics=1 tris=24 verts=48 mats=1 skin_bones=3
+      textures: []
+      material effects: none
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (24 tris / 48 verts)
+      [PASS] tri_count_matches  (expected 24, got 24)
+    VALIDATION PASS
+[11:52:32] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff --status /home/user/dadafdzf/FBX2MTA/temp/generated_anim.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/generated_anim.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/generated_anim.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=24 verts=16 armatures=1 bones=3 mats=1 vgroups=3 uv_layers=1
+    [INFO] Expected:      tris=24 verts=16 frames=3 mats=1
+    Info: Saved "generated_anim_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/generated_anim_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[11:52:33] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_col.py /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col --report /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col.validation.json
+    COL VALIDATION PASSED: generated_anim.col (408 bytes, 24 collision triangles, 16 vertices)
+[11:52:33] COL validation passed for generated_anim (24 triangles in file)
+[11:52:33] SUCCESS: generated_anim -> /home/user/dadafdzf/FBX2MTA/output/generated_anim.dff + /home/user/dadafdzf/FBX2MTA/output/generated_anim.col
+[11:52:33] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[11:52:33] Test resource model: generated_anim
+[11:52:33] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[11:52:33] BATCH: success=1 failed=0 skipped=0
+[11:52:33]   OK: generated_anim
+[11:52:33] Starting converter (driver)
+[11:52:33] Blender backend: headless bpy via /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py
+[11:52:33] Mode: IFP only - animation export (ANP3), no DFF/COL
+[11:52:33] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[11:52:33] Collision: DISABLED (IFP-only mode)
+[11:52:33] ============================================================
+[11:52:33] Processing: generated_test.fbx
+[11:52:33] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/generated_test.fbx --output /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/generated_test.log --status /home/user/dadafdzf/FBX2MTA/temp/generated_test.status.json --mode ifp --ifp-output /home/user/dadafdzf/FBX2MTA/temp/generated_test.ifp
+    [INFO] Blender 4.2.23 LTS headless
+    [INFO] DragonFF addon registered (official Parik27/DragonFF)
+    [INFO] Importing FBX: /home/user/dadafdzf/FBX2MTA/input/generated_test.fbx
+    FBX version: 7400
+    [INFO]   axis check: forward=-Z up=Y -> extents X=6.50 Y=6.10 Z=2.06 (upright score 0.317) [default (Y-up source)]
+    FBX version: 7400
+    [INFO] FBX imported (axis forward=-Z, up=Y, extents X/Y/Z = 6.50/6.10/2.06)
+    [INFO] Orientation plan: import in Blender Z-up (axis auto-detected above), then stage 4.5 converts the model to GTA SA Y-up model space (-90 deg about X, no mirroring). Both DFF and COL are exported from the same Y-up mesh.
+    [INFO] Static mesh model (no armature)
+    [INFO] Renaming image datablock 'TestTex' -> '.' (matches texture file)
+    [INFO]   texture: .  (/home/user/dadafdzf/FBX2MTA/input/.)
+    [INFO] Processing mesh 'TestCreature': verts=384 polys=620
+    [INFO]   triangulated 60 quads/ngons -> tris=728
+    [INFO]   closed mesh: recalculated normals outward
+    [INFO]   UV layer 'UVMap': 2184 coords (loops=2184)
+    [INFO] No residual object transforms to apply
+    [INFO] Converted model to GTA SA Y-up model space (-90 deg about X, no mirroring)
+    [INFO] OBJECT: TestCreature
+    Vertices: 384
+    Triangles: 728
+    [INFO] MATERIAL: TestMaterial
+    Triangles: 728
+    [INFO] Geometry Budget: skipped (IFP-only mode - no DFF export, mesh is not touched)
+    [INFO] === Animation (IFP) stage ===
+    [ERROR] IFP FAILED (IFP-only mode - FBX has no animation): no armature in scene (static model - nothing to animate)
+[11:52:33] FAILED: IFP conversion of generated_test (see /home/user/dadafdzf/FBX2MTA/logs/generated_test.log)
+[11:52:33] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[11:52:33] No DFF in this batch (IFP-only mode?) - MTA test resource not generated (run with mode=both to get a complete test resource)
+[11:52:33] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[11:52:33] BATCH: success=0 failed=1 skipped=0
+[11:52:33]   FAILED: generated_test (no armature in scene (static model - nothing to animate))
+[11:52:34] Starting converter (driver)
+[11:52:34] Blender backend: headless bpy via /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py
+[11:52:34] Mode: BOTH - DFF + COL + IFP (auto - only files with animation)
+[11:52:34] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[11:52:34] Collision: enabled (AUTO - budget chosen by model size)
+[11:52:34] ============================================================
+[11:52:34] Processing: generated_anim.fbx
+[11:52:34] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/generated_anim.fbx --output /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/generated_anim.log --status /home/user/dadafdzf/FBX2MTA/temp/generated_anim.status.json --mode both --col --col-quality AUTO --col-triangles 0 --col-output /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col --ifp --ifp-output /home/user/dadafdzf/FBX2MTA/temp/generated_anim.ifp
+    [INFO] Converted model to GTA SA Y-up model space (-90 deg about X, no mirroring)
+    [INFO] Added missing Armature modifier to 'TestCharacter' (armature 'TestRig') - required for DFF skinning
+    [INFO] Scene parked on animation start frame 1 (DFF/COL rest pose = first keyframe = IFP frame 1)
+    [INFO] OBJECT: TestCharacter
+    Vertices: 16
+    Triangles: 24
+    [INFO] MATERIAL: TestMaterial
+    Triangles: 24
+    [INFO] Geometry Budget: AUTO - 24 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO] Armature 'TestRig': bone_id/type set on 3 bones
+    [INFO]   'TestCharacter': estimated DFF vertices 48 (limit 65535)
+    Info: Finished export in 0.01s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff (4023 bytes) in 0.5s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff
+    [INFO] === Animation (IFP) stage ===
+    [SUCCESS] model.ifp created: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.ifp (3 bones, 30 frames @ 30fps, anim name 'generated_anim')
+    [INFO] === Collision (COL) stage ===
+    [INFO] Original collision triangles: 24
+    [INFO] Target collision triangles: 24 (small model - collision kept at full detail)
+    [INFO] [INFO] Creating collision mesh from 1 object(s)
+    [INFO] Collision optimized: 16 vertices / 24 triangles
+    [INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col
+    [SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col (408 bytes)
+    [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col (408 bytes, 24 triangles)
+[11:52:34] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff --expect-tris 24
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff)
+      [PASS] size>0  (4023 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=4 geos=1 atomics=1 tris=24 verts=48 mats=1 skin_bones=3
+      textures: []
+      material effects: none
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (24 tris / 48 verts)
+      [PASS] tri_count_matches  (expected 24, got 24)
+    VALIDATION PASS
+[11:52:34] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff --status /home/user/dadafdzf/FBX2MTA/temp/generated_anim.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/generated_anim.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/generated_anim.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=24 verts=16 armatures=1 bones=3 mats=1 vgroups=3 uv_layers=1
+    [INFO] Expected:      tris=24 verts=16 frames=3 mats=1
+    Info: Saved "generated_anim_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/generated_anim_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[11:52:35] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_col.py /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col --report /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col.validation.json
+    COL VALIDATION PASSED: generated_anim.col (408 bytes, 24 collision triangles, 16 vertices)
+[11:52:35] COL validation passed for generated_anim (24 triangles in file)
+[11:52:35] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/gta_ifp.py /home/user/dadafdzf/FBX2MTA/temp/generated_anim.ifp
+    /home/user/dadafdzf/FBX2MTA/temp/generated_anim.ifp: pkg='generated_anim' anim='generated_anim' bones=3 keyframes=90 t=[0.00s..0.97s] -> read OK
+[11:52:35] IFP validated for generated_anim: 3 bones, 30 frames @ 30fps, anim 'generated_anim' (bone ids from DFF)
+[11:52:35] SUCCESS: generated_anim -> /home/user/dadafdzf/FBX2MTA/output/generated_anim.dff + /home/user/dadafdzf/FBX2MTA/output/generated_anim.col + generated_anim.ifp
+[11:52:35] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[11:52:35] Test resource model: generated_anim
+[11:52:35] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[11:52:35] BATCH: success=1 failed=0 skipped=0
+[11:52:35]   OK: generated_anim

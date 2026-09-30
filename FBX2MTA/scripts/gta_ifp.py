@@ -19,6 +19,7 @@ GTA San Andreas and loaded by MTA's engineLoadIFP / animlib:
 Quantisation: |quat component| < 8 (unit quats), |translation| < 32 units,
 animation length < ~1092 s (int16 time ticks).
 """
+import os
 import struct
 
 ROT_SCALE = 4096.0
@@ -92,6 +93,8 @@ def write_anp3(filepath, pkg_name, anim_name, bones):
 
     struct.pack_into("<I", body, data_size_off, kf_bytes)
     out = b"ANP3" + struct.pack("<I", len(body)) + bytes(body)
+    parent = os.path.dirname(os.path.abspath(filepath))
+    os.makedirs(parent, exist_ok=True)
     with open(filepath, "wb") as f:
         f.write(out)
     return len(bones), sum(len(b["keyframes"]) for b in bones)
