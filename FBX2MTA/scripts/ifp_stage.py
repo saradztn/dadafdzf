@@ -202,6 +202,31 @@ def export_ifp(dff_path, ifp_path, model_name, anim_name=None,
             tracks[n].append((t_s, (q.x, q.y, q.z, q.w),
                               tuple(local.translation)))
 
+    # ---- keyframe type per bone
+    # ANP3 stores translation as int16 x1024 (range +-31.5 units). Most
+    # bones only ROTATE: their local translation is a constant offset (the
+    # DFF rest position). Those are exported as rotation-only (type 3)
+    # keyframes, which store NO translation - MTA keeps the DFF's rest
+    # position, which is exactly that constant value. This matches real
+    # GTA IFPs ("usually just the root object contains translated frames")
+    # and is what lets rigs with large rest offsets (RDR/STK) export.
+    # Only bones whose local position ACTUALLY animates get type 4.
+    TRANS_TOL = 1e-3  # Blender units (mm-level) treated as "static"
+    static_bones = 0
+    for n in names:
+        ts = [kf[2] for kf in tracks[n]]
+        if not ts:
+            continue
+        ref = ts[0]
+        const = all(
+            abs(a - b) < TRANS_TOL
+            for t in ts for a, b in zip(t, ref))
+        if const:
+            static_bones += 1
+            for i in range(len(tracks[n])):
+                tt, qq, _ = tracks[n][i]
+                tracks[n][i] = (tt, qq, None)  # drop -> type 3
+
     # ---- write ANP3
     anim = anim_name or _sanitized(model_name, "anim")
     # ANP3 names are truncated to 23 chars - keep them unique after truncation
@@ -225,6 +250,10 @@ def export_ifp(dff_path, ifp_path, model_name, anim_name=None,
                  + ", ".join(skipped[:5])
         if len(skipped) > 5:
             reason += f" (+{len(skipped) - 5} more)"
+    if static_bones:
+        note = (f"{static_bones} bone(s) rotation-only (constant local "
+                f"offset kept by the DFF - ANP3 int16 limit)")
+        reason = note if not reason else reason + "; " + note
     return done(present=True, success=True, reason=reason, anim=anim,
                 frames=len(frames), fps=fps, bones=n_b, file=ifp_path,
                 id_source="DFF" if dff_path and os.path.exists(dff_path)

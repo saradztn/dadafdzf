@@ -27,8 +27,8 @@ else
     print('IFP LOADED OK')
     -- plays on the player ped (needs matching skeleton, e.g.
     -- use your model as a custom ped: engineReplaceModel + createPed)
-    setPedAnimation(localPlayer, 'generated_anim', 0, -1, -1, 1)
-    print('ANIMATION PLAYING: generated_anim (setPedAnimation)')
+    setPedAnimation(localPlayer, 'parented_test', 0, -1, -1, 1)
+    print('ANIMATION PLAYING: parented_test (setPedAnimation)')
 end
 
 -- 4) spawn the model so you can see / walk on it

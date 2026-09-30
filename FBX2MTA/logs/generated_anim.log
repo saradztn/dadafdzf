@@ -24,10 +24,11 @@ Triangles: 24
 [INFO] Armature 'TestRig': bone_id/type set on 3 bones
 [INFO]   'TestCharacter': estimated DFF vertices 48 (limit 65535)
 [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
-[INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff (4023 bytes) in 0.5s
+[INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff (4023 bytes) in 0.57s
 [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff
 [INFO] === Animation (IFP) stage ===
 [SUCCESS] model.ifp created: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.ifp (3 bones, 30 frames @ 30fps, anim name 'generated_anim')
+[WARN] IFP note: 3 bone(s) rotation-only (constant local offset kept by the DFF - ANP3 int16 limit)
 [INFO] === Collision (COL) stage ===
 [INFO] Original collision triangles: 24
 [INFO] Target collision triangles: 24 (small model - collision kept at full detail)

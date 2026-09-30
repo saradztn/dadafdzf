@@ -87,8 +87,11 @@ def write_anp3(filepath, pkg_name, anim_name, bones):
                 for c in tv:
                     if abs(c) * TRANS_SCALE > INT16_MAX:
                         raise IfpError(
-                            f"{b['name']}: translation {c:.3f} exceeds int16 "
-                            f"range at x{TRANS_SCALE:.0f} (max ~31.5 units)")
+                            f"{b['name']}: animated local translation "
+                            f"{c:.1f} exceeds the ANP3 int16 limit "
+                            f"(+-31.5 units at x{TRANS_SCALE:.0f}) - this "
+                            f"bone actually MOVES more than the format can "
+                            f"store (constant offsets are kept by the DFF)")
                 body.extend(struct.pack("<3h", *[int(round(c * TRANS_SCALE)) for c in tv]))
 
     struct.pack_into("<I", body, data_size_off, kf_bytes)
