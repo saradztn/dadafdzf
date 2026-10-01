@@ -679,12 +679,24 @@ def main():
         MAX_TEX = 1024  # safe max for the SA renderer
 
         def _ensure_loaded(img):
-            if img is not None and not img.has_data:
-                # .fbm sidecar / embedded file may need an explicit load
+            if img is None:
+                return None
+            if not img.has_data:
+                # 1) sidecar / disk images: explicit load
                 try:
                     img.load()
                 except Exception:
                     pass
+                # 2) FBX-EMBEDDED textures: Blender keeps the decoded
+                #    pixels in an internal cache (the .fbm sidecar file
+                #    is never written). A plain `img.pixels` reference is
+                #    lazy and does NOTHING - an actual operation on the
+                #    array (len/index/foreach) materializes the data.
+                if not img.has_data:
+                    try:
+                        _n = len(img.pixels)
+                    except Exception:
+                        _n = 0
             return img
 
         def _usable(img):
@@ -763,9 +775,15 @@ def main():
                         break
                 if chosen is None:
                     bimg = _ensure_loaded(cands[0][0])
+                    fp = bimg.filepath or ""
+                    if fp and (os.path.isdir(fp) or fp in (".", "..")
+                               or fp.endswith(os.sep)):
+                        fp = ""
+                    where = (f"file missing? {fp}" if fp
+                             else "no texture file in the FBX")
                     mat_notes.append(
-                        f"{mat.name}: image '{bimg.name}' not available "
-                        f"(file missing? {bimg.filepath or 'no path'})")
+                        f"{mat.name}: image '{bimg.name or 'unnamed'}' "
+                        f"not available ({where})")
                     txd.setdefault("skipped", []).append(mat.name)
                     continue
                 img, node_label = chosen

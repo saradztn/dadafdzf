@@ -22,10 +22,11 @@ Triangles: 728
 [INFO] Geometry Budget: AUTO - 728 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
 [INFO]   'TestCreature': estimated DFF vertices 650 (limit 65535)
 [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
-[INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff (32216 bytes) in 0.6s
+[INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff (32216 bytes) in 0.62s
 [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff
 [INFO] === Texture (TXD) stage ===
-[INFO] TXD: no image textures found in materials - skipped
+[INFO] TXD material: TestMaterial: image '.' not available (no texture file in the FBX)
+[WARN] TXD: no usable textures in 1 material(s) [TestMaterial: image '.' not available (no texture file in the FBX)]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).
 [INFO] === Collision (COL) stage ===
 [INFO] Original collision triangles: 728
 [INFO] Target collision triangles: 728 (small model - collision kept at full detail)

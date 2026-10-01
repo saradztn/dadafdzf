@@ -4567,3 +4567,847 @@
 [23:18:39] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
 [23:18:39] BATCH: success=1 failed=0 skipped=0
 [23:18:39]   OK: testtex_test
+[20:12:25] Starting converter (driver)
+[20:12:25] Blender backend: headless bpy via /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py
+[20:12:25] Output per model: DFF + TXD (textures) + COL (when enabled)
+[20:12:25] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[20:12:25] Collision: enabled (AUTO - budget chosen by model size)
+[20:12:25] ERROR: no .fbx files found in input/
+[20:13:48] Starting converter (driver)
+[20:13:48] Blender backend: headless bpy via /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py
+[20:13:48] Output per model: DFF + TXD (textures) + COL (when enabled)
+[20:13:48] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[20:13:48] Collision: enabled (AUTO - budget chosen by model size)
+[20:13:48] ============================================================
+[20:13:48] Processing: tex2_test.fbx
+[20:13:48] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/tex2_test.fbx --output /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/tex2_test.log --status /home/user/dadafdzf/FBX2MTA/temp/tex2_test.status.json --col --col-quality AUTO --col-triangles 0 --col-output /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col
+    [INFO] Converted model to GTA SA Y-up model space (-90 deg about X, no mirroring)
+    [INFO] OBJECT: Cube
+    Vertices: 8
+    Triangles: 12
+    [INFO] MATERIAL: MixMat
+    Triangles: 12
+    [INFO] Geometry Budget: AUTO - 12 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO]   'Cube': estimated DFF vertices 16 (limit 65535)
+    Info: Finished export in 0.00s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff (1304 bytes) in 0.64s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff
+    [INFO] === Texture (TXD) stage ===
+    [INFO] TXD material: MixMat: no image node
+    [INFO] TXD material: LooseMat: no image node
+    [INFO] TXD material: PlainC: no image node
+    [WARN] TXD: no usable textures in 3 material(s) [MixMat: no image node; LooseMat: no image node; PlainC: no image node]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).
+    [INFO] === Collision (COL) stage ===
+    [INFO] Original collision triangles: 12
+    [INFO] Target collision triangles: 12 (small model - collision kept at full detail)
+    [INFO] [INFO] Creating collision mesh from 1 object(s)
+    [INFO] Collision optimized: 8 vertices / 12 triangles
+    [INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col
+    [SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col (264 bytes)
+    [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col (264 bytes, 12 triangles)
+[20:13:49] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff --expect-tris 12
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff)
+      [PASS] size>0  (1304 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=1 geos=1 atomics=1 tris=12 verts=16 mats=3 skin_bones=0
+      textures: []
+      material effects: none
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (12 tris / 16 verts)
+      [PASS] tri_count_matches  (expected 12, got 12)
+    VALIDATION PASS
+[20:13:49] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff --status /home/user/dadafdzf/FBX2MTA/temp/tex2_test.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/tex2_test.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/tex2_test.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=12 verts=8 armatures=0 bones=0 mats=1 vgroups=0 uv_layers=1
+    [INFO] Expected:      tris=12 verts=8 frames=0 mats=3
+    Info: Saved "tex2_test_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/tex2_test_roundtrip.blend
+    [ERROR] Round-trip test: FAIL material mismatch: exported 3, re-imported 1
+[20:13:49] FAILED: round-trip test for tex2_test: material mismatch: exported 3, re-imported 1
+[20:13:49] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[20:13:49] No DFF in this batch - MTA test resource not generated
+[20:13:49] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[20:13:49] BATCH: success=0 failed=1 skipped=0
+[20:13:49]   FAILED: tex2_test (round-trip: material mismatch: exported 3, re-imported 1)
+[20:16:56] Starting converter (driver)
+[20:16:56] Blender backend: headless bpy via /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py
+[20:16:56] Output per model: DFF + TXD (textures) + COL (when enabled)
+[20:16:56] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[20:16:56] Collision: enabled (AUTO - budget chosen by model size)
+[20:16:56] ERROR: no .fbx files found in input/
+[20:17:21] Starting converter (driver)
+[20:17:21] Blender backend: headless bpy via /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py
+[20:17:21] Output per model: DFF + TXD (textures) + COL (when enabled)
+[20:17:21] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[20:17:21] Collision: enabled (AUTO - budget chosen by model size)
+[20:17:21] ============================================================
+[20:17:21] Processing: tex2_test.fbx
+[20:17:21] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/tex2_test.fbx --output /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/tex2_test.log --status /home/user/dadafdzf/FBX2MTA/temp/tex2_test.status.json --col --col-quality AUTO --col-triangles 0 --col-output /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col
+    [INFO] OBJECT: Cube
+    Vertices: 8
+    Triangles: 12
+    [INFO] MATERIAL: MixMat
+    Triangles: 12
+    [INFO] Geometry Budget: AUTO - 12 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO]   'Cube': estimated DFF vertices 16 (limit 65535)
+    Info: Finished export in 0.00s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff (1372 bytes) in 0.59s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff
+    [INFO] === Texture (TXD) stage ===
+    [INFO] TXD material: MixMat: no image node
+    [INFO] TXD material: LooseMat: no image node
+    [INFO] TXD material: PlainC: no image node
+    [INFO] TXD material: GlowMat: image 'tex2_e' not available (file missing? /home/user/dadafdzf/FBX2MTA/input/tex2_test.fbm/tex2_e.png)
+    [WARN] TXD: no usable textures in 4 material(s) [MixMat: no image node; LooseMat: no image node; PlainC: no image node; GlowMat: image 'tex2_e' not available (file missing? /home/user/dadafdzf/FBX2MTA/input/tex2_test.fbm/tex2_e.png)]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).
+    [INFO] === Collision (COL) stage ===
+    [INFO] Original collision triangles: 12
+    [INFO] Target collision triangles: 12 (small model - collision kept at full detail)
+    [INFO] [INFO] Creating collision mesh from 1 object(s)
+    [INFO] Collision optimized: 8 vertices / 12 triangles
+    [INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col
+    [SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col (264 bytes)
+    [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col (264 bytes, 12 triangles)
+[20:17:21] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff --expect-tris 12
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff)
+      [PASS] size>0  (1372 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=1 geos=1 atomics=1 tris=12 verts=16 mats=4 skin_bones=0
+      textures: []
+      material effects: none
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (12 tris / 16 verts)
+      [PASS] tri_count_matches  (expected 12, got 12)
+    VALIDATION PASS
+[20:17:21] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff --status /home/user/dadafdzf/FBX2MTA/temp/tex2_test.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/tex2_test.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/tex2_test.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=12 verts=8 armatures=0 bones=0 mats=4 vgroups=0 uv_layers=1
+    [INFO] Expected:      tris=12 verts=8 frames=0 mats=4
+    Info: Saved "tex2_test_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/tex2_test_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[20:17:22] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_col.py /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col --report /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col.validation.json
+    COL VALIDATION PASSED: tex2_test.col (264 bytes, 12 collision triangles, 8 vertices)
+[20:17:22] COL validation passed for tex2_test (12 triangles in file)
+[20:17:22] TXD for tex2_test: none (no usable textures in 4 material(s) [MixMat: no image node; LooseMat: no image node; PlainC: no image node; GlowMat: image 'tex2_e' not available (file missing? /home/user/dadafdzf/FBX2MTA/input/tex2_test.fbm/tex2_e.png)]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).)
+[20:17:22] SUCCESS: tex2_test -> /home/user/dadafdzf/FBX2MTA/output/tex2_test.dff + /home/user/dadafdzf/FBX2MTA/output/tex2_test.col
+[20:17:22] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[20:17:22] Test resource model: tex2_test
+[20:17:22] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[20:17:22] BATCH: success=1 failed=0 skipped=0
+[20:17:22]   OK: tex2_test
+[20:19:34] Starting converter (driver)
+[20:19:34] Blender backend: headless bpy via /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py
+[20:19:34] Output per model: DFF + TXD (textures) + COL (when enabled)
+[20:19:34] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[20:19:34] Collision: enabled (AUTO - budget chosen by model size)
+[20:19:34] ============================================================
+[20:19:34] Processing: tex2_test.fbx
+[20:19:34] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/tex2_test.fbx --output /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/tex2_test.log --status /home/user/dadafdzf/FBX2MTA/temp/tex2_test.status.json --col --col-quality AUTO --col-triangles 0 --col-output /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col
+    Vertices: 8
+    Triangles: 12
+    [INFO] MATERIAL: MixMat
+    Triangles: 12
+    [INFO] Geometry Budget: AUTO - 12 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO]   'Cube': estimated DFF vertices 16 (limit 65535)
+    Info: Finished export in 0.00s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff (1440 bytes) in 0.57s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff
+    [INFO] === Texture (TXD) stage ===
+    [INFO] TXD material: MixMat: no image node
+    [INFO] TXD material: LooseMat: no image node
+    [INFO] TXD material: PlainC: no image node
+    [INFO] TXD material: GlowMat: image 'tex2_e' not available (file missing? /home/user/dadafdzf/FBX2MTA/input/tex2_test.fbm/tex2_e.png)
+    [INFO] TXD material: NormalMat: no image node
+    [WARN] TXD: no usable textures in 5 material(s) [MixMat: no image node; LooseMat: no image node; PlainC: no image node; GlowMat: image 'tex2_e' not available (file missing? /home/user/dadafdzf/FBX2MTA/input/tex2_test.fbm/tex2_e.png); NormalMat: no image node]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).
+    [INFO] === Collision (COL) stage ===
+    [INFO] Original collision triangles: 12
+    [INFO] Target collision triangles: 12 (small model - collision kept at full detail)
+    [INFO] [INFO] Creating collision mesh from 1 object(s)
+    [INFO] Collision optimized: 8 vertices / 12 triangles
+    [INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col
+    [SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col (264 bytes)
+    [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col (264 bytes, 12 triangles)
+[20:19:34] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff --expect-tris 12
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff)
+      [PASS] size>0  (1440 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=1 geos=1 atomics=1 tris=12 verts=16 mats=5 skin_bones=0
+      textures: []
+      material effects: none
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (12 tris / 16 verts)
+      [PASS] tri_count_matches  (expected 12, got 12)
+    VALIDATION PASS
+[20:19:34] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff --status /home/user/dadafdzf/FBX2MTA/temp/tex2_test.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/tex2_test.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/tex2_test.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=12 verts=8 armatures=0 bones=0 mats=5 vgroups=0 uv_layers=1
+    [INFO] Expected:      tris=12 verts=8 frames=0 mats=5
+    Info: Saved "tex2_test_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/tex2_test_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[20:19:35] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_col.py /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col --report /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col.validation.json
+    COL VALIDATION PASSED: tex2_test.col (264 bytes, 12 collision triangles, 8 vertices)
+[20:19:35] COL validation passed for tex2_test (12 triangles in file)
+[20:19:35] TXD for tex2_test: none (no usable textures in 5 material(s) [MixMat: no image node; LooseMat: no image node; PlainC: no image node; GlowMat: image 'tex2_e' not available (file missing? /home/user/dadafdzf/FBX2MTA/input/tex2_test.fbm/tex2_e.png); NormalMat: no image node]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).)
+[20:19:35] SUCCESS: tex2_test -> /home/user/dadafdzf/FBX2MTA/output/tex2_test.dff + /home/user/dadafdzf/FBX2MTA/output/tex2_test.col
+[20:19:35] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[20:19:35] Test resource model: tex2_test
+[20:19:35] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[20:19:35] BATCH: success=1 failed=0 skipped=0
+[20:19:35]   OK: tex2_test
+[20:21:01] Starting converter (driver)
+[20:21:01] Blender backend: headless bpy via /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py
+[20:21:01] Output per model: DFF + TXD (textures) + COL (when enabled)
+[20:21:01] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[20:21:01] Collision: enabled (AUTO - budget chosen by model size)
+[20:21:01] ============================================================
+[20:21:01] Processing: generated_test.fbx
+[20:21:01] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/generated_test.fbx --output /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/generated_test.log --status /home/user/dadafdzf/FBX2MTA/temp/generated_test.status.json --col --col-quality AUTO --col-triangles 0 --col-output /home/user/dadafdzf/FBX2MTA/temp/generated_test.col
+    [INFO]   UV layer 'UVMap': 2184 coords (loops=2184)
+    [INFO] No residual object transforms to apply
+    [INFO] Converted model to GTA SA Y-up model space (-90 deg about X, no mirroring)
+    [INFO] OBJECT: TestCreature
+    Vertices: 384
+    Triangles: 728
+    [INFO] MATERIAL: TestMaterial
+    Triangles: 728
+    [INFO] Geometry Budget: AUTO - 728 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO]   'TestCreature': estimated DFF vertices 650 (limit 65535)
+    Info: Finished export in 0.09s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff (32216 bytes) in 0.65s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff
+    [INFO] === Texture (TXD) stage ===
+    [INFO] TXD material: TestMaterial: image '.' not available (file missing? /home/user/dadafdzf/FBX2MTA/input/.)
+    [WARN] TXD: no usable textures in 1 material(s) [TestMaterial: image '.' not available (file missing? /home/user/dadafdzf/FBX2MTA/input/.)]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).
+    [INFO] === Collision (COL) stage ===
+    [INFO] Original collision triangles: 728
+    [INFO] Target collision triangles: 728 (small model - collision kept at full detail)
+    [INFO] [INFO] Creating collision mesh from 1 object(s)
+    [INFO] Collision optimized: 384 vertices / 728 triangles
+    [INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/generated_test.col
+    [SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/generated_test.col (8248 bytes)
+    [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/generated_test.col (8248 bytes, 728 triangles)
+[20:21:01] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff --expect-tris 728
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/generated_test.dff)
+      [PASS] size>0  (32216 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=1 geos=1 atomics=1 tris=728 verts=650 mats=1 skin_bones=0
+      textures: ['']
+      material effects: none
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (728 tris / 650 verts)
+      [PASS] tri_count_matches  (expected 728, got 728)
+    VALIDATION PASS
+[20:21:01] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff --status /home/user/dadafdzf/FBX2MTA/temp/generated_test.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/generated_test.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/generated_test.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=728 verts=384 armatures=0 bones=0 mats=1 vgroups=0 uv_layers=1
+    [INFO] Expected:      tris=728 verts=384 frames=0 mats=1
+    Info: Saved "generated_test_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/generated_test_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[20:21:02] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_col.py /home/user/dadafdzf/FBX2MTA/temp/generated_test.col --report /home/user/dadafdzf/FBX2MTA/temp/generated_test.col.validation.json
+    COL VALIDATION PASSED: generated_test.col (8248 bytes, 728 collision triangles, 384 vertices)
+[20:21:02] COL validation passed for generated_test (728 triangles in file)
+[20:21:02] TXD for generated_test: none (no usable textures in 1 material(s) [TestMaterial: image '.' not available (file missing? /home/user/dadafdzf/FBX2MTA/input/.)]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).)
+[20:21:02] SUCCESS: generated_test -> /home/user/dadafdzf/FBX2MTA/output/generated_test.dff + /home/user/dadafdzf/FBX2MTA/output/generated_test.col
+[20:21:02] ============================================================
+[20:21:02] Processing: testtex_test.fbx
+[20:21:02] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/testtex_test.fbx --output /home/user/dadafdzf/FBX2MTA/temp/testtex_test.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/testtex_test.log --status /home/user/dadafdzf/FBX2MTA/temp/testtex_test.status.json --col --col-quality AUTO --col-triangles 0 --col-output /home/user/dadafdzf/FBX2MTA/temp/testtex_test.col
+    [INFO] MATERIAL: MainBody
+    Triangles: 2
+    [INFO] MATERIAL: Logo
+    Triangles: 2
+    [INFO] Geometry Budget: AUTO - 12 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO]   'Body': estimated DFF vertices 24 (limit 65535)
+    Info: Finished export in 0.00s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.dff (1748 bytes) in 0.57s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.dff
+    [INFO] === Texture (TXD) stage ===
+    [INFO] TXD material: MainBody: 'testtex_main' (128x128)
+    [INFO] TXD material: Logo: 'testtex_logo' (64x64)
+    [INFO] TXD material: Plain: no image node
+    [INFO] TXD: 2 texture(s) extracted from 3 material(s)
+    [SUCCESS] model.txd created: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.txd (2 texture(s), 82216 bytes) - validated with DragonFF TXD reader
+    [INFO] TXD textures: testtex_main (128x128), testtex_logo (64x64)
+    [INFO] === Collision (COL) stage ===
+    [INFO] Original collision triangles: 12
+    [INFO] Target collision triangles: 12 (small model - collision kept at full detail)
+    [INFO] [INFO] Creating collision mesh from 1 object(s)
+    [INFO] Collision optimized: 8 vertices / 12 triangles
+    [INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.col
+    [SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.col (264 bytes)
+    [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.col (264 bytes, 12 triangles)
+[20:21:03] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/testtex_test.dff --expect-tris 12
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/testtex_test.dff)
+      [PASS] size>0  (1748 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=1 geos=1 atomics=1 tris=12 verts=24 mats=3 skin_bones=0
+      textures: ['testtex_logo', 'testtex_main']
+      material effects: none
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (12 tris / 24 verts)
+      [PASS] tri_count_matches  (expected 12, got 12)
+    VALIDATION PASS
+[20:21:03] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/testtex_test.dff --status /home/user/dadafdzf/FBX2MTA/temp/testtex_test.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/testtex_test.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/testtex_test.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=12 verts=8 armatures=0 bones=0 mats=3 vgroups=0 uv_layers=1
+    [INFO] Expected:      tris=12 verts=8 frames=0 mats=3
+    Info: Saved "testtex_test_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/testtex_test_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[20:21:03] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_col.py /home/user/dadafdzf/FBX2MTA/temp/testtex_test.col --report /home/user/dadafdzf/FBX2MTA/temp/testtex_test.col.validation.json
+    COL VALIDATION PASSED: testtex_test.col (264 bytes, 12 collision triangles, 8 vertices)
+[20:21:03] COL validation passed for testtex_test (12 triangles in file)
+[20:21:03] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_txd.py /home/user/dadafdzf/FBX2MTA/temp/testtex_test.txd --report /home/user/dadafdzf/FBX2MTA/temp/testtex_test.txd.validation.json
+    {
+      "info": {
+        "textures": [
+          {
+            "name": "testtex_main",
+            "width": 128,
+            "height": 128,
+            "bytes": 65536
+          },
+          {
+            "name": "testtex_logo",
+            "width": 64,
+            "height": 64,
+            "bytes": 16384
+          }
+        ],
+        "rw_version": 221187,
+        "device_id": 2,
+        "rw_stamp": "0x1803ffff"
+      },
+      "errors": []
+    }
+[20:21:03] TXD validated for testtex_test: 2 texture(s), 82,216 bytes (names match the DFF material texture names)
+[20:21:03] SUCCESS: testtex_test -> /home/user/dadafdzf/FBX2MTA/output/testtex_test.dff + testtex_test.txd + /home/user/dadafdzf/FBX2MTA/output/testtex_test.col
+[20:21:03] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[20:21:03] Test resource model: testtex_test
+[20:21:03] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[20:21:03] BATCH: success=2 failed=0 skipped=0
+[20:21:03]   OK: generated_test
+[20:21:03]   OK: testtex_test
+[20:30:11] Starting converter (driver)
+[20:30:11] Blender backend: headless bpy via /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py
+[20:30:11] Output per model: DFF + TXD (textures) + COL (when enabled)
+[20:30:11] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[20:30:11] Collision: enabled (AUTO - budget chosen by model size)
+[20:30:11] ============================================================
+[20:30:11] Processing: tex2_test.fbx
+[20:30:11] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/tex2_test.fbx --output /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/tex2_test.log --status /home/user/dadafdzf/FBX2MTA/temp/tex2_test.status.json --col --col-quality AUTO --col-triangles 0 --col-output /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col
+    [INFO] OBJECT: Cube
+    Vertices: 8
+    Triangles: 12
+    [INFO] MATERIAL: MixMat
+    Triangles: 12
+    [INFO] Geometry Budget: AUTO - 12 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO]   'Cube': estimated DFF vertices 16 (limit 65535)
+    Info: Finished export in 0.00s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff (1372 bytes) in 0.54s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff
+    [INFO] === Texture (TXD) stage ===
+    [INFO] TXD material: MixMat: no image node
+    [INFO] TXD material: LooseMat: no image node
+    [INFO] TXD material: PlainC: no image node
+    [INFO] TXD material: GlowMat: image 'tex2_e' not available (file missing? /home/user/dadafdzf/FBX2MTA/input/tex2_test.fbm/tex2_e.png)
+    [WARN] TXD: no usable textures in 4 material(s) [MixMat: no image node; LooseMat: no image node; PlainC: no image node; GlowMat: image 'tex2_e' not available (file missing? /home/user/dadafdzf/FBX2MTA/input/tex2_test.fbm/tex2_e.png)]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).
+    [INFO] === Collision (COL) stage ===
+    [INFO] Original collision triangles: 12
+    [INFO] Target collision triangles: 12 (small model - collision kept at full detail)
+    [INFO] [INFO] Creating collision mesh from 1 object(s)
+    [INFO] Collision optimized: 8 vertices / 12 triangles
+    [INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col
+    [SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col (264 bytes)
+    [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col (264 bytes, 12 triangles)
+[20:30:12] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff --expect-tris 12
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff)
+      [PASS] size>0  (1372 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=1 geos=1 atomics=1 tris=12 verts=16 mats=4 skin_bones=0
+      textures: []
+      material effects: none
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (12 tris / 16 verts)
+      [PASS] tri_count_matches  (expected 12, got 12)
+    VALIDATION PASS
+[20:30:12] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff --status /home/user/dadafdzf/FBX2MTA/temp/tex2_test.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/tex2_test.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/tex2_test.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=12 verts=8 armatures=0 bones=0 mats=4 vgroups=0 uv_layers=1
+    [INFO] Expected:      tris=12 verts=8 frames=0 mats=4
+    Info: Saved "tex2_test_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/tex2_test_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[20:30:12] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_col.py /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col --report /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col.validation.json
+    COL VALIDATION PASSED: tex2_test.col (264 bytes, 12 collision triangles, 8 vertices)
+[20:30:12] COL validation passed for tex2_test (12 triangles in file)
+[20:30:12] TXD for tex2_test: none (no usable textures in 4 material(s) [MixMat: no image node; LooseMat: no image node; PlainC: no image node; GlowMat: image 'tex2_e' not available (file missing? /home/user/dadafdzf/FBX2MTA/input/tex2_test.fbm/tex2_e.png)]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).)
+[20:30:12] SUCCESS: tex2_test -> /home/user/dadafdzf/FBX2MTA/output/tex2_test.dff + /home/user/dadafdzf/FBX2MTA/output/tex2_test.col
+[20:30:12] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[20:30:12] Test resource model: tex2_test
+[20:30:12] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[20:30:12] BATCH: success=1 failed=0 skipped=0
+[20:30:12]   OK: tex2_test
+[20:35:44] Starting converter (driver)
+[20:35:44] Blender backend: headless bpy via /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py
+[20:35:44] Output per model: DFF + TXD (textures) + COL (when enabled)
+[20:35:44] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[20:35:44] Collision: enabled (AUTO - budget chosen by model size)
+[20:35:44] ============================================================
+[20:35:44] Processing: tex2_test.fbx
+[20:35:44] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/tex2_test.fbx --output /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/tex2_test.log --status /home/user/dadafdzf/FBX2MTA/temp/tex2_test.status.json --col --col-quality AUTO --col-triangles 0 --col-output /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col
+    Triangles: 12
+    [INFO] MATERIAL: MixMat
+    Triangles: 12
+    [INFO] Geometry Budget: AUTO - 12 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO]   'Cube': estimated DFF vertices 16 (limit 65535)
+    Info: Finished export in 0.01s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff (1372 bytes) in 0.59s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff
+    [INFO] === Texture (TXD) stage ===
+    [INFO] TXD material: MixMat: no image node
+    [INFO] TXD material: LooseMat: no image node
+    [INFO] TXD material: PlainC: no image node
+    [INFO] TXD material: GlowMat: 'tex2_e' (48x48)
+    [INFO] TXD: 1 texture(s) extracted from 4 material(s)
+    [SUCCESS] model.txd created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.txd (1 texture(s), 9384 bytes) - validated with DragonFF TXD reader
+    [INFO] TXD textures: tex2_e (48x48)
+    [INFO] === Collision (COL) stage ===
+    [INFO] Original collision triangles: 12
+    [INFO] Target collision triangles: 12 (small model - collision kept at full detail)
+    [INFO] [INFO] Creating collision mesh from 1 object(s)
+    [INFO] Collision optimized: 8 vertices / 12 triangles
+    [INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col
+    [SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col (264 bytes)
+    [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col (264 bytes, 12 triangles)
+[20:35:45] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff --expect-tris 12
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff)
+      [PASS] size>0  (1372 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=1 geos=1 atomics=1 tris=12 verts=16 mats=4 skin_bones=0
+      textures: []
+      material effects: none
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (12 tris / 16 verts)
+      [PASS] tri_count_matches  (expected 12, got 12)
+    VALIDATION PASS
+[20:35:45] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff --status /home/user/dadafdzf/FBX2MTA/temp/tex2_test.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/tex2_test.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/tex2_test.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=12 verts=8 armatures=0 bones=0 mats=4 vgroups=0 uv_layers=1
+    [INFO] Expected:      tris=12 verts=8 frames=0 mats=4
+    Info: Saved "tex2_test_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/tex2_test_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[20:35:45] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_col.py /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col --report /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col.validation.json
+    COL VALIDATION PASSED: tex2_test.col (264 bytes, 12 collision triangles, 8 vertices)
+[20:35:45] COL validation passed for tex2_test (12 triangles in file)
+[20:35:45] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_txd.py /home/user/dadafdzf/FBX2MTA/temp/tex2_test.txd --report /home/user/dadafdzf/FBX2MTA/temp/tex2_test.txd.validation.json
+    {
+      "info": {
+        "textures": [
+          {
+            "name": "tex2_e",
+            "width": 48,
+            "height": 48,
+            "bytes": 9216
+          }
+        ],
+        "rw_version": 221187,
+        "device_id": 2,
+        "rw_stamp": "0x1803ffff"
+      },
+      "errors": []
+    }
+[20:35:45] TXD validated for tex2_test: 1 texture(s), 9,384 bytes (names match the DFF material texture names)
+[20:35:45] SUCCESS: tex2_test -> /home/user/dadafdzf/FBX2MTA/output/tex2_test.dff + tex2_test.txd + /home/user/dadafdzf/FBX2MTA/output/tex2_test.col
+[20:35:45] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[20:35:45] Test resource model: tex2_test
+[20:35:45] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[20:35:45] BATCH: success=1 failed=0 skipped=0
+[20:35:45]   OK: tex2_test
+[20:36:13] Starting converter (driver)
+[20:36:13] Blender backend: headless bpy via /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py
+[20:36:13] Output per model: DFF + TXD (textures) + COL (when enabled)
+[20:36:13] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[20:36:13] Collision: enabled (AUTO - budget chosen by model size)
+[20:36:13] ============================================================
+[20:36:13] Processing: tex2_test.fbx
+[20:36:13] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/tex2_test.fbx --output /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/tex2_test.log --status /home/user/dadafdzf/FBX2MTA/temp/tex2_test.status.json --col --col-quality AUTO --col-triangles 0 --col-output /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col
+    [INFO] MATERIAL: MixMat
+    Triangles: 12
+    [INFO] Geometry Budget: AUTO - 12 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO]   'Cube': estimated DFF vertices 16 (limit 65535)
+    Info: Finished export in 0.00s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff (1440 bytes) in 0.53s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff
+    [INFO] === Texture (TXD) stage ===
+    [INFO] TXD material: MixMat: no image node
+    [INFO] TXD material: LooseMat: no image node
+    [INFO] TXD material: PlainC: no image node
+    [INFO] TXD material: GlowMat: 'tex2_e' (48x48)
+    [INFO] TXD material: NormalMat: no image node
+    [INFO] TXD: 1 texture(s) extracted from 5 material(s)
+    [SUCCESS] model.txd created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.txd (1 texture(s), 9384 bytes) - validated with DragonFF TXD reader
+    [INFO] TXD textures: tex2_e (48x48)
+    [INFO] === Collision (COL) stage ===
+    [INFO] Original collision triangles: 12
+    [INFO] Target collision triangles: 12 (small model - collision kept at full detail)
+    [INFO] [INFO] Creating collision mesh from 1 object(s)
+    [INFO] Collision optimized: 8 vertices / 12 triangles
+    [INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col
+    [SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col (264 bytes)
+    [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col (264 bytes, 12 triangles)
+[20:36:13] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff --expect-tris 12
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff)
+      [PASS] size>0  (1440 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=1 geos=1 atomics=1 tris=12 verts=16 mats=5 skin_bones=0
+      textures: []
+      material effects: none
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (12 tris / 16 verts)
+      [PASS] tri_count_matches  (expected 12, got 12)
+    VALIDATION PASS
+[20:36:13] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff --status /home/user/dadafdzf/FBX2MTA/temp/tex2_test.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/tex2_test.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/tex2_test.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=12 verts=8 armatures=0 bones=0 mats=5 vgroups=0 uv_layers=1
+    [INFO] Expected:      tris=12 verts=8 frames=0 mats=5
+    Info: Saved "tex2_test_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/tex2_test_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[20:36:14] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_col.py /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col --report /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col.validation.json
+    COL VALIDATION PASSED: tex2_test.col (264 bytes, 12 collision triangles, 8 vertices)
+[20:36:14] COL validation passed for tex2_test (12 triangles in file)
+[20:36:14] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_txd.py /home/user/dadafdzf/FBX2MTA/temp/tex2_test.txd --report /home/user/dadafdzf/FBX2MTA/temp/tex2_test.txd.validation.json
+    {
+      "info": {
+        "textures": [
+          {
+            "name": "tex2_e",
+            "width": 48,
+            "height": 48,
+            "bytes": 9216
+          }
+        ],
+        "rw_version": 221187,
+        "device_id": 2,
+        "rw_stamp": "0x1803ffff"
+      },
+      "errors": []
+    }
+[20:36:14] TXD validated for tex2_test: 1 texture(s), 9,384 bytes (names match the DFF material texture names)
+[20:36:14] SUCCESS: tex2_test -> /home/user/dadafdzf/FBX2MTA/output/tex2_test.dff + tex2_test.txd + /home/user/dadafdzf/FBX2MTA/output/tex2_test.col
+[20:36:14] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[20:36:14] Test resource model: tex2_test
+[20:36:14] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[20:36:14] BATCH: success=1 failed=0 skipped=0
+[20:36:14]   OK: tex2_test
+[20:36:43] Starting converter (driver)
+[20:36:43] Blender backend: headless bpy via /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py
+[20:36:43] Output per model: DFF + TXD (textures) + COL (when enabled)
+[20:36:43] DragonFF: official Parik27/DragonFF addon (Blender 4.2+)
+[20:36:43] Collision: enabled (AUTO - budget chosen by model size)
+[20:36:43] ============================================================
+[20:36:43] Processing: generated_anim.fbx
+[20:36:43] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/generated_anim.fbx --output /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/generated_anim.log --status /home/user/dadafdzf/FBX2MTA/temp/generated_anim.status.json --col --col-quality AUTO --col-triangles 0 --col-output /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col
+    [INFO] Added missing Armature modifier to 'TestCharacter' (armature 'TestRig') - required for DFF skinning
+    [INFO] Scene parked on animation start frame 1 (DFF/COL rest pose = first keyframe)
+    [INFO] OBJECT: TestCharacter
+    Vertices: 16
+    Triangles: 24
+    [INFO] MATERIAL: TestMaterial
+    Triangles: 24
+    [INFO] Geometry Budget: AUTO - 24 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO] Armature 'TestRig': bone_id/type set on 3 bones
+    [INFO]   'TestCharacter': estimated DFF vertices 48 (limit 65535)
+    Info: Finished export in 0.01s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff (4023 bytes) in 0.63s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff
+    [INFO] === Texture (TXD) stage ===
+    [INFO] TXD material: TestMaterial: no image node
+    [WARN] TXD: no usable textures in 1 material(s) [TestMaterial: no image node]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).
+    [INFO] === Collision (COL) stage ===
+    [INFO] Original collision triangles: 24
+    [INFO] Target collision triangles: 24 (small model - collision kept at full detail)
+    [INFO] [INFO] Creating collision mesh from 1 object(s)
+    [INFO] Collision optimized: 16 vertices / 24 triangles
+    [INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col
+    [SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col (408 bytes)
+    [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col (408 bytes, 24 triangles)
+[20:36:44] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff --expect-tris 24
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff)
+      [PASS] size>0  (4023 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=4 geos=1 atomics=1 tris=24 verts=48 mats=1 skin_bones=3
+      textures: []
+      material effects: none
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (24 tris / 48 verts)
+      [PASS] tri_count_matches  (expected 24, got 24)
+    VALIDATION PASS
+[20:36:44] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff --status /home/user/dadafdzf/FBX2MTA/temp/generated_anim.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/generated_anim.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/generated_anim.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=24 verts=16 armatures=1 bones=3 mats=1 vgroups=3 uv_layers=1
+    [INFO] Expected:      tris=24 verts=16 frames=3 mats=1
+    Info: Saved "generated_anim_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/generated_anim_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[20:36:44] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_col.py /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col --report /home/user/dadafdzf/FBX2MTA/temp/generated_anim.col.validation.json
+    COL VALIDATION PASSED: generated_anim.col (408 bytes, 24 collision triangles, 16 vertices)
+[20:36:44] COL validation passed for generated_anim (24 triangles in file)
+[20:36:44] TXD for generated_anim: none (no usable textures in 1 material(s) [TestMaterial: no image node]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).)
+[20:36:44] SUCCESS: generated_anim -> /home/user/dadafdzf/FBX2MTA/output/generated_anim.dff + /home/user/dadafdzf/FBX2MTA/output/generated_anim.col
+[20:36:44] ============================================================
+[20:36:44] Processing: generated_test.fbx
+[20:36:44] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/generated_test.fbx --output /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/generated_test.log --status /home/user/dadafdzf/FBX2MTA/temp/generated_test.status.json --col --col-quality AUTO --col-triangles 0 --col-output /home/user/dadafdzf/FBX2MTA/temp/generated_test.col
+    [INFO]   UV layer 'UVMap': 2184 coords (loops=2184)
+    [INFO] No residual object transforms to apply
+    [INFO] Converted model to GTA SA Y-up model space (-90 deg about X, no mirroring)
+    [INFO] OBJECT: TestCreature
+    Vertices: 384
+    Triangles: 728
+    [INFO] MATERIAL: TestMaterial
+    Triangles: 728
+    [INFO] Geometry Budget: AUTO - 728 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO]   'TestCreature': estimated DFF vertices 650 (limit 65535)
+    Info: Finished export in 0.08s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff (32216 bytes) in 0.62s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff
+    [INFO] === Texture (TXD) stage ===
+    [INFO] TXD material: TestMaterial: image '.' not available (no texture file in the FBX)
+    [WARN] TXD: no usable textures in 1 material(s) [TestMaterial: image '.' not available (no texture file in the FBX)]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).
+    [INFO] === Collision (COL) stage ===
+    [INFO] Original collision triangles: 728
+    [INFO] Target collision triangles: 728 (small model - collision kept at full detail)
+    [INFO] [INFO] Creating collision mesh from 1 object(s)
+    [INFO] Collision optimized: 384 vertices / 728 triangles
+    [INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/generated_test.col
+    [SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/generated_test.col (8248 bytes)
+    [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/generated_test.col (8248 bytes, 728 triangles)
+[20:36:45] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff --expect-tris 728
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/generated_test.dff)
+      [PASS] size>0  (32216 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=1 geos=1 atomics=1 tris=728 verts=650 mats=1 skin_bones=0
+      textures: ['']
+      material effects: none
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (728 tris / 650 verts)
+      [PASS] tri_count_matches  (expected 728, got 728)
+    VALIDATION PASS
+[20:36:45] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/generated_test.dff --status /home/user/dadafdzf/FBX2MTA/temp/generated_test.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/generated_test.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/generated_test.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=728 verts=384 armatures=0 bones=0 mats=1 vgroups=0 uv_layers=1
+    [INFO] Expected:      tris=728 verts=384 frames=0 mats=1
+    Info: Saved "generated_test_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/generated_test_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[20:36:45] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_col.py /home/user/dadafdzf/FBX2MTA/temp/generated_test.col --report /home/user/dadafdzf/FBX2MTA/temp/generated_test.col.validation.json
+    COL VALIDATION PASSED: generated_test.col (8248 bytes, 728 collision triangles, 384 vertices)
+[20:36:45] COL validation passed for generated_test (728 triangles in file)
+[20:36:45] TXD for generated_test: none (no usable textures in 1 material(s) [TestMaterial: image '.' not available (no texture file in the FBX)]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).)
+[20:36:45] SUCCESS: generated_test -> /home/user/dadafdzf/FBX2MTA/output/generated_test.dff + /home/user/dadafdzf/FBX2MTA/output/generated_test.col
+[20:36:45] ============================================================
+[20:36:45] Processing: parented_test.fbx
+[20:36:45] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/parented_test.fbx --output /home/user/dadafdzf/FBX2MTA/temp/parented_test.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/parented_test.log --status /home/user/dadafdzf/FBX2MTA/temp/parented_test.status.json --col --col-quality AUTO --col-triangles 0 --col-output /home/user/dadafdzf/FBX2MTA/temp/parented_test.col
+    [INFO] Scene parked on animation start frame 1 (DFF/COL rest pose = first keyframe)
+    [INFO] Unparented armature 'Root' from 'Sam' (DragonFF export-order safety; matrices already identity)
+    [INFO] OBJECT: Body
+    Vertices: 8
+    Triangles: 12
+    [INFO] MATERIAL: M
+    Triangles: 12
+    [INFO] Geometry Budget: AUTO - 12 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO] Armature 'Root': bone_id/type set on 2 bones
+    [INFO]   'Body': estimated DFF vertices 24 (limit 65535)
+    Info: Finished export in 0.00s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/parented_test.dff (2352 bytes) in 0.62s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/parented_test.dff
+    [INFO] === Texture (TXD) stage ===
+    [INFO] TXD material: M: no image node
+    [WARN] TXD: no usable textures in 1 material(s) [M: no image node]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).
+    [INFO] === Collision (COL) stage ===
+    [INFO] Original collision triangles: 12
+    [INFO] Target collision triangles: 12 (small model - collision kept at full detail)
+    [INFO] [INFO] Creating collision mesh from 1 object(s)
+    [INFO] Collision optimized: 8 vertices / 12 triangles
+    [INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/parented_test.col
+    [SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/parented_test.col (264 bytes)
+    [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/parented_test.col (264 bytes, 12 triangles)
+[20:36:46] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/parented_test.dff --expect-tris 12
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/parented_test.dff)
+      [PASS] size>0  (2352 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=3 geos=1 atomics=1 tris=12 verts=24 mats=1 skin_bones=2
+      textures: []
+      material effects: none
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (12 tris / 24 verts)
+      [PASS] tri_count_matches  (expected 12, got 12)
+    VALIDATION PASS
+[20:36:46] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/parented_test.dff --status /home/user/dadafdzf/FBX2MTA/temp/parented_test.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/parented_test.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/parented_test.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=12 verts=8 armatures=1 bones=2 mats=1 vgroups=2 uv_layers=1
+    [INFO] Expected:      tris=12 verts=8 frames=2 mats=1
+    Info: Saved "parented_test_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/parented_test_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[20:36:47] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_col.py /home/user/dadafdzf/FBX2MTA/temp/parented_test.col --report /home/user/dadafdzf/FBX2MTA/temp/parented_test.col.validation.json
+    COL VALIDATION PASSED: parented_test.col (264 bytes, 12 collision triangles, 8 vertices)
+[20:36:47] COL validation passed for parented_test (12 triangles in file)
+[20:36:47] TXD for parented_test: none (no usable textures in 1 material(s) [M: no image node]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).)
+[20:36:47] SUCCESS: parented_test -> /home/user/dadafdzf/FBX2MTA/output/parented_test.dff + /home/user/dadafdzf/FBX2MTA/output/parented_test.col
+[20:36:47] ============================================================
+[20:36:47] Processing: testtex_test.fbx
+[20:36:47] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/convert.py --input /home/user/dadafdzf/FBX2MTA/input/testtex_test.fbx --output /home/user/dadafdzf/FBX2MTA/temp/testtex_test.dff --budget AUTO --log /home/user/dadafdzf/FBX2MTA/logs/testtex_test.log --status /home/user/dadafdzf/FBX2MTA/temp/testtex_test.status.json --col --col-quality AUTO --col-triangles 0 --col-output /home/user/dadafdzf/FBX2MTA/temp/testtex_test.col
+    [INFO] MATERIAL: MainBody
+    Triangles: 2
+    [INFO] MATERIAL: Logo
+    Triangles: 2
+    [INFO] Geometry Budget: AUTO - 12 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+    [INFO]   'Body': estimated DFF vertices 24 (limit 65535)
+    Info: Finished export in 0.00s
+    [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+    [INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.dff (1748 bytes) in 0.51s
+    [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.dff
+    [INFO] === Texture (TXD) stage ===
+    [INFO] TXD material: MainBody: 'testtex_main' (128x128)
+    [INFO] TXD material: Logo: 'testtex_logo' (64x64)
+    [INFO] TXD material: Plain: no image node
+    [INFO] TXD: 2 texture(s) extracted from 3 material(s)
+    [SUCCESS] model.txd created: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.txd (2 texture(s), 82216 bytes) - validated with DragonFF TXD reader
+    [INFO] TXD textures: testtex_main (128x128), testtex_logo (64x64)
+    [INFO] === Collision (COL) stage ===
+    [INFO] Original collision triangles: 12
+    [INFO] Target collision triangles: 12 (small model - collision kept at full detail)
+    [INFO] [INFO] Creating collision mesh from 1 object(s)
+    [INFO] Collision optimized: 8 vertices / 12 triangles
+    [INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.col
+    [SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.col (264 bytes)
+    [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.col (264 bytes, 12 triangles)
+[20:36:47] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_dff.py /home/user/dadafdzf/FBX2MTA/temp/testtex_test.dff --expect-tris 12
+    [PASS] exists  (/home/user/dadafdzf/FBX2MTA/temp/testtex_test.dff)
+      [PASS] size>0  (1748 bytes)
+      [PASS] signature  (RWClump fourcc at offset 8)
+      [PASS] parsed_by_dragonff
+      [PASS] rw_version  (v3.6.0.3 (0x36003))
+      [PASS] has_clump  (1 clump(s))
+      info: frames=1 geos=1 atomics=1 tris=12 verts=24 mats=3 skin_bones=0
+      textures: ['testtex_logo', 'testtex_main']
+      material effects: none
+      [PASS] finite_data  (bad values: 0)
+      [PASS] valid_indices  (bad indices: 0)
+      [PASS] valid_uvs  (uv problems: 0)
+      [PASS] has_geometry  (12 tris / 24 verts)
+      [PASS] tri_count_matches  (expected 12, got 12)
+    VALIDATION PASS
+[20:36:47] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/blender/run_blender.py /home/user/dadafdzf/FBX2MTA/scripts/roundtrip.py --dff /home/user/dadafdzf/FBX2MTA/temp/testtex_test.dff --status /home/user/dadafdzf/FBX2MTA/temp/testtex_test.status.json --rt-status /home/user/dadafdzf/FBX2MTA/temp/testtex_test.rt.json --log /home/user/dadafdzf/FBX2MTA/logs/testtex_test.rt.log
+    [INFO] Round-trip: importing DFF back through DragonFF
+    [INFO] Re-imported: meshes=1 tris=12 verts=8 armatures=0 bones=0 mats=3 vgroups=0 uv_layers=1
+    [INFO] Expected:      tris=12 verts=8 frames=0 mats=3
+    Info: Saved "testtex_test_roundtrip.blend"
+    [INFO] Round-trip scene saved: /home/user/dadafdzf/FBX2MTA/temp/testtex_test_roundtrip.blend
+    [SUCCESS] Round-trip test: PASS
+[20:36:48] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_col.py /home/user/dadafdzf/FBX2MTA/temp/testtex_test.col --report /home/user/dadafdzf/FBX2MTA/temp/testtex_test.col.validation.json
+    COL VALIDATION PASSED: testtex_test.col (264 bytes, 12 collision triangles, 8 vertices)
+[20:36:48] COL validation passed for testtex_test (12 triangles in file)
+[20:36:48] CMD: /usr/bin/python3 /home/user/dadafdzf/FBX2MTA/scripts/validate_txd.py /home/user/dadafdzf/FBX2MTA/temp/testtex_test.txd --report /home/user/dadafdzf/FBX2MTA/temp/testtex_test.txd.validation.json
+    {
+      "info": {
+        "textures": [
+          {
+            "name": "testtex_main",
+            "width": 128,
+            "height": 128,
+            "bytes": 65536
+          },
+          {
+            "name": "testtex_logo",
+            "width": 64,
+            "height": 64,
+            "bytes": 16384
+          }
+        ],
+        "rw_version": 221187,
+        "device_id": 2,
+        "rw_stamp": "0x1803ffff"
+      },
+      "errors": []
+    }
+[20:36:48] TXD validated for testtex_test: 2 texture(s), 82,216 bytes (names match the DFF material texture names)
+[20:36:48] SUCCESS: testtex_test -> /home/user/dadafdzf/FBX2MTA/output/testtex_test.dff + testtex_test.txd + /home/user/dadafdzf/FBX2MTA/output/testtex_test.col
+[20:36:48] MTA runtime test unavailable (MTA:SA not installed on this machine) - writing drop-in test resource instead
+[20:36:48] Test resource model: testtex_test
+[20:36:48] Report written: /home/user/dadafdzf/FBX2MTA/reports/model_report.txt
+[20:36:48] BATCH: success=4 failed=0 skipped=0
+[20:36:48]   OK: generated_anim
+[20:36:48]   OK: generated_test
+[20:36:48]   OK: parented_test
+[20:36:48]   OK: testtex_test

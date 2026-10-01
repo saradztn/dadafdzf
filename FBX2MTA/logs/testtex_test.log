@@ -8,10 +8,10 @@
 [INFO] Static mesh model (no armature)
 [INFO] Renaming image datablock 'testtex_logo.001' -> 'testtex_logo' (matches texture file)
 [INFO] Renaming image datablock 'testtex_main.001' -> 'testtex_main' (matches texture file)
-[INFO]   texture: testtex_logo  (/home/user/dadafdzf/FBX2MTA/input/tex_src/testtex_logo.png)
-[INFO]   texture: testtex_logo.001  (/home/user/dadafdzf/FBX2MTA/input/tex_src/testtex_logo.png)
-[INFO]   texture: testtex_main  (/home/user/dadafdzf/FBX2MTA/input/tex_src/testtex_main.png)
-[INFO]   texture: testtex_main.001  (/home/user/dadafdzf/FBX2MTA/input/tex_src/testtex_main.png)
+[INFO]   texture: testtex_logo  (/home/user/dadafdzf/FBX2MTA/input/testtex_test.fbm/testtex_logo.png)
+[INFO]   texture: testtex_logo.001  (/home/user/dadafdzf/FBX2MTA/input/testtex_test.fbm/testtex_logo.png)
+[INFO]   texture: testtex_main  (/home/user/dadafdzf/FBX2MTA/input/testtex_test.fbm/testtex_main.png)
+[INFO]   texture: testtex_main.001  (/home/user/dadafdzf/FBX2MTA/input/testtex_test.fbm/testtex_main.png)
 [INFO] Processing mesh 'Body': verts=8 polys=6
 [INFO]   triangulated 6 quads/ngons -> tris=12
 [INFO]   closed mesh: recalculated normals outward
@@ -30,8 +30,20 @@ Triangles: 2
 [INFO] Geometry Budget: AUTO - 12 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
 [INFO]   'Body': estimated DFF vertices 24 (limit 65535)
 [INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
-[INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.dff (1748 bytes) in 0.52s
+[INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.dff (1748 bytes) in 0.51s
 [SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.dff
 [INFO] === Texture (TXD) stage ===
+[INFO] TXD material: MainBody: 'testtex_main' (128x128)
+[INFO] TXD material: Logo: 'testtex_logo' (64x64)
+[INFO] TXD material: Plain: no image node
+[INFO] TXD: 2 texture(s) extracted from 3 material(s)
 [SUCCESS] model.txd created: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.txd (2 texture(s), 82216 bytes) - validated with DragonFF TXD reader
 [INFO] TXD textures: testtex_main (128x128), testtex_logo (64x64)
+[INFO] === Collision (COL) stage ===
+[INFO] Original collision triangles: 12
+[INFO] Target collision triangles: 12 (small model - collision kept at full detail)
+[INFO] [INFO] Creating collision mesh from 1 object(s)
+[INFO] Collision optimized: 8 vertices / 12 triangles
+[INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.col
+[SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.col (264 bytes)
+[SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/testtex_test.col (264 bytes, 12 triangles)

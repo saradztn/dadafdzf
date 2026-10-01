@@ -3,5 +3,6 @@
     <info author="FBX2MTA" name="testtex_test test" type="map" version="1.2" description="Automatic DFF + TXD + COL load test (FBX2MTA)"/>
     <script src="client.lua" type="client" cache="false" />
         <file src="model.dff"/>
+    <file src="model.col"/>
     <file src="model.txd"/>
 </meta>
