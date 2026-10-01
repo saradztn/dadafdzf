@@ -677,38 +677,111 @@ def main():
         import numpy as np
 
         MAX_TEX = 1024  # safe max for the SA renderer
-        entries = {}    # texture name -> (w, h, bgra8888 bytes), deduped
-        for ob in mesh_objs:
-            for mat in (ob.data.materials or []):
-                if mat is None or mat.name in entries:
-                    continue
-                # --- same image + naming path as the DFF exporter --------
+
+        def _ensure_loaded(img):
+            if img is not None and not img.has_data:
+                # .fbm sidecar / embedded file may need an explicit load
+                try:
+                    img.load()
+                except Exception:
+                    pass
+            return img
+
+        def _usable(img):
+            return (img is not None and bool(img.has_data)
+                    and img.size[0] > 1 and img.size[1] > 1)
+
+        def _candidates(mat):
+            """(image, node_label) pairs, most authoritative first.
+            #1 is exactly what the DFF exporter uses (base-color image) so
+            the TXD name matches the DFF texture name; the rest widen the
+            net for real-world FBX node setups: a Mapping/Mix node between
+            image and Base Color, an image linked to another input
+            (emission/opacity), an unlinked image node, or legacy slots."""
+            out = []
+            try:
                 wrapper = PrincipledBSDFWrapper(mat, is_readonly=False)
                 bct = wrapper.base_color_texture
-                if bct is None or bct.image is None:
+                if bct is not None and bct.image is not None:
+                    out.append((bct.image, bct.node_image.label
+                                if bct.node_image else ""))
+                    return out
+            except Exception:
+                pass
+            tree = mat.node_tree
+            if tree is not None:
+                bsdf = next((n for n in tree.nodes
+                             if n.type == "BSDF_PRINCIPLED"), None)
+                if bsdf is not None:
+                    bc = bsdf.inputs.get("Base Color")
+                    if bc is not None and bc.is_linked:
+                        node = bc.links[0].from_node
+                        if node.type == "TEX_IMAGE" and node.image:
+                            out.append((node.image, node.label))
+                        else:
+                            # one level deeper (Mix / RGB / HueSat / ...)
+                            for inp in node.inputs:
+                                if inp.is_linked:
+                                    src = inp.links[0].from_node
+                                    if (src.type == "TEX_IMAGE"
+                                            and src.image):
+                                        out.append((src.image, src.label))
+                seen = {id(i) for i, _l in out}
+                for n in tree.nodes:
+                    if (n.type == "TEX_IMAGE" and n.image is not None
+                            and id(n.image) not in seen):
+                        out.append((n.image, n.label))
+                        seen.add(id(n.image))
+            else:
+                try:  # legacy pre-2.8 materials
+                    for slot in mat.texture_slots or []:
+                        if (slot.texture is not None
+                                and getattr(slot.texture, "image", None)):
+                            out.append((slot.texture.image, ""))
+                except Exception:
+                    pass
+            return out
+
+        entries = {}    # texture name -> (w, h, bgra8888 bytes)
+        names_used = set()
+        mat_notes = []  # per-material diagnostics (log + reason)
+        mats_done = set()
+        for ob in mesh_objs:
+            for mat in (ob.data.materials or []):
+                if mat is None or mat.name in mats_done:
                     continue
-                img = bct.image
-                node_label = bct.node_image.label
+                mats_done.add(mat.name)
+                cands = _candidates(mat)
+                if not cands:
+                    mat_notes.append(f"{mat.name}: no image node")
+                    continue
+                chosen = None
+                for img_c, label_c in cands:
+                    img_c = _ensure_loaded(img_c)
+                    if _usable(img_c):
+                        chosen = (img_c, label_c)
+                        break
+                if chosen is None:
+                    bimg = _ensure_loaded(cands[0][0])
+                    mat_notes.append(
+                        f"{mat.name}: image '{bimg.name}' not available "
+                        f"(file missing? {bimg.filepath or 'no path'})")
+                    txd.setdefault("skipped", []).append(mat.name)
+                    continue
+                img, node_label = chosen
                 image_name = img.name
-                if node_label in image_name and node_label != "":
+                if node_label and node_label != "Image" \
+                        and node_label in image_name:
                     image_name = node_label
                 tname, _ = extract_texture_info_from_name(image_name)
-                tname = clear_extension(tname)
+                tname = clear_extension(tname) or img.name
                 if not tname:
+                    mat_notes.append(f"{mat.name}: empty texture name")
                     continue
-                # --- make sure the image is actually loaded --------------
-                # (FBX-embedded textures arrive with an .fbm sidecar path
-                #  that may need an explicit load in headless mode)
-                if not img.has_data:
-                    try:
-                        img.load()
-                    except Exception:
-                        pass
-                if not img.has_data or img.size[0] <= 0 or img.size[1] <= 0:
-                    log("WARN", f"Texture '{tname}': image data not "
-                                f"available ({img.filepath or 'no path'}) - "
-                                f"skipped")
-                    txd.setdefault("skipped", []).append(tname)
+                if tname in names_used:
+                    mat_notes.append(
+                        f"{mat.name}: '{tname}' already used by another "
+                        f"material (shared texture)")
                     continue
                 # --- size cap (SA renderer max 1024) ----------------------
                 w, h = img.size
@@ -716,8 +789,6 @@ def main():
                     s = MAX_TEX / float(max(w, h))
                     nw, nh = max(1, int(w * s)), max(1, int(h * s))
                     img.scale(nw, nh)
-                    log("WARN", f"Texture '{tname}': {w}x{h} -> {nw}x{nh} "
-                                f"(SA renderer max {MAX_TEX})")
                     w, h = nw, nh
                 # --- pixels: RGBA -> BGRA8888, rows top-down -------------
                 # (Blender pixels are bottom-up, RenderWare/D3D rows are
@@ -726,12 +797,32 @@ def main():
                 img.pixels.foreach_get(buf)
                 buf = np.clip(buf.reshape(h, w, 4), 0.0, 1.0)[::-1]
                 rgba = np.round(buf * 255.0).astype(np.uint8).tobytes()
+                names_used.add(tname)
                 entries[tname] = (w, h, ImageEncoder.rgba_to_bgra8888(rgba))
+                mat_notes.append(f"{mat.name}: '{tname}' ({w}x{h})")
+
+        for note in mat_notes:
+            log("INFO", "TXD material: " + note)
+        if entries:
+            log("INFO", f"TXD: {len(entries)} texture(s) extracted from "
+                        f"{len(mats_done)} material(s)")
+            if txd.get("skipped"):
+                log("WARN", "TXD: materials skipped (no usable image): "
+                            + ", ".join(txd["skipped"]))
 
         if not entries:
-            txd["reason"] = ("no textures found in materials "
-                             "(model will render untextured)")
-            log("INFO", "TXD: no image textures found in materials - skipped")
+            detail = "; ".join(mat_notes[:6])
+            more = (f" (+{len(mat_notes) - 6} more)"
+                    if len(mat_notes) > 6 else "")
+            if not detail:
+                detail = "no materials found on the mesh"
+            txd["reason"] = (
+                f"no usable textures in {len(mats_done)} material(s) "
+                f"[{detail}{more}]. The FBX carries no embedded texture "
+                f"data, so a TXD cannot be created. To get a TXD, re-export "
+                f"the FBX with textures embedded (or bake the textures "
+                f"into image textures linked to the materials).")
+            log("WARN", "TXD: " + txd["reason"])
         else:
             tobj = TxDCls()
             tobj.device_id = DeviceType.DEVICE_D3D9

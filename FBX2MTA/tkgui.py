@@ -331,6 +331,8 @@ class Fbx2MtaApp:
             txd_txt = txd
             if txd == "FAILED":
                 txd_txt += " - " + (r.get("txd_reason") or "see log")[:80]
+            elif txd == "NONE" and r.get("txd_reason"):
+                txd_txt += " (no img)"
             tag = "fail" if not (dff_ok and col_ok and txd_ok) else "pass"
             self.tree.insert("", "end", values=(
                 r["name"], r["dff"], txd_txt, col_txt,
