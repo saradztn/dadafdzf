@@ -1,0 +1,43 @@
+{
+  "file": "/home/user/dadafdzf/FBX2MTA/temp/generated_anim.col",
+  "valid": true,
+  "errors": [],
+  "checks": {
+    "bounds": true,
+    "geometry_exists": true,
+    "vertices_valid": true,
+    "face_indices_valid": true,
+    "structure": true
+  },
+  "info": {
+    "size_bytes": 408,
+    "models": 1,
+    "model_name": "Scene Collection",
+    "version": 3,
+    "bounds_min": [
+      -0.30000001192092896,
+      1.2000000476837158,
+      -0.30000022053718567
+    ],
+    "bounds_max": [
+      0.699999988079071,
+      2.049999952316284,
+      0.29999980330467224
+    ],
+    "bounds_size": [
+      1.0,
+      0.8499999046325684,
+      0.6000000238418579
+    ],
+    "mesh_vertices": 16,
+    "mesh_triangles": 24,
+    "spheres": 0,
+    "boxes": 0,
+    "vertex_extent": [
+      0.703125,
+      2.046875,
+      0.296875
+    ],
+    "degenerate_faces": 0
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "info": {
+    "textures": [
+      {
+        "name": "tex2_e",
+        "width": 48,
+        "height": 48,
+        "bytes": 9216
+      }
+    ],
+    "rw_version": 221187,
+    "device_id": 2,
+    "rw_stamp": "0x1803ffff"
+  },
+  "errors": []
+}

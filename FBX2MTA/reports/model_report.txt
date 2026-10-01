@@ -1,0 +1,246 @@
+========================================
+FBX2MTA CONVERSION REPORT
+========================================
+
+Input: generated_anim.fbx
+
+Original:
+Vertices: 16
+Triangles: 24
+Objects: 1
+Kind: skinned
+
+Processed (mesh):
+Vertices: 16
+Triangles: 24
+Objects: 1
+Decimated: False
+
+DFF content (measured from the DFF file):
+Vertices: 48
+Triangles: 24
+Frames: 4  (bones in skin: 3)
+Materials: 1
+Textures: none
+Material effects: none
+RW version: v3.6.0.3 (0x36003)
+
+Orientation: default (Y-up source) (upright score 0.85)
+
+Collision (COL):
+Status: PASS
+Quality: AUTO (budget by model size)
+Original triangles: 24
+Collision triangles: 24
+Collision vertices: 16
+File: generated_anim.col (408 bytes)
+Transform: identical to DFF (same processed mesh, identity world space)
+
+Textures (TXD):
+Status: NONE (no usable textures in 1 material(s) [TestMaterial: no image node]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).)
+
+DragonFF Export:
+SUCCESS
+Export Version: GTA SA (v3.6.0.3) 0x36003
+File: generated_anim.dff (4,023 bytes)
+
+DFF Validation:
+PASS
+Round Trip:
+PASS
+
+RESULT:
+Conversion Complete
+DFF: PASS
+COL: PASS
+TXD: NONE
+Triangles: 24
+Collision Triangles: 24
+Output: output/generated_anim.dff, output/generated_anim.col
+
+========================================
+
+Input: generated_test.fbx
+
+Original:
+Vertices: 384
+Triangles: 728
+Objects: 1
+Kind: static
+
+Processed (mesh):
+Vertices: 384
+Triangles: 728
+Objects: 1
+Decimated: False
+
+DFF content (measured from the DFF file):
+Vertices: 650
+Triangles: 728
+Frames: 1  (bones in skin: 0)
+Materials: 1
+Textures: none
+Material effects: none
+RW version: v3.6.0.3 (0x36003)
+
+Orientation: default (Y-up source) (upright score 0.3169)
+
+Collision (COL):
+Status: PASS
+Quality: AUTO (budget by model size)
+Original triangles: 728
+Collision triangles: 728
+Collision vertices: 384
+File: generated_test.col (8,248 bytes)
+Transform: identical to DFF (same processed mesh, identity world space)
+
+Textures (TXD):
+Status: NONE (no usable textures in 1 material(s) [TestMaterial: image '.' not available (no texture file in the FBX)]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).)
+
+DragonFF Export:
+SUCCESS
+Export Version: GTA SA (v3.6.0.3) 0x36003
+File: generated_test.dff (32,216 bytes)
+
+DFF Validation:
+PASS
+Round Trip:
+PASS
+
+RESULT:
+Conversion Complete
+DFF: PASS
+COL: PASS
+TXD: NONE
+Triangles: 728
+Collision Triangles: 728
+Output: output/generated_test.dff, output/generated_test.col
+
+========================================
+
+Input: parented_test.fbx
+
+Original:
+Vertices: 8
+Triangles: 12
+Objects: 1
+Kind: skinned
+
+Processed (mesh):
+Vertices: 8
+Triangles: 12
+Objects: 1
+Decimated: False
+
+DFF content (measured from the DFF file):
+Vertices: 24
+Triangles: 12
+Frames: 3  (bones in skin: 2)
+Materials: 1
+Textures: none
+Material effects: none
+RW version: v3.6.0.3 (0x36003)
+
+Orientation: default (Y-up source) (upright score 1.0)
+
+Collision (COL):
+Status: PASS
+Quality: AUTO (budget by model size)
+Original triangles: 12
+Collision triangles: 12
+Collision vertices: 8
+File: parented_test.col (264 bytes)
+Transform: identical to DFF (same processed mesh, identity world space)
+
+Textures (TXD):
+Status: NONE (no usable textures in 1 material(s) [M: no image node]. The FBX carries no embedded texture data, so a TXD cannot be created. To get a TXD, re-export the FBX with textures embedded (or bake the textures into image textures linked to the materials).)
+
+DragonFF Export:
+SUCCESS
+Export Version: GTA SA (v3.6.0.3) 0x36003
+File: parented_test.dff (2,352 bytes)
+
+DFF Validation:
+PASS
+Round Trip:
+PASS
+
+RESULT:
+Conversion Complete
+DFF: PASS
+COL: PASS
+TXD: NONE
+Triangles: 12
+Collision Triangles: 12
+Output: output/parented_test.dff, output/parented_test.col
+
+========================================
+
+Input: testtex_test.fbx
+
+Original:
+Vertices: 8
+Triangles: 12
+Objects: 1
+Kind: static
+
+Processed (mesh):
+Vertices: 8
+Triangles: 12
+Objects: 1
+Decimated: False
+
+DFF content (measured from the DFF file):
+Vertices: 24
+Triangles: 12
+Frames: 1  (bones in skin: 0)
+Materials: 3
+Textures: testtex_logo, testtex_main
+Material effects: none
+RW version: v3.6.0.3 (0x36003)
+
+Orientation: default (Y-up source) (upright score 1.0)
+
+Collision (COL):
+Status: PASS
+Quality: AUTO (budget by model size)
+Original triangles: 12
+Collision triangles: 12
+Collision vertices: 8
+File: testtex_test.col (264 bytes)
+Transform: identical to DFF (same processed mesh, identity world space)
+
+Textures (TXD):
+Status: PASS (RenderWare TXD v5, RW 3.6.0.3)
+Textures: 2 (BGRA8888, names match the DFF materials)
+File: testtex_test.txd (82,216 bytes)
+
+DragonFF Export:
+SUCCESS
+Export Version: GTA SA (v3.6.0.3) 0x36003
+File: testtex_test.dff (1,748 bytes)
+
+DFF Validation:
+PASS
+Round Trip:
+PASS
+
+RESULT:
+Conversion Complete
+DFF: PASS
+COL: PASS
+TXD: PASS
+Triangles: 12
+Collision Triangles: 12
+Output: output/testtex_test.dff, output/testtex_test.txd, output/testtex_test.col
+
+========================================
+
+BATCH SUMMARY
+success (DFF+COL): 4
+success (DFF only): 0
+with textures (TXD): 1
+failed: 0
+skipped: 0
+MTA runtime test: unavailable (test resource provided in test_resource/)
+========================================

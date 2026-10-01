@@ -1,0 +1,34 @@
+[INFO] Starting converter (Blender side)
+[INFO] Blender 4.2.23 LTS headless
+[INFO] DragonFF addon registered (official Parik27/DragonFF)
+[INFO] Importing FBX: input/generated_test.fbx
+[INFO]   axis check: forward=-Z up=Y -> extents X=6.50 Y=6.10 Z=2.06 (upright score 0.317) [default (Y-up source)]
+[INFO] FBX imported (axis forward=-Z, up=Y, extents X/Y/Z = 6.50/6.10/2.06)
+[INFO] Orientation plan: import in Blender Z-up (axis auto-detected above), then stage 4.5 converts the model to GTA SA Y-up model space (-90 deg about X, no mirroring). Both DFF and COL are exported from the same Y-up mesh.
+[INFO] Static mesh model (no armature)
+[INFO] Renaming image datablock 'TestTex' -> 'input' (matches texture file)
+[INFO]   texture: input  (/home/user/dadafdzf/FBX2MTA/input)
+[INFO] Processing mesh 'TestCreature': verts=384 polys=620
+[INFO]   triangulated 60 quads/ngons -> tris=728
+[INFO]   closed mesh: recalculated normals outward
+[INFO]   UV layer 'UVMap': 2184 coords (loops=2184)
+[INFO] No residual object transforms to apply
+[INFO] Converted model to GTA SA Y-up model space (-90 deg about X, no mirroring)
+[INFO] OBJECT: TestCreature
+Vertices: 384
+Triangles: 728
+[INFO] MATERIAL: TestMaterial
+Triangles: 728
+[INFO] Geometry Budget: AUTO - 728 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+[INFO]   'TestCreature': estimated DFF vertices 650 (limit 65535)
+[INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+[INFO] DFF exported: temp/gt2.dff (32220 bytes) in 0.56s
+[SUCCESS] DFF created: temp/gt2.dff
+[INFO] === Collision (COL) stage ===
+[INFO] Original collision triangles: 728
+[INFO] Target collision triangles: 728 (small model - collision kept at full detail)
+[INFO] [INFO] Creating collision mesh from 1 object(s)
+[INFO] Collision optimized: 384 vertices / 728 triangles
+[INFO] [INFO] Exporting COL using DragonFF: temp/gt2.col
+[SUCCESS] [SUCCESS] model.col created: temp/gt2.col (8248 bytes)
+[SUCCESS] model.col created: temp/gt2.col (8248 bytes, 728 triangles)

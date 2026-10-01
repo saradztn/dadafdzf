@@ -1,0 +1,43 @@
+{
+  "file": "/home/user/dadafdzf/FBX2MTA/temp/generated_test.col",
+  "valid": true,
+  "errors": [],
+  "checks": {
+    "bounds": true,
+    "geometry_exists": true,
+    "vertices_valid": true,
+    "face_indices_valid": true,
+    "structure": true
+  },
+  "info": {
+    "size_bytes": 8248,
+    "models": 1,
+    "model_name": "Scene Collection",
+    "version": 3,
+    "bounds_min": [
+      -3.3000001907348633,
+      0.0,
+      -3.0522961616516113
+    ],
+    "bounds_max": [
+      3.1999998092651367,
+      2.059999942779541,
+      3.0522961616516113
+    ],
+    "bounds_size": [
+      6.5,
+      2.059999942779541,
+      6.104592323303223
+    ],
+    "mesh_vertices": 384,
+    "mesh_triangles": 728,
+    "spheres": 0,
+    "boxes": 0,
+    "vertex_extent": [
+      3.296875,
+      2.0625,
+      3.0546875
+    ],
+    "degenerate_faces": 0
+  }
+}

@@ -1,0 +1,5 @@
+# heavy / generated artifacts (do NOT commit)
+blender/venv/
+__pycache__/
+*.pyc
+temp/

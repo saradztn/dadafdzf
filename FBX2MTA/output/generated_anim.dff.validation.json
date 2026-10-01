@@ -1,0 +1,39 @@
+{
+  "file": "/home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff",
+  "checks": {
+    "exists": "PASS",
+    "size>0": "PASS",
+    "signature": "PASS",
+    "parsed_by_dragonff": "PASS",
+    "rw_version": "PASS",
+    "has_clump": "PASS",
+    "finite_data": "PASS",
+    "valid_indices": "PASS",
+    "valid_uvs": "PASS",
+    "has_geometry": "PASS",
+    "tri_count_matches": "PASS"
+  },
+  "failures": [],
+  "info": {
+    "exists": "/home/user/dadafdzf/FBX2MTA/temp/generated_anim.dff",
+    "size>0": "4023 bytes",
+    "signature": "RWClump fourcc at offset 8",
+    "rw_version": "v3.6.0.3 (0x36003)",
+    "has_clump": "1 clump(s)",
+    "clumps": 1,
+    "frames": 4,
+    "geometries": 1,
+    "atomics": 1,
+    "triangles": 24,
+    "vertices": 48,
+    "materials": 1,
+    "textures": [],
+    "effects": [],
+    "skin_bones": 3,
+    "finite_data": "bad values: 0",
+    "valid_indices": "bad indices: 0",
+    "valid_uvs": "uv problems: 0",
+    "has_geometry": "24 tris / 48 verts",
+    "tri_count_matches": "expected 24, got 24"
+  }
+}

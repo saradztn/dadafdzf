@@ -1,0 +1,42 @@
+[INFO] Starting converter (Blender side)
+[INFO] Blender 4.2.23 LTS headless
+[INFO] DragonFF addon registered (official Parik27/DragonFF)
+[INFO] Importing FBX: /home/user/dadafdzf/FBX2MTA/input/tex2_test.fbx
+[INFO]   axis check: forward=-Z up=Y -> extents X=1.00 Y=1.00 Z=1.00 (upright score 1.000) [default (Y-up source)]
+[INFO] FBX imported (axis forward=-Z, up=Y, extents X/Y/Z = 1.00/1.00/1.00)
+[INFO] Orientation plan: import in Blender Z-up (axis auto-detected above), then stage 4.5 converts the model to GTA SA Y-up model space (-90 deg about X, no mirroring). Both DFF and COL are exported from the same Y-up mesh.
+[INFO] Static mesh model (no armature)
+[INFO]   texture: tex2_e  (/home/user/dadafdzf/FBX2MTA/input/tex2_test.fbm/tex2_e.png)
+[INFO] Processing mesh 'Cube': verts=8 polys=6
+[INFO]   triangulated 6 quads/ngons -> tris=12
+[INFO]   closed mesh: recalculated normals outward
+[INFO]   UV layer 'UVMap': 36 coords (loops=36)
+[INFO] No residual object transforms to apply
+[INFO] Converted model to GTA SA Y-up model space (-90 deg about X, no mirroring)
+[INFO] OBJECT: Cube
+Vertices: 8
+Triangles: 12
+[INFO] MATERIAL: MixMat
+Triangles: 12
+[INFO] Geometry Budget: AUTO - 12 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+[INFO]   'Cube': estimated DFF vertices 16 (limit 65535)
+[INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+[INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff (1440 bytes) in 0.53s
+[SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.dff
+[INFO] === Texture (TXD) stage ===
+[INFO] TXD material: MixMat: no image node
+[INFO] TXD material: LooseMat: no image node
+[INFO] TXD material: PlainC: no image node
+[INFO] TXD material: GlowMat: 'tex2_e' (48x48)
+[INFO] TXD material: NormalMat: no image node
+[INFO] TXD: 1 texture(s) extracted from 5 material(s)
+[SUCCESS] model.txd created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.txd (1 texture(s), 9384 bytes) - validated with DragonFF TXD reader
+[INFO] TXD textures: tex2_e (48x48)
+[INFO] === Collision (COL) stage ===
+[INFO] Original collision triangles: 12
+[INFO] Target collision triangles: 12 (small model - collision kept at full detail)
+[INFO] [INFO] Creating collision mesh from 1 object(s)
+[INFO] Collision optimized: 8 vertices / 12 triangles
+[INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col
+[SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col (264 bytes)
+[SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/tex2_test.col (264 bytes, 12 triangles)

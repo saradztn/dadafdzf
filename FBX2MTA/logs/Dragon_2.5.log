@@ -1,0 +1,48 @@
+[INFO] Starting converter (Blender side)
+[INFO] Blender 4.2.23 LTS headless
+[INFO] DragonFF addon registered (official Parik27/DragonFF)
+[INFO] Importing FBX: /home/user/dadafdzf/FBX2MTA/input/Dragon_2.5.fbx
+[INFO]   axis check: forward=-Z up=Y -> extents X=151.39 Y=98.54 Z=32.25 (upright score 0.213) [default (Y-up source)]
+[INFO] FBX imported (axis forward=-Z, up=Y, extents X/Y/Z = 151.39/98.54/32.25)
+[INFO] Orientation plan: import in Blender Z-up (axis auto-detected above), then stage 4.5 converts the model to GTA SA Y-up model space (-90 deg about X, no mirroring). Both DFF and COL are exported from the same Y-up mesh.
+[INFO] Skinned model detected: 1 armature(s)
+[INFO] Renaming image datablock 'Dragon_Bump_Col.jpg.001' -> 'Dragon_Bump_Col2' (matches texture file)
+[INFO] Renaming image datablock 'Dragon_Nor_mirror.jpg' -> 'Dragon_Nor_mirror2' (matches texture file)
+[INFO]   texture: Dragon_Bump_Col2  (/home/user/dadafdzf/FBX2MTA/input/textures/Dragon_Bump_Col2.jpg)
+[INFO]   texture: Dragon_Nor_mirror2  (/home/user/dadafdzf/FBX2MTA/input/textures/Dragon_Nor_mirror2.jpg)
+[INFO] Processing mesh 'Cube': verts=19895 polys=37985
+[INFO]   already triangulated
+[INFO]   merged 509 duplicate vertices
+[INFO]   open mesh (780 boundary edges): keeping original normals (validated finite+normalized)
+[INFO]   UV layer 'UV_mirror': 113955 coords (loops=113955)
+[INFO]   UV layer 'UV_NO_mirror': 113955 coords (loops=113955)
+[INFO] Applied residual transforms on 2 object(s) (kept model shape, normalized root matrices)
+[INFO] Converted model to GTA SA Y-up model space (-90 deg about X, no mirroring)
+[INFO] OBJECT: Cube
+Vertices: 19386
+Triangles: 37985
+[INFO] MATERIAL: EYES
+Triangles: 1104
+[INFO] MATERIAL: Game_dragon
+Triangles: 226
+[INFO] MATERIAL: Game_dragon.001
+Triangles: 36655
+[INFO] Geometry Budget: AUTO - 37985 triangles within limits, no reduction (hard DFF limit 65535 verts/geometry respected)
+[INFO] Armature 'a': bone_id/type set on 230 bones
+[INFO]   'Cube': estimated DFF vertices 22827 (limit 65535)
+[INFO]   material 'EYES': bump map -> 'Dragon_Nor_mirror2'
+[INFO]   material 'Game_dragon': bump map -> 'Dragon_Nor_mirror2'
+[INFO]   material 'Game_dragon.001': bump map -> 'Dragon_Nor_mirror2'
+[INFO] Export attempt [base]: result={'FINISHED'} file_ok=True
+[INFO] DFF exported: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff (1764246 bytes) in 22.32s
+[SUCCESS] DFF created: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.dff
+[INFO] === Collision (COL) stage ===
+[INFO] Original collision triangles: 37985
+[INFO] Target collision triangles: 5000 (large model - reduced to 5000 tris)
+[INFO] [INFO] Creating collision mesh from 1 object(s)
+[INFO] Collision decimation: 37985 -> 5000 triangles (ratio 0.132)
+[INFO] Collision cleanup: removed 251 faces of disconnected micro-islands
+[INFO] Collision optimized: 2410 vertices / 4749 triangles
+[INFO] [INFO] Exporting COL using DragonFF: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.col
+[SUCCESS] [SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.col (52572 bytes)
+[SUCCESS] model.col created: /home/user/dadafdzf/FBX2MTA/temp/Dragon_2.5.col (52572 bytes, 4749 triangles)

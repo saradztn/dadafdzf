@@ -1,0 +1,22 @@
+#include <stddef.h>
+long xkb_compose_state_feed(void){return 0L;}
+long xkb_compose_state_get_status(void){return 0L;}
+long xkb_compose_state_get_utf8(void){return 0L;}
+long xkb_compose_state_new(void){return 0L;}
+long xkb_compose_state_reset(void){return 0L;}
+long xkb_compose_state_unref(void){return 0L;}
+long xkb_compose_table_new_from_locale(void){return 0L;}
+long xkb_compose_table_unref(void){return 0L;}
+long xkb_context_new(void){return 0L;}
+long xkb_context_unref(void){return 0L;}
+long xkb_keymap_key_repeats(void){return 0L;}
+long xkb_keymap_mod_get_index(void){return 0L;}
+long xkb_keymap_new_from_string(void){return 0L;}
+long xkb_keymap_unref(void){return 0L;}
+long xkb_state_get_keymap(void){return 0L;}
+long xkb_state_key_get_one_sym(void){return 0L;}
+long xkb_state_key_get_utf8(void){return 0L;}
+long xkb_state_new(void){return 0L;}
+long xkb_state_serialize_mods(void){return 0L;}
+long xkb_state_unref(void){return 0L;}
+long xkb_state_update_mask(void){return 0L;}
